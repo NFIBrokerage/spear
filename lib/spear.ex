@@ -5,20 +5,6 @@ defmodule Spear do
 
   require Mint.HTTP
 
-  def do_http2 do
-    {:ok, conn} = Mint.HTTP2.connect(:http, "nghttp2.org", 80)
-    {:ok, conn, _request_ref} = Mint.HTTP.request(conn, "GET", "/robots.txt", [], nil)
-
-    receive do
-      message when Mint.HTTP.is_connection_message(conn, message) ->
-        {:ok, conn, responses} = Mint.HTTP.stream(conn, message)
-        Mint.HTTP.close(conn)
-        {:ok, responses}
-    after
-      5_000 -> {:error, :timeout}
-    end
-  end
-
   @service "/#{Hello.HelloService.Service.__meta__(:name)}/SayHello"
   @headers [
     {"grpc-timeout", "10S"},
@@ -34,9 +20,9 @@ defmodule Spear do
   def do_grpc do
     {:ok, conn} = Mint.HTTP2.connect(:http, "grpcb.in", 9000)
 
-    {:ok, conn, request_ref} = Mint.HTTP.request(conn, "POST", @service, @headers, @data)
-    # {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, @data)
-    # {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, :eof)
+    {:ok, conn, request_ref} = Mint.HTTP.request(conn, "POST", @service, @headers, :stream)
+    {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, @data)
+    {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, :eof)
 
     IO.inspect(request_ref, label: "request_ref")
 
@@ -46,12 +32,12 @@ defmodule Spear do
 
     responses_two
     |> into_map()
-    |> parse_data(Hello.HelloResponse)
+    # |> parse_data(Hello.HelloResponse)
   end
 
   def get_until_done(conn, acc \\ []) do
     receive do
-      message ->
+      message with Mint.HTTP.is_connection_message(conn, message) ->
         {:ok, conn, responses} = Mint.HTTP.stream(conn, message)
         acc = responses ++ acc
 
