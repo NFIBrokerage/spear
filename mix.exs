@@ -20,7 +20,8 @@ defmodule Spear.MixProject do
   defp deps do
     [
       {:mint, "~> 1.0"},
-      {:protobuf, "~> 0.7"}
+      {:protobuf, "~> 0.7"},
+      {:castore, "~> 0.0", only: [:dev, :test]}
     ]
   end
 end
