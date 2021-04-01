@@ -1,6 +1,4 @@
 %{
-  "castore": {:hex, :castore, "0.1.9", "eb08a94c12ebff92a92d844c6ccd90728dc7662aab9bdc8b3b785ba653c499d5", [:mix], [], "hexpm", "99c3a38ad9c0bab03fee1418c98390da1a31f3b85e317db5840d51a1443d26c8"},
-  "exprotobuf": {:hex, :exprotobuf, "1.2.17", "3003937da617f588a8fb63ebdd7b127a18d78d6502623c272076fd54c07c4de1", [:mix], [{:gpb, "~> 4.0", [hex: :gpb, repo: "hexpm", optional: false]}], "hexpm", "e07ec1e5ae6f8c1c8521450d5f6b658c8c700b1f34c70356e91ece0766f4361a"},
-  "gpb": {:hex, :gpb, "4.16.2", "bf5d9f2e455e8d8640249f6023cfccb6b16dab618925004e7f9858a4ebed51a8", [:make, :rebar3], [], "hexpm", "5a8e448a2ca872b4f4bef7005ff3d43818c3479885e75015f285b05f4f950b26"},
   "mint": {:hex, :mint, "1.2.1", "369cc8fecc54afd170e11740aa7efd066709e5ef3b5a2c63f0a47d1542cbd56a", [:mix], [{:castore, "~> 0.1.0", [hex: :castore, repo: "hexpm", optional: true]}], "hexpm", "053fe2f48c965f31878a16272478d9299fa412bc4df86dee2678986f2e40e018"},
+  "protobuf": {:hex, :protobuf, "0.7.1", "7d1b9f7d9ecb32eccd96b0c58572de4d1c09e9e3bc414e4cb15c2dce7013f195", [:mix], [], "hexpm", "6eff7a5287963719521c82e5d5b4583fd1d7cdd89ad129f0ea7d503a50a4d13f"},
 }
