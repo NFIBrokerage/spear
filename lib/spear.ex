@@ -5,25 +5,43 @@ defmodule Spear do
 
   require Mint.HTTP
 
-  @rpc "BidiHello"
-  @service "/#{Hello.HelloService.Service.__meta__(:name)}/#{@rpc}"
+  @rpc "Read"
+  @service "/#{EventStore.Client.Streams.Streams.Service.__meta__(:name)}/#{@rpc}"
   @headers [
-    {"grpc-timeout", "10S"},
+    # {"grpc-timeout", "10S"},
     {"content-type", "application/grpc+proto"},
     {"user-agent", "grpc-elixir-spear/0.0.1 (spear 0.0.1; mint 1.2.1)"},
     {"te", "trailers"}
   ]
   @compressed_flag <<0x00>>
-  @message_data Hello.HelloRequest.new(greeting: "ohai") |> Protobuf.Encoder.encode(iolist: true)
+  @message %EventStore.Client.Streams.ReadReq{
+    options: %EventStore.Client.Streams.ReadReq.Options{
+      count_option: {:count, 10},
+      filter_option: {:no_filter, %EventStore.Client.Shared.Empty{}},
+      read_direction: :Forwards,
+      resolve_links: false,
+      stream_option:
+        {:stream,
+         %EventStore.Client.Streams.ReadReq.Options.StreamOptions{
+           revision_option: {:start, %EventStore.Client.Shared.Empty{}},
+           stream_identifier: %EventStore.Client.Shared.StreamIdentifier{
+             streamName: "es_supported_clients"
+           }
+         }},
+      uuid_option: %EventStore.Client.Streams.ReadReq.Options.UUIDOption{
+        content: {:string, %EventStore.Client.Shared.Empty{}}
+      }
+    }
+  }
+
+  @message_data @message |> Protobuf.Encoder.encode(iolist: true)
   @message_length <<IO.iodata_length(@message_data)::unsigned-big-integer-8-unit(4)>>
   @data [@compressed_flag | [@message_length | @message_data]]
 
   def do_grpc do
-    {:ok, conn} = Mint.HTTP2.connect(:http, "grpcb.in", 9000)
+    {:ok, conn} = Mint.HTTP2.connect(:http, "localhost", 2113)
 
     {:ok, conn, request_ref} = Mint.HTTP.request(conn, "POST", @service, @headers, :stream)
-    {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, @data)
-    {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, @data)
     {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, @data)
     {:ok, conn} = Mint.HTTP.stream_request_body(conn, request_ref, :eof)
 
@@ -33,7 +51,7 @@ defmodule Spear do
 
     responses
     |> into_map()
-    |> parse_data(Hello.HelloResponse)
+    |> parse_data(EventStore.Client.Streams.ReadResp)
   end
 
   def get_until_done(conn, acc \\ []) do
