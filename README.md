@@ -4,14 +4,6 @@ A slim gRPC client backed by mint :yum:
 
 ## FAQ
 
-**Why just a client?**
-
-Just need a client.
-
-**Will you write a server too?**
-
-Probably nah.
-
 **Why the name "spear"?**
 
 1. best gum flavor
