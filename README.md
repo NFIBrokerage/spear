@@ -18,6 +18,10 @@ Probably nah.
 1. obligatory reference to ancient greek, roman, or egyptian history
 1. sounds cool :sunglasses:
 
+<!--
+
+haven't added any formatter exports yet, but reserve the right
+
 **Why is the formatter doing weird stuff to my definitions?**
 
 No. It's just trying to do its job you leave it alone.
@@ -32,6 +36,8 @@ the `.formatter.exs` (creating if not already there):
   import_deps: [:spear]
 ]
 ```
+
+-->
 
 **Why not `elixir-grpc/grpc`?**
 
