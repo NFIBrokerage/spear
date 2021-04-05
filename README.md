@@ -6,7 +6,6 @@ A spiffy EventStore 20+ client backed by mint :yum:
 
 **Why the name "spear"?**
 
-1. mint :wink:
 1. best gum flavor
 1. obligatory reference to ancient greek, roman, or egyptian history
 1. sounds cool :sunglasses:
