@@ -117,13 +117,13 @@ defmodule Spear.Connection do
 
   defp stream_body(conn, request_ref, messages) do
     Enum.reduce_while(messages, {:ok, conn}, fn message, {:ok, conn} ->
-      {message, _byte_size} = Request.to_wire_data(message)
+      {wire_data, _byte_size} = Request.to_wire_data(message)
 
       stream_result =
         Mint.HTTP.stream_request_body(
           conn,
           request_ref,
-          message
+          wire_data
         )
 
       case stream_result do
