@@ -115,20 +115,22 @@ defmodule Spear.Connection do
   defp process_response(_unknown, state), do: state
 
   defp stream_body(state, request_ref, messages) do
-    Enum.reduce_while(messages, {:ok, state}, fn message, {:ok, state} ->
-      {wire_data, _byte_size} = Request.to_wire_data(message)
+    Enum.reduce_while(messages, {:ok, state}, &stream_body_message(&1, &2, request_ref))
+  end
 
-      stream_result =
-        Mint.HTTP.stream_request_body(
-          state.conn,
-          request_ref,
-          wire_data
-        )
+  defp stream_body_message(message, {:ok, state}, request_ref) do
+    {wire_data, _byte_size} = Request.to_wire_data(message)
 
-      case stream_result do
-        {:ok, conn} -> {:cont, {:ok, put_in(state.conn, conn)}}
-        {:error, conn, reason} -> {:halt, {:error, put_in(state.conn, conn), reason}}
-      end
-    end)
+    stream_result =
+      Mint.HTTP.stream_request_body(
+        state.conn,
+        request_ref,
+        wire_data
+      )
+
+    case stream_result do
+      {:ok, conn} -> {:cont, {:ok, put_in(state.conn, conn)}}
+      {:error, conn, reason} -> {:halt, {:error, put_in(state.conn, conn), reason}}
+    end
   end
 end
