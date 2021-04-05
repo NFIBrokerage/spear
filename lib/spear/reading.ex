@@ -139,9 +139,19 @@ defmodule Spear.Reading do
     |> Spear.Event.from_read_response(link?: true)
     |> map_all_position()
   end
-  defp map_all_position(%Spear.Event{metadata: %{commit_position: commit, prepare_position: prepare}}), do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+
+  defp map_all_position(%Spear.Event{
+         metadata: %{commit_position: commit, prepare_position: prepare}
+       }),
+       do:
+         {:position,
+          %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+
   defp map_all_position(:start), do: {:start, %Shared.Empty{}}
-  defp map_all_position(%{commit_position: commit, prepare_position: prepare}), do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+
+  defp map_all_position(%{commit_position: commit, prepare_position: prepare}),
+    do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+
   defp map_all_position(:end), do: {:end, %Shared.Empty{}}
 
   defp map_stream_revision(%ReadResp{} = read_resp) do
@@ -149,7 +159,10 @@ defmodule Spear.Reading do
     |> Spear.Event.from_read_response(link?: true)
     |> map_stream_revision()
   end
-  defp map_stream_revision(%Spear.Event{metadata: %{stream_revision: revision}}), do: {:revision, revision}
+
+  defp map_stream_revision(%Spear.Event{metadata: %{stream_revision: revision}}),
+    do: {:revision, revision}
+
   defp map_stream_revision(:start), do: {:start, %Shared.Empty{}}
   defp map_stream_revision(n) when is_integer(n), do: {:revision, n}
   defp map_stream_revision(:end), do: {:end, %Shared.Empty{}}

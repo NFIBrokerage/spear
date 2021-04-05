@@ -105,15 +105,16 @@ defmodule Spear.Reading.Stream do
       # discard the first message since it is `from`
       {^from, <<_head, _::binary>> = rest} ->
         unfold_continuous(%__MODULE__{state | buffer: rest})
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
 
   defp unfold_continuous(%__MODULE__{buffer: buffer} = state) do
     case unfold_chunk(buffer) do
       {%_{} = message, remaining_buffer} ->
-        {message,
-         %__MODULE__{state | buffer: remaining_buffer, from: message}}
+        {message, %__MODULE__{state | buffer: remaining_buffer, from: message}}
 
       _ ->
         nil
