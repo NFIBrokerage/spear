@@ -1,6 +1,6 @@
 # Spear
 
-A slim gRPC client backed by mint :yum: for EventStore 20+
+A spiffy EventStore 20+ client backed by mint :yum:
 
 ## FAQ
 
