@@ -70,16 +70,20 @@ defmodule Spear.Connection do
   end
 
   @impl GenServer
-  def handle_info(message, %{conn: conn} = state) do
+  def handle_info(message, state) do
+    {:noreply, _handle_info(message, state)}
+  end
+
+  def _handle_info(message, %{conn: conn} = state) do
     case Mint.HTTP.stream(conn, message) do
       :unknown ->
         # YARD error handling
-        {:noreply, state}
+        state
 
       {:ok, conn, responses} ->
         state = put_in(state.conn, conn)
-        state = Enum.reduce(responses, state, &process_response/2)
-        {:noreply, state}
+
+        Enum.reduce(responses, state, &process_response/2)
     end
   end
 
