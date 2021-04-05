@@ -43,6 +43,8 @@ defmodule Spear.Event do
   EventStore uses event IDs to provide an idempotency feature. Any event
   written to the EventStore
 
+  TODO
+
   ## Examples
 
       File.stream!("data.csv")
@@ -112,9 +114,12 @@ defmodule Spear.Event do
       iex> events |> Enum.map(&Spear.Event.to_proposed_message/1)
       [%EventStore.Client.Streams.AppendReq{}, ..]
   """
-  @spec to_proposed_message(t(), encoder_mapping ::  %{}) :: AppendReq.t()
-  def to_proposed_message(%__MODULE__{} = event, encoder_mapping \\ %{"application/json" => &Jason.encode!/1}) do
-    encoder = Map.get(encoder_mapping, event.metadata.content_type, &(&1))
+  @spec to_proposed_message(t(), encoder_mapping :: %{}) :: AppendReq.t()
+  def to_proposed_message(
+        %__MODULE__{} = event,
+        encoder_mapping \\ %{"application/json" => &Jason.encode!/1}
+      ) do
+    encoder = Map.get(encoder_mapping, event.metadata.content_type, & &1)
 
     %AppendReq{
       content:
@@ -251,6 +256,13 @@ defmodule Spear.Event do
 
   defp destructure_read_response(
          %ReadResp{content: {:event, %ReadResp.ReadEvent{link: nil, event: event}}},
+         _link?
+       ) do
+    event
+  end
+
+  defp destructure_read_response(
+         %ReadResp{content: {:event, %ReadResp.ReadEvent{event: nil, link: event}}},
          _link?
        ) do
     event

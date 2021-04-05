@@ -71,7 +71,8 @@ defmodule Spear.Request do
     encoded_message = encode(message)
     message_length = IO.iodata_length(encoded_message)
 
-    {[<<0::unsigned-integer-8, message_length::unsigned-big-integer-8-unit(4)>>, encoded_message], 1 + 4 + message_length}
+    {[<<0::unsigned-integer-8, message_length::unsigned-big-integer-8-unit(4)>>, encoded_message],
+     1 + 4 + message_length}
   end
 
   @spec encode(struct()) :: iodata()

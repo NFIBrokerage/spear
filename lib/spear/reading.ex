@@ -1,9 +1,7 @@
 defmodule Spear.Reading do
-  @moduledoc """
-  Helper functions for reading streams
+  @moduledoc false
 
-  TODO
-  """
+  # Helper functions for reading streams
 
   alias Spear.Protos.EventStore.Client.{Shared, Streams.ReadReq, Streams.ReadResp}
 
@@ -89,63 +87,11 @@ defmodule Spear.Reading do
     data
   end
 
-  @doc """
-  Decodes a message body using a 2-arity decoder function.
-
-  This function is allowed to raise error when the event body cannot be decoded
-  according to the decoder function.
-
-  `opts` defaults to a decoder function of `Jason.decode!/2`. All remaining
-  key-value pains in `opts` are passed to the second argument of the decoder
-  function.
-
-  Any 2-arity decoder function is allowed as long as it implements the following
-  behaviour:
-
-  ```elixir
-  @callback decoder_fn(encoded_value :: binary(), opts :: Keyword.t()) :: decoded_value :: term()
-  ```
-
-  Where the returned `term` is any decoded value. (Note that the name
-  is flexible: the `:decoder` option expects a 2-arity _anonymous_ function.)
-
-  `event_stream` should be a `t:Enumerable.t/0` returned by reading a stream
-  with `Spear.stream!/3` or equivalent. This function assumes that it is
-  operating on the data payload of an event as is extracted by
-  `decode_to_event_body/2`. Note that the enumerable returned by
-  `Spear.stream!/3` applies `decode_to_event_body/2` as a default.
-
-  While it is very common to use JSON-encoding due to the wide availability
-  of JSON (de/en)coding libraries in virtually all languages, it is not
-  necessarily the only choice. Writing events in Erlang term format is a
-  reasonable choice if all services reading the stream are able to decode
-  the event bodies. For erlang term format, pass `:erlang.binary_to_term/2`
-  as the `:decoder` option.
-
-  ## Examples
-
-      iex> event_stream |> Spear.Reading.decode_as!(key: :atoms) |> Enum.to_list()
-      [
-        %{languages: ["typescript", "javascript"], runtime: "NodeJS"},
-      ]
-      iex> event_bodies = [<<131, 104, 2, 100, 0, 2, 111, 107, 100, 0, 4, 110, 105, 99, 101>>]
-      iex> event_bodies
-      ...> |> Spear.Reading.decode_as!(decoder: &:erlang.binary_to_term/2)
-      ...> |> Enum.to_list()
-      [{:ok, :nice}]
-  """
-  @spec decode_as!(Enumerable.t(), Keyword.t()) :: Enumerable.t()
-  def decode_as!(event_stream, opts \\ []) do
-    {decoder, remaining_opts} = Keyword.pop(opts, :decoder, &Jason.decode!/2)
-
-    Stream.map(event_stream, &decoder.(&1, remaining_opts))
-  end
-
   @doc false
   def build_read_request(request_info) when is_map(request_info) do
     build_read_request(
       request_info.stream,
-      request_info.revision,
+      request_info.from,
       request_info.max_count,
       request_info.filter,
       request_info.direction,
@@ -155,28 +101,21 @@ defmodule Spear.Reading do
 
   @doc false
   @spec build_read_request(
-          stream_name :: String.t(),
-          revision :: atom() | integer(),
+          stream_name :: String.t() | :all,
+          from :: atom() | integer() | %ReadResp{} | %Spear.Event{},
           max_count :: integer(),
           filter :: :TODO,
           direction :: :forwards | :backwards,
           resolve_links? :: boolean()
         ) :: %ReadReq{}
-  def build_read_request(stream_name, revision, max_count, filter, direction, resolve_links?) do
+  def build_read_request(stream_name, from, max_count, filter, direction, resolve_links?) do
     %ReadReq{
       options: %ReadReq.Options{
         count_option: {:count, max_count},
         filter_option: map_filter(filter),
         read_direction: map_direction(direction),
         resolve_links: resolve_links?,
-        stream_option:
-          {:stream,
-           %ReadReq.Options.StreamOptions{
-             revision_option: map_revision(revision),
-             stream_identifier: %Shared.StreamIdentifier{
-               streamName: stream_name
-             }
-           }},
+        stream_option: map_stream(stream_name, from),
         uuid_option: %ReadReq.Options.UUIDOption{
           content: {:string, %Shared.Empty{}}
         }
@@ -184,9 +123,36 @@ defmodule Spear.Reading do
     }
   end
 
-  defp map_revision(:start), do: {:start, %Shared.Empty{}}
-  defp map_revision(n) when is_integer(n), do: {:revision, n}
-  defp map_revision(:end), do: {:end, %Shared.Empty{}}
+  defp map_stream(:all, from),
+    do: {:all, %ReadReq.Options.AllOptions{all_option: map_all_position(from)}}
+
+  defp map_stream(stream_name, from) when is_binary(stream_name),
+    do:
+      {:stream,
+       %ReadReq.Options.StreamOptions{
+         revision_option: map_stream_revision(from),
+         stream_identifier: %Shared.StreamIdentifier{streamName: stream_name}
+       }}
+
+  defp map_all_position(%ReadResp{} = read_resp) do
+    read_resp
+    |> Spear.Event.from_read_response(link?: true)
+    |> map_all_position()
+  end
+  defp map_all_position(%Spear.Event{metadata: %{commit_position: commit, prepare_position: prepare}}), do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+  defp map_all_position(:start), do: {:start, %Shared.Empty{}}
+  defp map_all_position(%{commit_position: commit, prepare_position: prepare}), do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+  defp map_all_position(:end), do: {:end, %Shared.Empty{}}
+
+  defp map_stream_revision(%ReadResp{} = read_resp) do
+    read_resp
+    |> Spear.Event.from_read_response(link?: true)
+    |> map_stream_revision()
+  end
+  defp map_stream_revision(%Spear.Event{metadata: %{stream_revision: revision}}), do: {:revision, revision}
+  defp map_stream_revision(:start), do: {:start, %Shared.Empty{}}
+  defp map_stream_revision(n) when is_integer(n), do: {:revision, n}
+  defp map_stream_revision(:end), do: {:end, %Shared.Empty{}}
 
   defp map_filter(nil), do: {:no_filter, %Shared.Empty{}}
 

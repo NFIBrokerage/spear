@@ -72,8 +72,14 @@ defmodule Spear.Writing do
   # - current_revision_option_20_6_0
   # - expected_revision_option_20_6_0
   # that I'm not really sure what to do with
-  defp map_expectation_violation(%AppendResp.WrongExpectedVersion{current_revision_option: current_revision, expected_revision_option: expected_revision}) do
-    %ExpectationViolation{current: map_current_revision(current_revision), expected: map_expected_revision(expected_revision)}
+  defp map_expectation_violation(%AppendResp.WrongExpectedVersion{
+         current_revision_option: current_revision,
+         expected_revision_option: expected_revision
+       }) do
+    %ExpectationViolation{
+      current: map_current_revision(current_revision),
+      expected: map_expected_revision(expected_revision)
+    }
   end
 
   defp map_current_revision({:current_revision, revision}), do: revision

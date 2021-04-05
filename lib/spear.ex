@@ -227,17 +227,22 @@ defmodule Spear do
   returning an empty enumerable `[]`.
 
   `connection` may be any valid GenServer name (including PIDs) for a process
-  running the `Spear.Connection` GenServer. `stream_name` can be any stream,
-  existing or not, including projected streams such as `"$all"`, category
-  streams or event-type streams.
+  running the `Spear.Connection` GenServer.
+
+  `stream_name` can be any stream, existing or not, including projected
+  streams such as category streams or event-type streams. The `:all` atom
+  may be passed as `stream_name` to read all events in the EventStore.
 
   ## Options
 
   * `:from` - (default: `:start`) the EventStore stream revision from which to
-    read. Valid values include `:start`, `:end`, and any non-negative integer
-    representing the event number in the stream. Event numbers are inclusive
-    (e.g. reading from `0` will first return the event numbered `0` in the
-    stream, if one exists).
+    read. Valid values include `:start`, `:end`, any non-negative integer
+    representing the event number revision in the stream and events. Event
+    numbers are exclusive (e.g. reading from `0` will first return the
+    event numbered `0` in the stream, if one exists). `:start` and `:end`
+    are treated as inclusive (e.g. `:start` will return the first event in
+    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
+    be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStore stream. Valid values include `:forwards` and `:backwards`.
     Reading the EventStore stream forwards will return events in the order
@@ -251,17 +256,17 @@ defmodule Spear do
     EventStore at a time. Any positive integer is valid. See the enumeration
     characteristics section below for more information about how `:chunk_size`
     works and how to tune it.
-  * `:through` - (default: `Spear.Reading.decode_to_event_body/1`) a 1-arity
-    function to apply to the resulting stream. See
-    `Spear.Event.from_read_response/1` for more information on reducing
-    events to their bodies. To return events as `ReadResp` structs, pass the
-    identity function as this option: `&(&1)`.
   * `:timeout` - (default: `5_000` - 5s) the time allowed for the read of a
     single chunk of events in the EventStore stream. This time is _not_
     cumulative: an EventStore stream 100 events long which takes 5s to read
     each chunk may be read in chunks of 20 events culumaltively in 25s. A
     timeout of `5_001`ms would not raise a timeout error in that scenario
     (assuming the chunk read consistently takes `<= 5_000` ms).
+  * `:raw?:` - (default: `false`) controls whether or not the enumerable
+    `event_stream` is decoded to `Spear.Event` structs from their raw
+    `ReadReq` output. Setting `raw?: true` prevents this transformation and
+    leaves each event as a `ReadReq` struct. See
+    `Spear.Event.from_read_response/2` for more information.
 
   ## Enumeration Characteristics
 
@@ -302,7 +307,11 @@ defmodule Spear do
       iex> Spear.stream!(MyConnection, "es_supported_clients", chunk_size: 3) |> Enum.count()
       5
   """
-  @spec stream!(connection :: GenServer.name(), stream_name :: String.t(), opts :: Keyword.t()) ::
+  @spec stream!(
+          connection :: GenServer.name(),
+          stream_name :: String.t() | :all,
+          opts :: Keyword.t()
+        ) ::
           event_stream :: Enumerable.t()
   def stream!(connection, stream_name, opts \\ []) do
     default_stream_opts = [
@@ -328,7 +337,7 @@ defmodule Spear do
     Spear.Reading.Stream.new!(
       connection: connection,
       stream: stream_name,
-      revision: opts[:from],
+      from: opts[:from],
       max_count: opts[:chunk_size],
       filter: opts[:filter],
       direction: opts[:direction],
@@ -351,10 +360,13 @@ defmodule Spear do
   ## Options
 
   * `:from` - (default: `:start`) the EventStore stream revision from which to
-    read. Valid values include `:start`, `:end`, and any non-negative integer
-    representing the event number in the stream. Event numbers are inclusive
-    (e.g. reading from `0` will first return the event numbered `0` in the
-    stream, if one exists). EventStore streams are zero-indexed.
+    read. Valid values include `:start`, `:end`, any non-negative integer
+    representing the event number revision in the stream and events. Event
+    numbers are exclusive (e.g. reading from `0` will first return the
+    event numbered `0` in the stream, if one exists). `:start` and `:end`
+    are treated as inclusive (e.g. `:start` will return the first event in
+    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
+    be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStore stream. Valid values include `:forwards` and `:backwards`.
     Reading the EventStore stream forwards will return events in the order
@@ -454,7 +466,7 @@ defmodule Spear do
       Spear.Reading.Stream.read_chunk(
         connection: connection,
         stream: stream_name,
-        revision: opts[:from],
+        from: opts[:from],
         max_count: opts[:max_count],
         filter: opts[:filter],
         direction: opts[:direction],
@@ -589,7 +601,8 @@ defmodule Spear do
           opts[:raw?]
         )
 
-      error -> error
+      error ->
+        error
     end
   end
 end

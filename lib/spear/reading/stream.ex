@@ -4,7 +4,7 @@ defmodule Spear.Reading.Stream do
   defstruct [
     :connection,
     :stream,
-    :revision,
+    :from,
     :max_count,
     :filter,
     :direction,
@@ -54,9 +54,11 @@ defmodule Spear.Reading.Stream do
       {%ReadResp{content: {:stream_not_found, %ReadResp.StreamNotFound{}}}, _rest} ->
         []
 
-      {message, _rest} ->
+      {message, rest} ->
+        buffer = if state.from |> is_atom(), do: buffer, else: rest
+
         Stream.unfold(
-          %__MODULE__{state | buffer: buffer, revision: Reading.revision(message)},
+          %__MODULE__{state | buffer: buffer, from: message},
           unfold_fn
         )
 
@@ -96,19 +98,24 @@ defmodule Spear.Reading.Stream do
   # in this case the buffer has run dry and we need to request more events
   # (a new buffer) with a new ReadReq
   @spec unfold_continuous(t()) :: {emitted_element :: ReadReq.t(), t()} | nil
-  defp unfold_continuous(%__MODULE__{buffer: <<>>} = state) do
-    response = request!(%__MODULE__{state | revision: state.revision + 1})
+  defp unfold_continuous(%__MODULE__{buffer: <<>>, from: from} = state) do
+    response = request!(%__MODULE__{state | max_count: state.max_count + 1})
 
-    unfold_continuous(%__MODULE__{state | buffer: response[:data] || <<>>})
+    case unfold_chunk(response[:data] || <<>>) do
+      # discard the first message since it is `from`
+      {^from, <<_head, _::binary>> = rest} ->
+        unfold_continuous(%__MODULE__{state | buffer: rest})
+      _ -> nil
+    end
   end
 
   defp unfold_continuous(%__MODULE__{buffer: buffer} = state) do
     case unfold_chunk(buffer) do
-      {message, remaining_buffer} ->
+      {%_{} = message, remaining_buffer} ->
         {message,
-         %__MODULE__{state | buffer: remaining_buffer, revision: Reading.revision(message)}}
+         %__MODULE__{state | buffer: remaining_buffer, from: message}}
 
-      nil ->
+      _ ->
         nil
     end
   end

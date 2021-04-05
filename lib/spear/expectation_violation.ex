@@ -44,7 +44,7 @@ defmodule Spear.ExpectationViolation do
       {:error, %Spear.ExpectationViolation{current: :empty, expected: :exists}}
   """
   @type t :: %__MODULE__{
-    current: pos_integer() | :empty,
-    expected: pos_integer() | :empty | :exists | :any
-  }
+          current: pos_integer() | :empty,
+          expected: pos_integer() | :empty | :exists | :any
+        }
 end
