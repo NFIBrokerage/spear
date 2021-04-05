@@ -1,3 +1,5 @@
+alias Spear.Protos.EventStore
+
 defmodule EventStore.Client.Gossip.MemberInfo.VNodeState do
   @moduledoc false
   use Protobuf, enum: true, syntax: :proto3

@@ -1,3 +1,5 @@
+alias Spear.Protos.EventStore
+
 defmodule EventStore.Client.Shared.UUID.Structured do
   @moduledoc false
   use Protobuf, syntax: :proto3

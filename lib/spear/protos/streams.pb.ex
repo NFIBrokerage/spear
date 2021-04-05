@@ -1,3 +1,5 @@
+alias Spear.Protos.EventStore
+
 defmodule EventStore.Client.Streams.ReadReq.Options.ReadDirection do
   @moduledoc false
   use Protobuf, enum: true, syntax: :proto3
@@ -171,6 +173,8 @@ defmodule EventStore.Client.Streams.ReadReq do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @behaviour Spear.TypedMessage
+
   @type t :: %__MODULE__{
           options: EventStore.Client.Streams.ReadReq.Options.t() | nil
         }
@@ -178,6 +182,9 @@ defmodule EventStore.Client.Streams.ReadReq do
   defstruct [:options]
 
   field :options, 1, type: EventStore.Client.Streams.ReadReq.Options
+
+  @impl Spear.TypedMessage
+  def message_type, do: "event_store.client.streams.ReadReq"
 end
 
 defmodule EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent.MetadataEntry do
@@ -383,11 +390,16 @@ defmodule EventStore.Client.Streams.AppendReq do
           content: {atom, any}
         }
 
+  @behaviour Spear.TypedMessage
+
   defstruct [:content]
 
   oneof :content, 0
   field :options, 1, type: EventStore.Client.Streams.AppendReq.Options, oneof: 0
   field :proposed_message, 2, type: EventStore.Client.Streams.AppendReq.ProposedMessage, oneof: 0
+
+  @impl Spear.TypedMessage
+  def message_type, do: "event_store.client.streams.AppendReq"
 end
 
 defmodule EventStore.Client.Streams.AppendResp.Position do

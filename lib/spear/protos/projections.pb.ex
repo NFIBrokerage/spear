@@ -1,3 +1,5 @@
+alias Spear.Protos.EventStore
+
 defmodule EventStore.Client.Projections.CreateReq.Options.Transient do
   @moduledoc false
   use Protobuf, syntax: :proto3
