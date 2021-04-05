@@ -77,8 +77,13 @@ defmodule Spear.Connection do
       {:ok, conn, responses} ->
         state = put_in(state.conn, conn)
 
-        {:noreply, Enum.reduce(responses, state, &process_response/2)}
+        {:noreply, handle_responses(state, responses)}
     end
+  end
+
+  @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
+  defp handle_responses(state, responses) do
+    Enum.reduce(responses, state, &process_response/2)
   end
 
   defp process_response({:status, request_ref, status}, state) do
