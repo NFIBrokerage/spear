@@ -554,21 +554,18 @@ defmodule Spear do
   ...> |> Stream.map(fn n -> Spear.Event.new("incremented", n) end)
   ...> |> Spear.append(conn, "InfiniteCounter", timeout: :infinity, expect: :empty)
   {:error,
-   %Mint.HTTPError{
-     module: Mint.HTTP2,
-     reason: {:exceeds_window_size, :connection, 26}
-   }}
-   ```
+   {:grpc_failure, [code: 3, message: "Maximum Append Size of 1048576 Exceeded."]}}
+  ```
 
   Note that while EventStore streams can in theory store infinitely long
-  streams, they are not practically able to do so. More immediately, HTTP2
-  allows server implementations to direct clients to a maximum window size of
-  bytes allowed to be sent in a single request. EventStore exerts a reasonably
-  large window size per connection and request on the client, disallowing
-  the writing of infinite streams. In cases where a client attempts to write
-  too many events, `append/4` may fail with the `Mint.HTTPError` depicted
-  above (though possible with different elements in the second and third
-  elements of the `:reason` tuple).
+  streams, they are not practically able to do so. EventStore limits the size
+  of a single write to `1_048_576` events.
+
+  <!--
+  TODO determine if this is bytes or events by writing much larger
+  events. There's no way it's bytes, right? We've definitely written events
+  larger than a MB before.
+  -->
   """
   @spec append(
           event_stream :: Enumerable.t(),
@@ -594,15 +591,26 @@ defmodule Spear do
         opts
       )
 
-    case GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)) do
-      {:ok, response} ->
-        Spear.Writing.decode_append_response(
-          response[:data] || <<>>,
-          opts[:raw?]
-        )
+    with {:ok, %{status: 200, headers: headers} = response} <-
+           GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)),
+         {{"grpc-status", "0"}, _} <- {List.keyfind(headers, "grpc-status", 0), response} do
+      Spear.Writing.decode_append_response(
+        response[:data] || <<>>,
+        opts[:raw?]
+      )
+    else
+      {:error, reason} ->
+        {:error, reason}
 
-      error ->
-        error
+      # TODO this badly needs a refactor
+      {{"grpc-status", other_status}, response} ->
+        {:error,
+         {:grpc_failure,
+          code: other_status && String.to_integer(other_status),
+          message:
+            Enum.find_value(response.headers, fn {header, value} ->
+              header == "grpc-message" && value
+            end)}}
     end
   end
 end

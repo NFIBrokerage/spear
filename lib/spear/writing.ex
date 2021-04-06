@@ -65,6 +65,9 @@ defmodule Spear.Writing do
     else
       %AppendResp{result: {:wrong_expected_version, expectation_violation}} ->
         {:error, map_expectation_violation(expectation_violation)}
+
+      {:decode, bad_buffer} ->
+        {:error, {:malformed_response, bad_buffer}}
     end
   end
 
