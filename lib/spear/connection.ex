@@ -9,7 +9,6 @@ defmodule Spear.Connection do
 
   use GenServer
   alias Spear.Connection.Request
-  require Mint.HTTP
 
   defstruct [:conn, requests: %{}]
 
