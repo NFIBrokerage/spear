@@ -54,7 +54,6 @@ defmodule Spear.Connection do
   end
 
   defp request_and_stream_body(state, request, from) do
-    # TODO make request streams and store them in state
     with {:ok, conn, request_ref} <-
            Mint.HTTP.request(state.conn, @post, request.path, request.headers, :stream),
          request = Request.new(request.messages, request_ref, from),
