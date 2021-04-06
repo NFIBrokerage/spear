@@ -490,14 +490,11 @@ defmodule Spear do
   they will be lazily mapped to `AppendReq` structs before being encoded to
   wire data.
 
+  See the [Writing Events](TODO) guide for more information about writing
+  events.
+
   ## Options
 
-  * `:batch_size` - (default: `1`) the number of messages to write in each
-    HTTP2 DATA frame. Increasing this number may improve write performance
-    when writing a very large number of events, but is generally recommended
-    to keep at `1`. This does not guarantee that each batch will be written in
-    the same DATA frame. The HTTP2 client may split messages however it sees
-    fit.
   * `:expect` - (default: `:any`) the expectation to set on the
     status of the stream. The write will fail if the expectation fails. See
     `Spear.ExpectationViolation` for more information about expectations.
@@ -510,62 +507,14 @@ defmodule Spear do
     through the simplified return API, such as the stream's revision number
     after writing the events.
 
-  ## Enumeration Characteristics
+  ## Examples
 
-  `event_stream` is an `t:Enumerable.t()` which will be lazily computed as
-  events are emitted over-the-wire to the EventStore via gRPC. The procedure
-  for emitting events roughly follows this pseudo-code
-
-  ```elixir
-  initiate_grpc_request()
-
-  event_stream
-  |> Stream.map(&encode_to_wire_format/1)
-  |> Enum.each(&emit_event/1)
-
-  conclude_grpc_request()
-  ```
-
-  This means a few things:
-
-  First, you can efficiently emit events from a stream over a large source
-  such as a large CSV file
-
-  ```elixir
-  File.stream!("large.csv", read_ahead: 100_000)
-  |> MyCsvParser.parse_stream()
-  |> Stream.map(&MyCsvParser.turn_csv_line_into_spear_event/1)
-  |> Spear.append(conn, "ChargesFromCsvs", batch_size: 25)
-  # => :ok
-  ```
-
-  This pipeline will only run the stream as the events are being written to
-  the network. Realize, however, that this may not be ideal for all
-  use-cases: should the `MyCsvParser.turn_csv_line_into_spear_event/1` function
-  raise an error on the last line of the CSV, the final line of the CSV will
-  not be written as an event to the EventStore but all events produced prior
-  to the final line will be.
-
-  Second, you may (but are _not_ encouraged to) write events via an infinite
-  stream. A trivial counter mechanism could be implemented like so
-
-  ```elixir
-  iex> Stream.iterate(0, &(&1 + 1))
-  ...> |> Stream.map(fn n -> Spear.Event.new("incremented", n) end)
-  ...> |> Spear.append(conn, "InfiniteCounter", timeout: :infinity, expect: :empty)
-  {:error,
-   {:grpc_failure, [code: 3, message: "Maximum Append Size of 1048576 Exceeded."]}}
-  ```
-
-  Note that while EventStore streams can in theory store infinitely long
-  streams, they are not practically able to do so. EventStore limits the size
-  of a single write to `1_048_576` events.
-
-  <!--
-  TODO determine if this is bytes or events by writing much larger
-  events. There's no way it's bytes, right? We've definitely written events
-  larger than a MB before.
-  -->
+      iex> [Spear.Event.new("es_supported_clients", %{})]
+      ...> |> Spear.append(conn, expect: :exists)
+      :ok
+      iex> [Spear.Event.new("es_supported_clients", %{})]
+      ...> |> Spear.append(conn, expect: :empty)
+      {:error, %Spear.ExpectationViolation{current: 1, expected: :empty}}
   """
   @spec append(
           event_stream :: Enumerable.t(),
