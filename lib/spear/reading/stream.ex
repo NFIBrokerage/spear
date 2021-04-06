@@ -24,7 +24,7 @@ defmodule Spear.Reading.Stream do
 
     wrap_buffer_in_decode_stream(
       state,
-      response[:data] || <<>>,
+      response.data,
       &unfold_continuous/1
     )
   end
@@ -38,7 +38,7 @@ defmodule Spear.Reading.Stream do
         stream =
           wrap_buffer_in_decode_stream(
             state,
-            response[:data] || <<>>,
+            response.data,
             &unfold_chunk/1
           )
 
@@ -101,7 +101,7 @@ defmodule Spear.Reading.Stream do
   defp unfold_continuous(%__MODULE__{buffer: <<>>, from: from} = state) do
     response = request!(%__MODULE__{state | max_count: state.max_count + 1})
 
-    case unfold_chunk(response[:data] || <<>>) do
+    case unfold_chunk(response.data) do
       # discard the first message since it is `from`
       {^from, <<_head, _::binary>> = rest} ->
         unfold_continuous(%__MODULE__{state | buffer: rest})

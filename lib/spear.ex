@@ -595,7 +595,7 @@ defmodule Spear do
            GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)),
          {{"grpc-status", "0"}, _} <- {List.keyfind(headers, "grpc-status", 0), response} do
       Spear.Writing.decode_append_response(
-        response[:data] || <<>>,
+        response.data,
         opts[:raw?]
       )
     else
