@@ -143,21 +143,12 @@ defmodule Spear.Connection do
     params = {current_window, request_ref}
 
     {:ok, state}
-    # |> do_stage(:set_passive_mode, params)
     |> do_stage(:recv_responses, params)
     |> do_stage(:check_window_size, params)
-    # |> do_stage(:set_active_mode, params)
     |> emit_stage_results()
   end
 
   defp do_stage({:error, state, reason}, _stage, _params), do: {:error, state, reason}
-
-  # defp do_stage({:ok, state}, :set_passive_mode, _params) do
-  # case Mint.HTTP.set_mode(state.conn, :passive) do
-  # {:ok, conn} -> {:ok, put_in(state.conn, conn)}
-  # {:error, reason} -> {:error, state, reason}
-  # end
-  # end
 
   defp do_stage({:ok, state}, :recv_responses, {_current_window, _request_ref}) do
     case receive_next_and_stream(state.conn) do
@@ -186,13 +177,6 @@ defmodule Spear.Connection do
       do_stage({:ok, state}, :recv_responses, {new_window, request_ref})
     end
   end
-
-  # defp do_stage({:ok, state}, :set_active_mode, _params) do
-  # case Mint.HTTP.set_mode(state.conn, :active) do
-  # {:ok, conn} -> {:ok, put_in(state.conn, conn)}
-  # {:error, reason} -> {:error, state, reason}
-  # end
-  # end
 
   defp emit_stage_results({:ok, state}), do: {:cont, {:ok, state}}
   defp emit_stage_results({:error, state, reason}), do: {:halt, {:error, state, reason}}
