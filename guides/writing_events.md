@@ -18,7 +18,7 @@ such as a CSV file with many lines:
 File.stream!("large.csv", read_ahead: 100_000)
 |> MyCsvParser.parse_stream()
 |> Stream.map(&MyCsvParser.turn_csv_line_into_spear_event/1)
-|> Spear.append(conn, "ChargesFromCsvs", batch_size: 25)
+|> Spear.append(conn, "ChargesFromCsvs", timeout: :infinity)
 # => :ok
 ```
 
