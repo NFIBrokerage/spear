@@ -3,18 +3,21 @@ defmodule Spear.Connection.Request do
 
   # a struct representing a stream-able request
 
+  alias Spear.Protos.EventStore.Client.Streams.ReadResp
+
   @type t :: %{
           continuation: Enumerable.continuation(),
           request_ref: Mint.Types.request_ref(),
           buffer: binary(),
           from: GenServer.from(),
           response: Spear.Connection.Response.t(),
-          status: :streaming | :done
+          status: :streaming | :done,
+          type: :request | {:on_data, (binary -> any())}
         }
 
-  defstruct [:continuation, :buffer, :request_ref, :from, :response, :status]
+  defstruct [:continuation, :buffer, :request_ref, :from, :response, :status, :type]
 
-  def new(event_stream, request_ref, from) do
+  def new(%Spear.Request{messages: event_stream, response_module: response_module}, request_ref, from, type) do
     reducer = &reduce_with_suspend/2
     stream = Stream.map(event_stream, &Spear.Request.to_wire_data/1)
     continuation = &Enumerable.reduce(stream, &1, reducer)
@@ -24,8 +27,9 @@ defmodule Spear.Connection.Request do
       buffer: <<>>,
       request_ref: request_ref,
       from: from,
-      response: %Spear.Connection.Response{},
-      status: :streaming
+      response: %Spear.Connection.Response{type: response_module},
+      status: :streaming,
+      type: type
     }
   end
 
@@ -190,5 +194,26 @@ defmodule Spear.Connection.Request do
           state
       end
     end)
+  end
+
+  def handle_data(%__MODULE__{type: :request} = request, new_data) do
+    update_in(request.response.data, fn data -> data <> new_data end)
+  end
+
+  def handle_data(%__MODULE__{type: {:on_data, on_data}} = request, new_data) do
+    case Spear.Grpc.decode_next_message(request.response.data <> new_data, request.response.type) do
+      {%ReadResp{content: {:confirmation, %{subscription_id: _}}}, rest} ->
+        GenServer.reply(request.from, {:ok, request.request_ref})
+
+        put_in(request.response.data, rest)
+
+      {%_{} = message, rest} ->
+        on_data.(message)
+
+        put_in(request.response.data, rest)
+
+      nil ->
+        update_in(request.response.data, fn data -> data <> new_data end)
+    end
   end
 end

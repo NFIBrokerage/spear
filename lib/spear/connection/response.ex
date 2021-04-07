@@ -3,5 +3,5 @@ defmodule Spear.Connection.Response do
 
   # a slim data structure for storing information about an HTTP/2 response
 
-  defstruct [:status, headers: [], data: <<>>]
+  defstruct [:status, :type, headers: [], data: <<>>]
 end

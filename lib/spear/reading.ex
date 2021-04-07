@@ -3,7 +3,9 @@ defmodule Spear.Reading do
 
   # Helper functions for reading streams
 
-  alias Spear.Protos.EventStore.Client.{Shared, Streams.ReadReq, Streams.ReadResp}
+  alias Spear.Protos.EventStore.Client.{Shared, Streams.ReadReq, Streams.ReadResp, Streams.Streams.Service}
+
+  @uuid %ReadReq.Options.UUIDOption{content: {:string, %Shared.Empty{}}}
 
   @doc false
   def decode_next_message(message) do
@@ -87,40 +89,38 @@ defmodule Spear.Reading do
     data
   end
 
-  @doc false
-  def build_read_request(request_info) when is_map(request_info) do
-    build_read_request(
-      request_info.stream,
-      request_info.from,
-      request_info.max_count,
-      request_info.filter,
-      request_info.direction,
-      request_info.resolve_links?
-    )
-  end
-
-  @doc false
-  @spec build_read_request(
-          stream_name :: String.t() | :all,
-          from :: atom() | integer() | %ReadResp{} | %Spear.Event{},
-          max_count :: integer(),
-          filter :: :TODO,
-          direction :: :forwards | :backwards,
-          resolve_links? :: boolean()
-        ) :: %ReadReq{}
-  def build_read_request(stream_name, from, max_count, filter, direction, resolve_links?) do
+  def build_read_request(params) do
     %ReadReq{
       options: %ReadReq.Options{
-        count_option: {:count, max_count},
-        filter_option: map_filter(filter),
-        read_direction: map_direction(direction),
-        resolve_links: resolve_links?,
-        stream_option: map_stream(stream_name, from),
-        uuid_option: %ReadReq.Options.UUIDOption{
-          content: {:string, %Shared.Empty{}}
-        }
+        count_option: {:count, params.max_count},
+        filter_option: map_filter(params.filter),
+        read_direction: map_direction(params.direction),
+        resolve_links: params.resolve_links?,
+        stream_option: map_stream(params.stream, params.from),
+        uuid_option: @uuid
       }
     }
+  end
+
+  def build_subscribe_request(params) do
+    message =
+      %ReadReq{
+        options: %ReadReq.Options{
+          count_option: {:subscription, %ReadReq.Options.SubscriptionOptions{}},
+          filter_option: map_filter(params.filter),
+          read_direction: map_direction(params.direction),
+          resolve_links: params.resolve_links?,
+          stream_option: map_stream(params.stream, params.from),
+          uuid_option: @uuid
+        }
+      }
+
+    %Spear.Request{
+      service: Service,
+      rpc: :Read,
+      messages: [message]
+    }
+    |> Spear.Request.expand()
   end
 
   defp map_stream(:all, from),
@@ -172,56 +172,6 @@ defmodule Spear.Reading do
   defp map_direction(:forwards), do: :Forwards
   defp map_direction(:backwards), do: :Backwards
 
-  @doc """
-  Destructures the revision from a ReadResp structure
-
-  If no link is present in the ReadResp, the `:event`'s stream revision is
-  used. If a link is present, though, the stream revision of the link takes
-  precedence.
-
-  See the `Spear` moduledoc for more information about link resolution.
-
-  ## Examples
-
-      iex> alias Spear.Protos.EventStore.Client.Streams.ReadResp
-      iex> read_response =
-      ...> Spear.stream!(connection, "my_projected_stream", chunk_size: 1, resolve_links?: true, through: &(&1))
-      ...> |> Stream.drop(1)
-      ...> |> Enum.take(1)
-      ...> |> List.first()
-      %ReadResp{
-        content: {:event,
-         %ReadResp.ReadEvent{
-           event: %ReadResp.ReadEvent.RecordedEvent{
-             data: "{\\"languages\\":[\\"typescript\\",\\"javascript\\"],\\"runtime\\":\\"NodeJS\\"}",
-             stream_revision: 3
-           },
-           link: %ReadResp.ReadEvent.RecordedEvent{
-             data: "3@es_supported_clients",
-             stream_revision: 1
-           }
-         }}
-      }
-      iex> Spear.Reading.revision(read_response)
-      1
-      iex> read_response =
-      ...> Spear.stream!(connection, "es_supported_clients", chunk_size: 4, resolve_links?: true, through: &(&1))
-      ...> |> Stream.drop(3)
-      ...> |> Enum.take(1)
-      ...> |> List.first()
-      %ReadResp{
-        content: {:event,
-         %ReadResp.ReadEvent{
-           event: %ReadResp.ReadEvent.RecordedEvent{
-             data: "{\\"languages\\":[\\"typescript\\",\\"javascript\\"],\\"runtime\\":\\"NodeJS\\"}",
-             stream_revision: 3
-           },
-           link: nil
-         }}
-      }
-      iex> Spear.Reading.revision(read_response)
-      3
-  """
   @spec revision(ReadResp.t()) :: non_neg_integer()
   def revision(%ReadResp{
         content:

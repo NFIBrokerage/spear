@@ -110,112 +110,7 @@ defmodule Spear do
 
   To differentiate, we will most commonly refer to Elixir `Stream`s in the
   Spear documentation by their canonical data-type: `t:Enumerable.t/0`.
-
-  ## Link Resolution
-
-  Some functions in Spear have `:resolve_links?` options. Projected streams
-  such as streams beginning with `"$"` or custom-made projected streams do
-  not copy event bodies literally from linked events. For example, the `"$all"`
-  projected stream does not contain a copy of every event in the eventstore.
-  Rather projected streams are comprised of _link_ events which are very slim
-  references to the source events. This is conceptually similar to pointers in
-  a language like C.
-
-  When we read a projected stream (in this example an event-type stream) with
-  `:resolve_links?` set to false, we see
-
-  ```elixir
-  iex> alias Spear.Protos.EventStore.Client.Streams.ReadResp
-  iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false, raw?: true) |> Enum.take(1)
-  [
-    %ReadResp{
-      content: {:event,
-       %ReadResp.ReadEvent{
-         event: %EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent{
-           data: "0@es_supported_clients"
-         },
-         link: nil
-       }}
-    }
-  ]
-  ```
-
-  (Note that the read-response bodies we see in this section are simplified to
-  only show the parts interesting to link resolution.)
-
-  The `link` field on the read event is `nil` and the `event` field has a
-  strange `data` body of `0@es_supported_clients`. With link resolution turned
-  off, we are telling the EventStore that we'd like to read the stream
-  literally: to receive just the links themselves.
-
-  When we turn link resolution on, we see a different picture
-
-  ```elixir
-  iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: true, raw?: true) |> Enum.take(1)
-  [
-    %ReadResp{
-      content: {:event,
-       %ReadResp.ReadEvent{
-         event: %ReadResp.ReadEvent.RecordedEvent{
-           data: "{\"languages\":[\"typescript\",\"javascript\"],\"runtime\":\"NodeJS\"}",
-         },
-         link: %ReadResp.ReadEvent.RecordedEvent{
-           data: "0@es_supported_clients",
-         }
-       }}
-    }
-  ]
-  ```
-
-  Now the `:link` field contains the reference to the original event and the
-  `:event` contains the full data for the original event.
-
-  What happens if you try to resolve links for an EventStore stream which is
-  not a projected stream?
-
-  ```elixir
-  iex> Spear.stream!(conn, "es_supported_clients", chunk_size: 1, resolve_links?: true, raw?: true) |> Enum.take(1)
-  [
-    %ReadResp{
-      content: {:event,
-       %ReadResp.ReadEvent{
-         event: %ReadResp.ReadEvent.RecordedEvent{
-           data: "{\"languages\":[\"typescript\",\"javascript\"],\"runtime\":\"NodeJS\"}",
-         },
-         link: nil
-       }}
-    }
-  ]
-  ```
-
-  Nothing! The events from non-projected streams are unaffected by link
-  resolution choice. Hence the `:resolve_links?` option is consistently
-  defaulted to `true`.
   """
-
-  quote do
-    @subscription_message %EventStore.Client.Streams.ReadReq{
-      options: %EventStore.Client.Streams.ReadReq.Options{
-        count_option:
-          {:subscription, %EventStore.Client.Streams.ReadReq.Options.SubscriptionOptions{}},
-        filter_option: {:no_filter, %EventStore.Client.Shared.Empty{}},
-        read_direction: :Forwards,
-        resolve_links: false,
-        stream_option:
-          {:stream,
-           %EventStore.Client.Streams.ReadReq.Options.StreamOptions{
-             revision_option: {:start, %EventStore.Client.Shared.Empty{}},
-             stream_identifier: %EventStore.Client.Shared.StreamIdentifier{
-               streamName: "es_supported_clients"
-             }
-           }},
-        uuid_option: %EventStore.Client.Streams.ReadReq.Options.UUIDOption{
-          content: {:string, %EventStore.Client.Shared.Empty{}}
-        }
-      }
-    }
-    _ = @subscription_message
-  end
 
   @doc """
   Collects an EventStore stream into an enumerable
@@ -239,7 +134,7 @@ defmodule Spear do
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
     numbers are exclusive (e.g. reading from `0` will first return the
-    event numbered `0` in the stream, if one exists). `:start` and `:end`
+    event numbered `1` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
     the stream).  Events (either `Spear.Event` or ReadResp structs) can also
     be supplied and will be treated as exclusive.
@@ -522,7 +417,7 @@ defmodule Spear do
           stream_name :: String.t(),
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
-  def append(event_stream, conn, stream_name, opts \\ []) do
+  def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
     # TODO gRPC timeout
     default_write_opts = [
       batch_size: 1,
@@ -561,5 +456,118 @@ defmodule Spear do
               header == "grpc-message" && value
             end)}}
     end
+  end
+
+  @doc """
+  Subscribes a process to an EventStore stream
+
+  Unlike `read_stream/3` or `stream!/3`, this function does not return an
+  enumerable. Instead the `subscriber` process is signed up to receive messages
+  for subscription events. Events are emitted in order as info messages with
+  the signature
+
+  ```elixir
+  {:spear_event, Spear.Event.t()}
+  ```
+
+  or this signature if the `raw?: true` option is provided
+
+  ```elixir
+  {:spear_event, Spear.Protos.EventStore.Client.Streams.ReadResp.t()}
+  ```
+
+  This function will block the caller until the subscription has been
+  confirmed by the EventStore.
+
+  ## Options
+
+  * `:from` - (default: `:start`) the EventStore stream revision from which to
+    read. Valid values include `:start`, `:end`, any non-negative integer
+    representing the event number revision in the stream and events. Event
+    numbers are exclusive (e.g. reading from `0` will first return the
+    event numbered `1` in the stream, if one exists). `:start` and `:end`
+    are treated as inclusive (e.g. `:start` will return the first event in
+    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
+    be supplied and will be treated as exclusive.
+  * `:filter` - (default: `nil`) TODO
+  * `:resolve_links?` - (default: `true`) whether or not to request that
+    link references be resolved. See the moduledocs for more information
+    about link resolution.
+  * `:timeout` - (default: `5_000`) the time to wait for the EventStore
+    to confirm the subscription request.
+  * `:raw?` - (default: `false`) controls whether the events are sent as
+    raw `ReadResp` structs or decoded into `t:Spear.Event.t/0`s
+
+  ## Examples
+
+      # TODO fix reading from end
+      # say there are 3 events in the EventStore stream "my_stream"
+      iex> Spear.subscribe(conn, self(), "my_stream", from: 0)
+      {:ok, #Reference<0.1160763861.3015180291.51238>}
+      iex> flush
+      {:spear_event, %Spear.Event{}} # second event
+      {:spear_event, %Spear.Event{}} # third event
+      :ok
+  """
+  @spec subscribe(
+          connection :: pid | GenServer.name(),
+          subscriber :: pid | GenServer.name(),
+          stream_name :: String.t() | :all,
+          opts :: Keyword.t()
+        ) :: {:ok, subscription_reference :: reference()} | {:error, any()}
+  def subscribe(conn, subscriber, stream_name, opts \\ []) do
+    default_subscribe_opts = [
+      direction: :forwards,
+      from: :start,
+      filter: nil,
+      resolve_links?: true,
+      timeout: 5_000,
+      raw?: false,
+      through: &Spear.Event.from_read_response/1
+    ]
+
+    opts =
+      default_subscribe_opts
+      |> Keyword.merge(opts)
+      |> Keyword.merge(stream: stream_name, subscriber: subscriber)
+
+    through =
+      if opts[:raw?] do
+        & &1
+      else
+        opts[:through]
+      end
+
+    on_data = fn message ->
+      subscriber
+      |> GenServer.whereis()
+      |> send({:spear_event, through.(message)})
+    end
+
+    request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
+
+    GenServer.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
+  end
+
+  @doc """
+  Cancels a subscription
+
+  This function will cancel a subscription if the provided
+  `subscription_reference` exists, but is idempotent: if the
+  `subscription_reference` is not an active subscription reference, `:ok` will
+  be returned.
+
+  ## Examples
+
+      iex> {:ok, subscription} = Spear.subscribe(conn, self(), "my_stream")
+      {:ok, #Reference<0.4293953740.2750676995.30541>}
+      iex> Spear.cancel_subscription(conn, subscription)
+      :ok
+      iex> Spear.cancel_subscription(conn, subscription)
+      :ok
+  """
+  @spec cancel_subscription(connection :: pid | GenServer.name(), subscription_reference :: reference(), timeout()) :: :ok | {:error, any()}
+  def cancel_subscription(conn, subscription_reference, timeout \\ 5_000) when is_reference(subscription_reference) do
+    GenServer.call(conn, {:cancel, subscription_reference}, timeout)
   end
 end
