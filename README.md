@@ -34,11 +34,12 @@ the `.formatter.exs` (creating if not already there):
 **Backed by... Mint?**
 
 [`elixir-mint/mint`](https://github.com/elixir-mint/mint) is a functional
-HTTP client which supports HTTP2. As the kids say these days, gRPC is
-_spicy_ HTTP2. Practically speaking, gRPC just adds some well-known headers and
-a message format that allows messages to not be aligned with HTTP2 DATA frames.
-It's relatively trivial to implement gRPC with a nice HTTP2 library like
-mint :slightly_smiling_face:.
+HTTP client which supports HTTP2.
+
+As the kids say these days, gRPC is spicy HTTP2. Practically speaking,
+gRPC just adds some well-known headers and a message format that allows
+messages to not be aligned with HTTP2 DATA frames.  It's relatively trivial
+to implement gRPC with a nice HTTP2 library like mint :slightly_smiling_face:.
 
 **Why not `elixir-grpc/grpc`?**
 
