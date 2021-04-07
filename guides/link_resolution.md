@@ -18,7 +18,7 @@ iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false
   %ReadResp{
     content: {:event,
      %ReadResp.ReadEvent{
-       event: %EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent{
+       event: %ReadResp.ReadEvent.RecordedEvent{
          data: "0@es_supported_clients"
        },
        link: nil
