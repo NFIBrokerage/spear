@@ -1,6 +1,8 @@
 defmodule Spear.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/NFIBrokerage/spear"
+
   def project do
     [
       app: :spear,
@@ -8,7 +10,9 @@ defmodule Spear.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      package: package(),
+      description: description()
     ]
   end
 
@@ -28,9 +32,39 @@ defmodule Spear.MixProject do
     ]
   end
 
+  defp package do
+    [
+      name: "spear",
+      files: ~w(lib .formatter.exs mix.exs README.md .version),
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => @source_url <> "/blob/main/CHANGELOG.md"
+      }
+    ]
+  end
+
+  defp description do
+    "A sharp EventStore 20+ client backed by mint"
+  end
+
   defp docs do
     [
-      main: "Spear"
+      deps: [],
+      language: "en",
+      formatters: ["html"],
+      main: Spear,
+      extras: [
+        "CHANGELOG.md",
+        "guides/writing_events.md",
+        "guides/streams.md"
+      ],
+      groups_for_extras: [
+        Guides: Path.wildcard("guides/*.md")
+      ],
+      skip_undefined_reference_warnings_on: [
+        "CHANGELOG.md"
+      ]
     ]
   end
 end

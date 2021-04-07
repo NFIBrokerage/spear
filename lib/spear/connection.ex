@@ -1,6 +1,20 @@
 defmodule Spear.Connection do
   @moduledoc """
   A GenServer which brokers a connection to an EventStore
+
+  <!--
+
+  ## Configuration
+
+  TODO
+
+  -->
+
+  ## Examples
+
+      iex> {:ok, conn} = Spear.Connection.start_link(connection_string: "esdb://localhost:2113")
+      iex> Spear.stream!(conn, "es_supported_clients") |> Enum.take(3)
+      [%Spear.Event{}, %Spear.Event{}, %Spear.Event{}]
   """
 
   # see the very similar original implementation of this from the Mint
@@ -14,6 +28,7 @@ defmodule Spear.Connection do
 
   @post "POST"
 
+  @doc false
   def start_link(opts) do
     name = Keyword.take(opts, [:name])
     rest = Keyword.delete(opts, :name)
@@ -27,10 +42,11 @@ defmodule Spear.Connection do
       config
       |> Keyword.fetch!(:connection_string)
       |> URI.parse()
+      |> set_esdb_scheme()
 
     # YARD determine scheme from query params
     # YARD boot this to a handle_continue/2 or handle_cast/2?
-    case Mint.HTTP.connect(String.to_atom(uri.scheme), uri.host, uri.port,
+    case Mint.HTTP.connect(uri.scheme, uri.host, uri.port,
            protocols: [:http2],
            mode: :active
          ) do
@@ -129,4 +145,7 @@ defmodule Spear.Connection do
   end
 
   defp process_response(_unknown, state), do: state
+
+  defp set_esdb_scheme(%URI{scheme: "esdb"} = uri), do: %URI{uri | scheme: :http}
+  defp set_esdb_scheme(%URI{scheme: "http"} = uri), do: %URI{uri | scheme: :http}
 end

@@ -10,6 +10,46 @@ defmodule Spear.Event do
 
   defstruct [:id, :type, :body, metadata: %{}]
 
+  @typedoc """
+  A struct representing an EventStore event
+
+  `t:Spear.Event.t/0`s may be created to write to the EventStore with
+  `new/3`. `t:Spear.Event.t/0`s will be lazily mapped into
+  gRPC-compatible structs before being written to the EventStore with
+  `to_proposed_message/2`.
+
+  `t:Spear.Event.t/0`s typically look different between events which are
+  written to- and events which are read from the EventStore. Read events
+  contain more metadata which pertains to EventStoreDB specifics like
+  the creation timestamp of the event.
+
+  ## Examples
+
+      iex> Spear.stream!(conn, "es_supported_clients") |> Enum.take(1)
+      [
+        %Spear.Event{
+          body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
+          id: "1fc908c1-af32-4d06-a9bd-3bf86a833fdf",
+          metadata: %{
+            commit_position: 18446744073709551615,
+            content_type: "application/json",
+            created: ~U[2021-04-01 21:11:38.196799Z],
+            custom_metadata: "",
+            prepare_position: 18446744073709551615,
+            stream_name: "es_supported_clients",
+            stream_revision: 0
+          },
+          type: "grpc-client"
+        }
+      ]
+      iex> Spear.Event.new("grpc-client", %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
+      %Spear.Event{
+        body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
+        id: "b952575a-1014-404d-ba20-f0904df7954e",
+        metadata: %{content_type: "application/json", custom_metadata: ""},
+        type: "grpc-client"
+      }
+  """
   @type t :: %__MODULE__{
           id: String.t(),
           type: String.t(),
@@ -41,9 +81,39 @@ defmodule Spear.Event do
   ## Event IDs
 
   EventStore uses event IDs to provide an idempotency feature. Any event
-  written to the EventStore
+  written to the EventStore with an already existing ID will be not be
+  duplicated.
 
-  TODO
+  ```elixir
+  iex> event = Spear.Event.new("grpc-client", %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"})
+  %Spear.Event{
+    body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
+    id: "1e654b2a-ff04-4af8-887f-052442edcd83",
+    metadata: %{content_type: "application/json", custom_metadata: ""},
+    type: "grpc-client"
+  }
+  iex> [event] |> Spear.append(conn, "idempotency_test")
+  :ok
+  iex> [event] |> Spear.append(conn, "idempotency_test")
+  :ok
+  iex> Spear.stream!(conn, "idempotency_test") |> Enum.to_list
+  [
+    %Spear.Event{
+      body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
+      id: "1e654b2a-ff04-4af8-887f-052442edcd83",
+      metadata: %{
+        commit_position: 18446744073709551615,
+        content_type: "application/json",
+        created: ~U[2021-04-07 21:53:40.395681Z],
+        custom_metadata: "",
+        prepare_position: 18446744073709551615,
+        stream_name: "idempotency_test",
+        stream_revision: 0
+      },
+      type: "grpc-client"
+    }
+  ]
+  ```
 
   ## Examples
 
@@ -196,6 +266,7 @@ defmodule Spear.Event do
   ```elixir
   iex> Spear.stream!(conn, "es_supported_clients", raw?: true)
   ...> |> Stream.map(&Spear.Event.from_read_response(&1, decoder: &Poison.decode!/2, keys: :atoms))
+  ```
 
   ## Examples
 
@@ -203,7 +274,6 @@ defmodule Spear.Event do
       |> Stream.map(&Spear.Event.from_read_response/1)
       |> Enum.to_list()
       # => [%Spear.Event{}, %Spear.Event{}, ..]
-  ```
   """
   @spec from_read_response(ReadResp.t(), Keyword.t()) :: t()
   def from_read_response(read_response, opts \\ []) do
@@ -313,24 +383,50 @@ defmodule Spear.Event do
   # `ecto`
   #
   # I'll say "this code is not novel and probably belongs to Ecto" but I've
-  # heard that laywers generally don't like the term "probably"
+  # heard that laywers generally don't like the term "probably."
   #
   # If a reader has advice on how to properly attribute this, please open an
   # issue :)
 
   @doc """
-  Produces a binary UUID v4 in human-readable format
+  Produces a random UUID v4 in human-readable format
 
   ## Examples
 
-      iex> Spear.Writing.uuid_v4
+      iex> Spear.Event.uuid_v4
       "98d3a5e2-ceb4-4a78-8084-97edf9452823"
+      iex> Spear.Event.uuid_v4                   
+      "2629ea4b-d165-45c9-8a2f-92b5e20b894e"
   """
   @spec uuid_v4() :: binary()
   def uuid_v4 do
-    <<u0::48, _::4, u1::12, _::2, u2::62>> = :crypto.strong_rand_bytes(16)
+    16 |> :crypto.strong_rand_bytes() |> uuid_v4()
+  end
 
+  @doc """
+  Produces a consistent UUID v4 in human-readable format given any input
+  data structure
+
+  This function can be used to generate a consistent UUID for a data structure
+  of any shape. Under the hood it uses `:erlang.phash2/1` to hash the data
+  structure, which should be portable across many environments. This function
+  can be taken advantage of to generate consistent event IDs for the sake of
+  idempotency (see the Event ID section in `new/3` for more information).
+
+  ## Examples
+
+      iex> Spear.Event.uuid_v4 %{"foo" => "bar"}
+      "33323639-3934-4339-b332-363939343339"
+      iex> Spear.Event.uuid_v4 %{"foo" => "bar"}
+      "33323639-3934-4339-b332-363939343339"
+  """
+  def uuid_v4(<<u0::48, _::4, u1::12, _::2, u2::62>>) do
     <<u0::48, 4::4, u1::12, 2::2, u2::62>> |> uuid_to_string
+  end
+
+  def uuid_v4(datastructure) do
+    String.pad_leading("", 16, datastructure |> :erlang.phash2() |> Integer.to_string())
+    |> uuid_v4()
   end
 
   defp uuid_to_string(<<

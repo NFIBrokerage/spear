@@ -5,7 +5,7 @@ information about the event-writing functionality.
 
 ## Enumeration Characteristics
 
-`event_stream` is an `t:Enumerable.t()` which will be lazily written to the
+`event_stream` is an `t:Enumerable.t/0` which will be lazily written to the
 EventStore as elements of the stream are computed and serialized on to the
 wire.
 
