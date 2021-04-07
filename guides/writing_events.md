@@ -33,7 +33,12 @@ iex> Stream.iterate(0, &(&1 + 1))
 ...> |> Stream.map(fn n -> Spear.Event.new("incremented", n) end)
 ...> |> Spear.append(conn, "InfiniteCounter", timeout: :infinity, expect: :empty)
 {:error,
- {:grpc_failure, [code: 3, message: "Maximum Append Size of 1048576 Exceeded."]}}
+ %Spear.Grpc.Response{
+   data: "",
+   message: "Maximum Append Size of 1048576 Exceeded.",
+   status: :invalid_argument,
+   status_code: 3
+ }}
 ```
 
 Note that while EventStore streams can in theory store infinitely long
