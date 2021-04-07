@@ -1,6 +1,6 @@
 # Spear
 
-A spiffy EventStore 20+ client backed by mint :yum:
+A sharp EventStore 20+ client backed by mint :yum:
 
 ## FAQ
 
@@ -31,9 +31,17 @@ the `.formatter.exs` (creating if not already there):
 
 -->
 
+**Backed by... Mint?**
+
+[`elixir-mint/mint`](https://github.com/elixir-mint/mint) is a functional
+HTTP client which supports HTTP2. As the kids say these days, gRPC is
+_spicy_ HTTP2. Practically speaking, gRPC just adds some well-known headers and
+a message format that allows messages to not be aligned with HTTP2 DATA frames.
+It's relatively trivial to implement gRPC with a nice HTTP2 library like
+mint :slightly_smiling_face:.
+
 **Why not `elixir-grpc/grpc`?**
 
-That project looks good but it depends on `:gun` which doesn't
-play nice with other dependencies. It also provides a server
-and client implementation in one library which I think is
-strange at best, bloated at worst.
+That project looks good but it depends on `:gun` which doesn't play nice with
+other dependencies. It also provides a server and client implementation in
+one library. This library only needs a client.
