@@ -3,7 +3,12 @@ defmodule Spear.Reading do
 
   # Helper functions for reading streams
 
-  alias Spear.Protos.EventStore.Client.{Shared, Streams.ReadReq, Streams.ReadResp, Streams.Streams.Service}
+  alias Spear.Protos.EventStore.Client.{
+    Shared,
+    Streams.ReadReq,
+    Streams.ReadResp,
+    Streams.Streams.Service
+  }
 
   @uuid %ReadReq.Options.UUIDOption{content: {:string, %Shared.Empty{}}}
 
@@ -103,17 +108,16 @@ defmodule Spear.Reading do
   end
 
   def build_subscribe_request(params) do
-    message =
-      %ReadReq{
-        options: %ReadReq.Options{
-          count_option: {:subscription, %ReadReq.Options.SubscriptionOptions{}},
-          filter_option: map_filter(params.filter),
-          read_direction: map_direction(params.direction),
-          resolve_links: params.resolve_links?,
-          stream_option: map_stream(params.stream, params.from),
-          uuid_option: @uuid
-        }
+    message = %ReadReq{
+      options: %ReadReq.Options{
+        count_option: {:subscription, %ReadReq.Options.SubscriptionOptions{}},
+        filter_option: map_filter(params.filter),
+        read_direction: map_direction(params.direction),
+        resolve_links: params.resolve_links?,
+        stream_option: map_stream(params.stream, params.from),
+        uuid_option: @uuid
       }
+    }
 
     %Spear.Request{
       service: Service,

@@ -17,7 +17,12 @@ defmodule Spear.Connection.Request do
 
   defstruct [:continuation, :buffer, :request_ref, :from, :response, :status, :type]
 
-  def new(%Spear.Request{messages: event_stream, response_module: response_module}, request_ref, from, type) do
+  def new(
+        %Spear.Request{messages: event_stream, response_module: response_module},
+        request_ref,
+        from,
+        type
+      ) do
     reducer = &reduce_with_suspend/2
     stream = Stream.map(event_stream, &Spear.Request.to_wire_data/1)
     continuation = &Enumerable.reduce(stream, &1, reducer)

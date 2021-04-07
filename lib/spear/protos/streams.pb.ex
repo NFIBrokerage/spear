@@ -512,6 +512,8 @@ defmodule EventStore.Client.Streams.DeleteReq do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @behaviour Spear.TypedMessage
+
   @type t :: %__MODULE__{
           options: EventStore.Client.Streams.DeleteReq.Options.t() | nil
         }
@@ -519,6 +521,9 @@ defmodule EventStore.Client.Streams.DeleteReq do
   defstruct [:options]
 
   field :options, 1, type: EventStore.Client.Streams.DeleteReq.Options
+
+  @impl Spear.TypedMessage
+  def message_type, do: "event_store.client.streams.DeleteReq"
 end
 
 defmodule EventStore.Client.Streams.DeleteResp.Position do
@@ -573,6 +578,11 @@ end
 defmodule EventStore.Client.Streams.TombstoneReq do
   @moduledoc false
   use Protobuf, syntax: :proto3
+
+  @behaviour Spear.TypedMessage
+
+  @impl Spear.TypedMessage
+  def message_type, do: "event_store.client.streams.TombstoneReq"
 
   @type t :: %__MODULE__{
           options: EventStore.Client.Streams.TombstoneReq.Options.t() | nil

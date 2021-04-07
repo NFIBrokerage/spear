@@ -7,40 +7,73 @@ defmodule Spear.Writing do
     Streams.Streams.Service,
     Streams.AppendReq,
     Streams.AppendResp,
+    Streams.DeleteReq,
+    Streams.TombstoneReq,
     Shared
   }
 
   alias Spear.ExpectationViolation
 
-  def build_write_request(events, stream_name, opts) do
-    {expectation, opts} = Keyword.pop(opts, :expect, :any)
-
+  def build_write_request(params) do
     messages =
-      stream_name
-      |> build_append_request(expectation)
-      |> List.wrap()
-      |> Stream.concat(events)
+      [build_append_request(params)]
+      |> Stream.concat(params.event_stream)
       |> Stream.map(&to_append_request/1)
 
     %Spear.Request{
       service: Service,
       rpc: :Append,
-      messages: messages,
-      batch_size: opts[:batch_size]
+      messages: messages
     }
     |> Spear.Request.expand()
   end
 
-  defp build_append_request(stream_name, expectation) do
+  defp build_append_request(params) do
     %AppendReq{
       content:
         {:options,
          %AppendReq.Options{
-           expected_stream_revision: map_expectation(expectation),
+           expected_stream_revision: map_expectation(params.expect),
            stream_identifier: %Shared.StreamIdentifier{
-             streamName: stream_name
+             streamName: params.stream
            }
          }}
+    }
+  end
+
+  def build_delete_request(%{tombstone?: false} = params) do
+    %Spear.Request{
+      service: Service,
+      rpc: :Delete,
+      messages: [build_delete_message(params)]
+    }
+    |> Spear.Request.expand()
+  end
+
+  def build_delete_request(%{tombstone?: true} = params) do
+    %Spear.Request{
+      service: Service,
+      rpc: :Tombstone,
+      messages: [build_delete_message(params)]
+    }
+    |> Spear.Request.expand()
+  end
+
+  defp build_delete_message(%{tombstone?: false} = params) do
+    %DeleteReq{
+      options: %DeleteReq.Options{
+        stream_identifier: %Shared.StreamIdentifier{streamName: params.stream},
+        expected_stream_revision: map_expectation(params.expect)
+      }
+    }
+  end
+
+  defp build_delete_message(%{tombstone?: true} = params) do
+    %TombstoneReq{
+      options: %TombstoneReq.Options{
+        stream_identifier: %Shared.StreamIdentifier{streamName: params.stream},
+        expected_stream_revision: map_expectation(params.expect)
+      }
     }
   end
 
@@ -57,28 +90,14 @@ defmodule Spear.Writing do
 
   defp to_append_request(%AppendReq{} = request), do: request
 
-  def decode_append_response(buffer, _raw? = false) when is_binary(buffer) do
-    with {_, {%AppendResp{} = response, <<>>}} <-
-           {:decode, Spear.Grpc.decode_next_message(buffer, AppendResp)},
-         %AppendResp{result: {:success, _metadata = %AppendResp.Success{}}} <- response do
-      :ok
-    else
-      %AppendResp{result: {:wrong_expected_version, expectation_violation}} ->
-        {:error, map_expectation_violation(expectation_violation)}
-
-      {:decode, bad_buffer} ->
-        {:error, {:malformed_response, bad_buffer}}
-    end
-  end
-
   # N.B. there are fields in here
   # - current_revision_option_20_6_0
   # - expected_revision_option_20_6_0
   # that I'm not really sure what to do with
-  defp map_expectation_violation(%AppendResp.WrongExpectedVersion{
-         current_revision_option: current_revision,
-         expected_revision_option: expected_revision
-       }) do
+  def map_expectation_violation(%AppendResp.WrongExpectedVersion{
+        current_revision_option: current_revision,
+        expected_revision_option: expected_revision
+      }) do
     %ExpectationViolation{
       current: map_current_revision(current_revision),
       expected: map_expected_revision(expected_revision)

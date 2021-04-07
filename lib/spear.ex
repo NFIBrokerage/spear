@@ -55,13 +55,13 @@ defmodule Spear do
   ordered list of events in an EventStore stream. These response messages are
   returned as quickly as possible and resemble a unary request very closely.
 
-  This same RPC is invoked to implement `Spear.subscribe/TODO`, though, which
+  This same RPC is invoked to implement `Spear.subscribe/4`, though, which
   does not return an Elixir `t:Enumerable.t/0`. Instead this function
   asynchronously signs-up the given process for receiving messages per event.
 
   gRPC streams may emulate synchronous calls returning lists as with
   `Spear.stream!/3` but are also commonly used to implement asynchronous
-  subscription workflows as with `Spear.subscribe/TODO`.
+  subscription workflows as with `Spear.subscribe/4`.
 
   gRPC streams may even be fully asynchronous is both directions as with
   EventStore Persistent Subscriptions. This communication is known as
@@ -426,35 +426,30 @@ defmodule Spear do
       raw?: false
     ]
 
-    opts = Keyword.merge(default_write_opts, opts)
+    opts =
+      default_write_opts
+      |> Keyword.merge(opts)
+      |> Keyword.merge(event_stream: event_stream, stream: stream_name)
 
-    request =
-      Spear.Writing.build_write_request(
-        event_stream,
-        stream_name,
-        opts
-      )
+    request = opts |> Enum.into(%{}) |> Spear.Writing.build_write_request()
 
-    with {:ok, %{status: 200, headers: headers} = response} <-
-           GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)),
-         {{"grpc-status", "0"}, _} <- {List.keyfind(headers, "grpc-status", 0), response} do
-      Spear.Writing.decode_append_response(
-        response.data,
-        opts[:raw?]
-      )
+    with {:ok, %Spear.Connection.Response{} = response} <-
+           GenServer.call(conn, {:request, request}, opts[:timeout]),
+         %Spear.Grpc.Response{status: :ok, data: %{result: {:success, _}}} <-
+           Spear.Grpc.Response.from_connection_response(response) do
+      :ok
     else
-      {:error, reason} ->
-        {:error, reason}
+      {:error, %Spear.Connection.Response{} = response} ->
+        {:error, response}
 
-      # TODO this badly needs a refactor
-      {{"grpc-status", other_status}, response} ->
-        {:error,
-         {:grpc_failure,
-          code: other_status && String.to_integer(other_status),
-          message:
-            Enum.find_value(response.headers, fn {header, value} ->
-              header == "grpc-message" && value
-            end)}}
+      %Spear.Grpc.Response{
+        status: :ok,
+        data: %{result: {:wrong_expected_version, expectation_violation}}
+      } ->
+        {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
+
+      %Spear.Grpc.Response{} = response ->
+        {:error, response}
     end
   end
 
@@ -500,7 +495,6 @@ defmodule Spear do
 
   ## Examples
 
-      # TODO fix reading from end
       # say there are 3 events in the EventStore stream "my_stream"
       iex> Spear.subscribe(conn, self(), "my_stream", from: 0)
       {:ok, #Reference<0.1160763861.3015180291.51238>}
@@ -546,6 +540,7 @@ defmodule Spear do
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
+    # TODO deal with broken subscriptions
     GenServer.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
   end
 
@@ -566,8 +561,92 @@ defmodule Spear do
       iex> Spear.cancel_subscription(conn, subscription)
       :ok
   """
-  @spec cancel_subscription(connection :: pid | GenServer.name(), subscription_reference :: reference(), timeout()) :: :ok | {:error, any()}
-  def cancel_subscription(conn, subscription_reference, timeout \\ 5_000) when is_reference(subscription_reference) do
+  @spec cancel_subscription(
+          connection :: pid | GenServer.name(),
+          subscription_reference :: reference(),
+          timeout()
+        ) :: :ok | {:error, any()}
+  def cancel_subscription(conn, subscription_reference, timeout \\ 5_000)
+      when is_reference(subscription_reference) do
     GenServer.call(conn, {:cancel, subscription_reference}, timeout)
+  end
+
+  @doc """
+  Deletes an EventStore stream
+
+  EventStore supports two kinds of stream deletions: soft-deletes and
+  tombstones. By default this function will perform a soft-delete. Pass the
+  `tombstone?: true` option to tombstone the stream.
+
+  Soft-deletes make the events in the specified stream no longer accessible
+  through reads. A scavenge operation will reclaim the disk space taken by
+  any soft-deleted events. New events may be written to a soft-deleted stream.
+  When reading soft-deleted streams, `:from` options of `:start` and `:end`
+  will behave as expected, but all events in the stream will have revision
+  numbers off-set by the number of deleted events.
+
+  Tombstoned streams may not be written to ever again. Attempting to write
+  to a tombstoned stream will fail with a gRPC `:failed_precondition` error
+
+  ```elixir
+  iex> [Spear.Event.new("delete_test", %{})] |> Spear.append(conn, "delete_test_0")
+  :ok
+  iex> Spear.delete_stream(conn, "delete_test_0")
+  :ok
+  iex> [Spear.Event.new("delete_test", %{})] |> Spear.append(conn, "delete_test_0")
+  {:error,
+   %Spear.Grpc.Response{
+     data: "",
+     message: "Event stream 'delete_test_0' is deleted.",
+     status: :failed_precondition,
+     status_code: 9
+   }}
+  ```
+
+  ## Options
+
+  * `:tombstone?` - (default: `false`) controls whether the stream is
+    soft-deleted or tombstoned.
+  * `:timeout` - (default: `5_000` - 5s) the time allowed to block while
+    waiting for the EventStore to delete the stream.
+  * `:expect` - (default: `:any`) the expected state of the stream when
+    performing the deleteion. See `append/4` and `Spear.ExpectationViolation`
+    for more information.
+
+  ## Examples
+
+      iex> Spear.append(events, conn, "my_stream")
+      :ok
+      iex> Spear.delete_stream(conn, "my_stream")
+      :ok
+  """
+  @spec delete_stream(
+          connection :: pid | GenServer.name(),
+          stream_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def delete_stream(conn, stream_name, opts \\ []) when is_binary(stream_name) do
+    default_delete_opts = [
+      tombstone?: false,
+      timeout: 5_000,
+      expect: :any
+    ]
+
+    opts =
+      default_delete_opts
+      |> Keyword.merge(opts)
+      |> Keyword.put(:stream, stream_name)
+
+    request = opts |> Enum.into(%{}) |> Spear.Writing.build_delete_request()
+
+    with {:ok, %Spear.Connection.Response{} = response} <-
+           GenServer.call(conn, {:request, request}, opts[:timeout]),
+         %Spear.Grpc.Response{status: :ok} <-
+           Spear.Grpc.Response.from_connection_response(response) do
+      :ok
+    else
+      {:error, %Spear.Connection.Response{} = response} -> {:error, response}
+      %Spear.Grpc.Response{} = response -> {:error, response}
+    end
   end
 end
