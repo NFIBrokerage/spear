@@ -8,7 +8,7 @@ defmodule Spear.Connection do
   # https://github.com/elixir-mint/mint/blob/796b8db097d69ede7163acba223ab2045c2773a4/pages/Architecture.md
 
   use GenServer
-  alias Spear.Request
+  alias Spear.Connection.Request
 
   defstruct [:conn, requests: %{}]
 
@@ -44,10 +44,8 @@ defmodule Spear.Connection do
 
   @impl GenServer
   def handle_call({:request, request}, from, state) do
-    case request_and_stream_body(state, request) do
-      {:ok, state, request_ref} ->
-        state = put_in(state.requests[request_ref], %{from: from, response: %{}})
-
+    case request_and_stream_body(state, request, from) do
+      {:ok, state} ->
         {:noreply, state}
 
       {:error, state, reason} ->
@@ -55,14 +53,16 @@ defmodule Spear.Connection do
     end
   end
 
-  defp request_and_stream_body(state, request) do
+  defp request_and_stream_body(state, request, from) do
     with {:ok, conn, request_ref} <-
            Mint.HTTP.request(state.conn, @post, request.path, request.headers, :stream),
+         request = Request.new(request.messages, request_ref, from),
          state = put_in(state.conn, conn),
-         {:ok, state} <- stream_body(state, request_ref, request.messages),
-         {:ok, conn} <- Mint.HTTP.stream_request_body(state.conn, request_ref, :eof) do
-      {:ok, put_in(state.conn, conn), request_ref}
+         state = put_in(state.requests[request_ref], request),
+         {:ok, state} <- Request.emit_messages(state, request) do
+      {:ok, state}
     else
+      {:error, %__MODULE__{} = state, reason} -> {:error, state, reason}
       {:error, conn, reason} -> {:error, put_in(state.conn, conn), reason}
     end
   end
@@ -83,24 +83,26 @@ defmodule Spear.Connection do
 
   @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
   defp handle_responses(state, responses) do
-    Enum.reduce(responses, state, &process_response/2)
+    responses
+    |> Enum.reduce(state, &process_response/2)
+    |> Request.continue_requests()
   end
 
   defp process_response({:status, request_ref, status}, state) do
-    put_in(state.requests[request_ref].response[:status], status)
+    put_in(state.requests[request_ref].response.status, status)
   end
 
   defp process_response({:headers, request_ref, new_headers}, state) do
     update_in(
-      state.requests[request_ref].response[:headers],
-      fn headers -> (headers || []) ++ new_headers end
+      state.requests[request_ref].response.headers,
+      fn headers -> headers ++ new_headers end
     )
   end
 
   defp process_response({:data, request_ref, new_data}, state) do
     update_in(
-      state.requests[request_ref].response[:data],
-      fn data -> (data || <<>>) <> new_data end
+      state.requests[request_ref].response.data,
+      fn data -> data <> new_data end
     )
   end
 
@@ -113,24 +115,4 @@ defmodule Spear.Connection do
   end
 
   defp process_response(_unknown, state), do: state
-
-  defp stream_body(state, request_ref, messages) do
-    Enum.reduce_while(messages, {:ok, state}, &stream_body_message(&1, &2, request_ref))
-  end
-
-  defp stream_body_message(message, {:ok, state}, request_ref) do
-    {wire_data, _byte_size} = Request.to_wire_data(message)
-
-    stream_result =
-      Mint.HTTP.stream_request_body(
-        state.conn,
-        request_ref,
-        wire_data
-      )
-
-    case stream_result do
-      {:ok, conn} -> {:cont, {:ok, put_in(state.conn, conn)}}
-      {:error, conn, reason} -> {:halt, {:error, put_in(state.conn, conn), reason}}
-    end
-  end
 end

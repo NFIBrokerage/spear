@@ -490,14 +490,11 @@ defmodule Spear do
   they will be lazily mapped to `AppendReq` structs before being encoded to
   wire data.
 
+  See the [Writing Events](TODO) guide for more information about writing
+  events.
+
   ## Options
 
-  * `:batch_size` - (default: `1`) the number of messages to write in each
-    HTTP2 DATA frame. Increasing this number may improve write performance
-    when writing a very large number of events, but is generally recommended
-    to keep at `1`. This does not guarantee that each batch will be written in
-    the same DATA frame. The HTTP2 client may split messages however it sees
-    fit.
   * `:expect` - (default: `:any`) the expectation to set on the
     status of the stream. The write will fail if the expectation fails. See
     `Spear.ExpectationViolation` for more information about expectations.
@@ -510,65 +507,14 @@ defmodule Spear do
     through the simplified return API, such as the stream's revision number
     after writing the events.
 
-  ## Enumeration Characteristics
+  ## Examples
 
-  `event_stream` is an `t:Enumerable.t()` which will be lazily computed as
-  events are emitted over-the-wire to the EventStore via gRPC. The procedure
-  for emitting events roughly follows this pseudo-code
-
-  ```elixir
-  initiate_grpc_request()
-
-  event_stream
-  |> Stream.map(&encode_to_wire_format/1)
-  |> Enum.each(&emit_event/1)
-
-  conclude_grpc_request()
-  ```
-
-  This means a few things:
-
-  First, you can efficiently emit events from a stream over a large source
-  such as a large CSV file
-
-  ```elixir
-  File.stream!("large.csv", read_ahead: 100_000)
-  |> MyCsvParser.parse_stream()
-  |> Stream.map(&MyCsvParser.turn_csv_line_into_spear_event/1)
-  |> Spear.append(conn, "ChargesFromCsvs", batch_size: 25)
-  # => :ok
-  ```
-
-  This pipeline will only run the stream as the events are being written to
-  the network. Realize, however, that this may not be ideal for all
-  use-cases: should the `MyCsvParser.turn_csv_line_into_spear_event/1` function
-  raise an error on the last line of the CSV, the final line of the CSV will
-  not be written as an event to the EventStore but all events produced prior
-  to the final line will be.
-
-  Second, you may (but are _not_ encouraged to) write events via an infinite
-  stream. A trivial counter mechanism could be implemented like so
-
-  ```elixir
-  iex> Stream.iterate(0, &(&1 + 1))
-  ...> |> Stream.map(fn n -> Spear.Event.new("incremented", n) end)
-  ...> |> Spear.append(conn, "InfiniteCounter", timeout: :infinity, expect: :empty)
-  {:error,
-   %Mint.HTTPError{
-     module: Mint.HTTP2,
-     reason: {:exceeds_window_size, :connection, 26}
-   }}
-   ```
-
-  Note that while EventStore streams can in theory store infinitely long
-  streams, they are not practically able to do so. More immediately, HTTP2
-  allows server implementations to direct clients to a maximum window size of
-  bytes allowed to be sent in a single request. EventStore exerts a reasonably
-  large window size per connection and request on the client, disallowing
-  the writing of infinite streams. In cases where a client attempts to write
-  too many events, `append/4` may fail with the `Mint.HTTPError` depicted
-  above (though possible with different elements in the second and third
-  elements of the `:reason` tuple).
+      iex> [Spear.Event.new("es_supported_clients", %{})]
+      ...> |> Spear.append(conn, expect: :exists)
+      :ok
+      iex> [Spear.Event.new("es_supported_clients", %{})]
+      ...> |> Spear.append(conn, expect: :empty)
+      {:error, %Spear.ExpectationViolation{current: 1, expected: :empty}}
   """
   @spec append(
           event_stream :: Enumerable.t(),
@@ -594,15 +540,26 @@ defmodule Spear do
         opts
       )
 
-    case GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)) do
-      {:ok, response} ->
-        Spear.Writing.decode_append_response(
-          response[:data] || <<>>,
-          opts[:raw?]
-        )
+    with {:ok, %{status: 200, headers: headers} = response} <-
+           GenServer.call(conn, {:request, request}, Keyword.fetch!(opts, :timeout)),
+         {{"grpc-status", "0"}, _} <- {List.keyfind(headers, "grpc-status", 0), response} do
+      Spear.Writing.decode_append_response(
+        response.data,
+        opts[:raw?]
+      )
+    else
+      {:error, reason} ->
+        {:error, reason}
 
-      error ->
-        error
+      # TODO this badly needs a refactor
+      {{"grpc-status", other_status}, response} ->
+        {:error,
+         {:grpc_failure,
+          code: other_status && String.to_integer(other_status),
+          message:
+            Enum.find_value(response.headers, fn {header, value} ->
+              header == "grpc-message" && value
+            end)}}
     end
   end
 end
