@@ -41,7 +41,7 @@ gRPC just adds some well-known headers and a message format that allows
 messages to not be aligned with HTTP2 DATA frames.  It's relatively trivial
 to implement gRPC with a nice HTTP2 library like mint :slightly_smiling_face:.
 
-**Why not `elixir-grpc/grpc`?**
+**Why not [`elixir-grpc/grpc`](https://github.com/elixir-grpc/grpc)?**
 
 That project looks good but it depends on `:gun` which doesn't play nice with
 other dependencies. It also provides a server and client implementation in
