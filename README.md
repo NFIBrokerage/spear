@@ -43,6 +43,7 @@ to implement gRPC with a nice HTTP2 library like mint :slightly_smiling_face:.
 
 **Why not [`elixir-grpc/grpc`](https://github.com/elixir-grpc/grpc)?**
 
-That project looks good but it depends on `:gun` which doesn't play nice with
+That project looks good but it depends on
+[`:gun`](https://github.com/ninenines/gun) which doesn't play nice with
 other dependencies. It also provides a server and client implementation in
 one library. This library only needs a client.
