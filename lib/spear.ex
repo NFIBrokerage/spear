@@ -406,7 +406,7 @@ defmodule Spear do
   """
   @spec subscribe(
           connection :: Spear.Connection.t(),
-          subscriber :: Spear.Connection.t(),
+          subscriber :: pid() | GenServer.name(),
           stream_name :: String.t() | :all,
           opts :: Keyword.t()
         ) :: {:ok, subscription_reference :: reference()} | {:error, any()}
