@@ -63,12 +63,14 @@ defmodule Spear.Client do
   @doc """
   A wrapper around `Spear.append/3`
   """
-  @callback append(event_stream :: Enumerable.t(), stream_name :: String.t()) :: :ok | {:error, any()}
+  @callback append(event_stream :: Enumerable.t(), stream_name :: String.t()) ::
+              :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.append/4`
   """
-  @callback append(event_stream :: Enumerable.t(), stream_name :: String.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @callback append(event_stream :: Enumerable.t(), stream_name :: String.t(), opts :: Keyword.t()) ::
+              :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.cancel_subscription/2`
@@ -78,7 +80,8 @@ defmodule Spear.Client do
   @doc """
   A wrapper around `Spear.cancel_subscription/3`
   """
-  @callback cancel_subscription(subscription_reference :: reference(), timeout()) :: :ok | {:error, any()}
+  @callback cancel_subscription(subscription_reference :: reference(), timeout()) ::
+              :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.delete_stream/2`
@@ -93,12 +96,14 @@ defmodule Spear.Client do
   @doc """
   A wrapper around `Spear.read_stream/2`
   """
-  @callback read_stream(stream_name :: String.t() | :all) :: {:ok, Enumerable.t()} | {:error, any()}
+  @callback read_stream(stream_name :: String.t() | :all) ::
+              {:ok, Enumerable.t()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.read_stream/3`
   """
-  @callback read_stream(stream_name :: String.t() | :all, opts :: Keyword.t()) :: {:ok, Enumerable.t()} | {:error, any()}
+  @callback read_stream(stream_name :: String.t() | :all, opts :: Keyword.t()) ::
+              {:ok, Enumerable.t()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.stream!/2`
@@ -113,12 +118,17 @@ defmodule Spear.Client do
   @doc """
   A wrapper around `Spear.subscribe/3`
   """
-  @callback subscribe(subscriber :: pid() | GenServer.name(), stream_name :: String.t() | :all) :: {:ok, reference()} | {:error, any()}
+  @callback subscribe(subscriber :: pid() | GenServer.name(), stream_name :: String.t() | :all) ::
+              {:ok, reference()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.subscribe/4`
   """
-  @callback subscribe(subscriber :: pid() | GenServer.name(), stream_name :: String.t() | :all, opts :: Keyword.t()) :: {:ok, reference()} | {:error, any()}
+  @callback subscribe(
+              subscriber :: pid() | GenServer.name(),
+              stream_name :: String.t() | :all,
+              opts :: Keyword.t()
+            ) :: {:ok, reference()} | {:error, any()}
 
   @optional_callbacks start_link: 1
 

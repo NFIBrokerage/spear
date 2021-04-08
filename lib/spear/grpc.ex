@@ -15,9 +15,7 @@ defmodule Spear.Grpc do
         _ -> '0.0.0'
       end
 
-    "grpc-elixir-spear/#{spear_version} (mint #{@mint_version}; Elixir #{System.version()}; OTP #{
-      System.otp_release()
-    })"
+    "grpc-elixir-spear/#{spear_version} (mint #{@mint_version}; Elixir #{System.version()}; OTP #{System.otp_release()})"
   end
 
   # happy path of parsing DATA frame(s)
