@@ -1,5 +1,7 @@
 # Spear
 
+[![Last Updated](https://img.shields.io/github/last-commit/NFIBrokerage/spear.svg)](https://github.com/NFIBrokerage/spear/commits/main)
+
 A sharp EventStore 20+ client backed by mint :yum:
 
 ## FAQ
