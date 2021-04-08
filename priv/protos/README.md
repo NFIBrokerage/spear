@@ -14,7 +14,7 @@ EventStore/EventStore@6eedacecd6a4da8ab705a82d5229f5c630f60277
     protoc -I priv/protos --elixir_out=plugins=grpc:./lib/spear/protos priv/protos/<file>
     ```
 1. Edit `lib/spear/protos/*.pb.ex` to add the following to the top of the file
-    ```
+    ```elixir
     alias Spear.Protos.EventStore
     ```
 1. Also delete all modules with `Stub` in their names
