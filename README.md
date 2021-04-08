@@ -48,6 +48,15 @@ That project looks good but it depends on
 other dependencies. It also provides a server and client implementation in
 one library. This library only needs a client.
 
+<!--
+
+Wanted to keep this #shade out of the online+viewable readme:
+
+Also the code quality is... questionable 🤔
+https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215e/lib/grpc/adapter/gun.ex#L170-L262
+
+-->
+
 **How close is this to being usable?**
 
 Here's the general plan:
