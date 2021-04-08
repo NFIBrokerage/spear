@@ -321,7 +321,7 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
-    # TODO gRPC timeout
+    # YARD gRPC timeout?
     default_write_opts = [
       batch_size: 1,
       expect: :any,
