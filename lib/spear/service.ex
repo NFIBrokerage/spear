@@ -1,16 +1,33 @@
 defmodule Spear.Service do
-  @moduledoc """
-  TODO: replace this or link to the upstream source via permalink
+  @moduledoc false
 
-  Define gRPC service used by Stub and Server. You should use `Protobuf` to
-  to generate code instead of using this module directly.
-  It imports DSL functions like `rpc/3` and `stream/1` for defining the RPC
-  functions easily:
-      defmodule Greeter.Service do
-        use Spear.Service, name: "helloworld.Greeter"
-        rpc :SayHello, HelloRequest, stream(HelloReply)
-      end
-  """
+  # N.B. this is copied whole-sale from
+  #
+  # https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215e/lib/grpc/service.ex
+  #
+  # because the protobuf generator for `protoc` generates this service
+  # definition
+  #
+  # and frankly I kinda like the syntax
+  #
+  # nevertheless I think it's a bit of a hostile practice to have a canonical
+  # generator tool force library choice
+  # and I think this macro _should_ belong to the Protobuf library
+  #
+  # TODO replace this with a behaviour and pure function calls and just bite
+  # the bullet when translating protobuf definitions :facepalm:
+  #
+  # begin quote
+
+  # Define gRPC service used by Stub and Server. You should use `Protobuf` to
+  # to generate code instead of using this module directly.
+  # It imports DSL functions like `rpc/3` and `stream/1` for defining the RPC
+  # functions easily:
+  #
+  #     defmodule Greeter.Service do
+  #       use Spear.Service, name: "helloworld.Greeter"
+  #       rpc :SayHello, HelloRequest, stream(HelloReply)
+  #     end
 
   defmacro __using__(opts) do
     quote do
@@ -57,4 +74,6 @@ defmodule Spear.Service do
   def grpc_type({_, {_, true}, {_, false}}), do: :client_stream
   def grpc_type({_, {_, false}, {_, true}}), do: :server_stream
   def grpc_type({_, {_, true}, {_, true}}), do: :bidi_stream
+
+  # end quote
 end

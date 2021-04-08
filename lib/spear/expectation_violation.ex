@@ -20,6 +20,10 @@ defmodule Spear.ExpectationViolation do
   If an expectation is violated, the return signature will be
   `{:error, %Spear.ExpectationViolation{}}`, which gives information about
   the expectation and the current revision. See `t:t/0`.
+
+  Expectations may also be set in `Spear.delete_stream/3`, although if
+  expectations set on a deletion request are violated, EventStoreDB returns
+  a gRPC error response instead of this struct.
   """
 
   defstruct [:current, :expected]

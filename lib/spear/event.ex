@@ -96,7 +96,7 @@ defmodule Spear.Event do
   :ok
   iex> [event] |> Spear.append(conn, "idempotency_test")
   :ok
-  iex> Spear.stream!(conn, "idempotency_test") |> Enum.to_list
+  iex> Spear.stream!(conn, "idempotency_test") |> Enum.to_list()
   [
     %Spear.Event{
       body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
@@ -409,9 +409,12 @@ defmodule Spear.Event do
 
   This function can be used to generate a consistent UUID for a data structure
   of any shape. Under the hood it uses `:erlang.phash2/1` to hash the data
-  structure, which should be portable across many environments. This function
-  can be taken advantage of to generate consistent event IDs for the sake of
-  idempotency (see the Event ID section in `new/3` for more information).
+  structure, which should be portable across many environments.
+
+  This function can be taken advantage of to generate consistent event
+  IDs for the sake of idempotency (see the Event ID section in `new/3`
+  for more information). Pass the `:id` option to `new/3` to override the
+  default random UUID generation.
 
   ## Examples
 
@@ -420,12 +423,15 @@ defmodule Spear.Event do
       iex> Spear.Event.uuid_v4 %{"foo" => "bar"}
       "33323639-3934-4339-b332-363939343339"
   """
+  @spec uuid_v4(term()) :: binary()
+  def uuid_v4(term)
+
   def uuid_v4(<<u0::48, _::4, u1::12, _::2, u2::62>>) do
     <<u0::48, 4::4, u1::12, 2::2, u2::62>> |> uuid_to_string
   end
 
-  def uuid_v4(datastructure) do
-    String.pad_leading("", 16, datastructure |> :erlang.phash2() |> Integer.to_string())
+  def uuid_v4(term) do
+    String.pad_leading("", 16, term |> :erlang.phash2() |> Integer.to_string())
     |> uuid_v4()
   end
 

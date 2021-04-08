@@ -2,13 +2,13 @@ defmodule Spear.Connection do
   @moduledoc """
   A GenServer which brokers a connection to an EventStore
 
-  <!--
-
   ## Configuration
 
-  TODO
-
-  -->
+  * `:name` - the name of the GenServer. See `t:GenServer.name/0` for more
+    information. When not provided, the spawned process is not aliased to a
+    name and is only addressable through its PID.
+  * `:connection_string` - (**required**) the connection string to parse
+    containing all connection information
 
   ## Examples
 
@@ -26,9 +26,57 @@ defmodule Spear.Connection do
 
   defstruct [:conn, requests: %{}]
 
+  @typedoc """
+  A connection process
+
+  A connection process (either referred to as `conn` or `connection` in the
+  documentation) may either be a PID or a name such as a module or otherwise
+  atom.
+
+  ## Examples
+
+
+      iex> {:ok, conn} = Spear.Connection.start_link(connection_string: "esdb://localhost:2113")
+      {:ok, #PID<0.225.0>}
+      iex> Spear.read_stream(conn, "es_supported_clients", max_count: 1)
+      {:ok,
+       #Stream<[
+         enum: #Function<62.80860365/2 in Stream.unfold/2>,
+         funs: [#Function<48.80860365/1 in Stream.map/2>]
+       ]>}
+  """
+  @type t :: pid() | GenServer.name()
+
   @post "POST"
 
   @doc false
+  def child_spec(init_arg) do
+    default = %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [init_arg]}
+    }
+
+    Supervisor.child_spec(default, [])
+  end
+
+  @doc """
+  Starts a connection process
+
+  This function can be called directly in order to link it to the current
+  process, but the more common workflow is to start a `Spear.Connection`
+  GenServer as a part of a supervision tree.
+
+  ## Examples
+
+  E.g. in an application's supervision tree defined in
+  `lib/my_app/application.ex`:
+
+      children = [
+        {Spear.Connection, connection_string: "esdb://localhost:2113"}
+      ]
+      Supervisor.start_link(children, strategy: :one_for_one)
+  """
+  @spec start_link(opts :: Keyword.t()) :: {:ok, t()} | GenServer.on_start()
   def start_link(opts) do
     name = Keyword.take(opts, [:name])
     rest = Keyword.delete(opts, :name)

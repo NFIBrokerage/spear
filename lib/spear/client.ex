@@ -150,6 +150,7 @@ defmodule Spear.Client do
 
       @impl unquote(__MODULE__)
       unquote(start_link_helper)
+      defoverridable start_link: 1
 
       @impl unquote(__MODULE__)
       def append(event_stream, stream_name, opts \\ []) do

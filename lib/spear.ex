@@ -106,7 +106,7 @@ defmodule Spear do
       5
   """
   @spec stream!(
-          connection :: GenServer.name(),
+          connection :: Spear.Connection.t(),
           stream_name :: String.t() | :all,
           opts :: Keyword.t()
         ) ::
@@ -237,7 +237,7 @@ defmodule Spear do
         }
       ]
   """
-  @spec read_stream(GenServer.name(), String.t(), Keyword.t()) ::
+  @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
     default_read_opts = [
@@ -316,7 +316,7 @@ defmodule Spear do
   """
   @spec append(
           event_stream :: Enumerable.t(),
-          connection :: GenServer.name(),
+          connection :: Spear.Connection.t(),
           stream_name :: String.t(),
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
@@ -407,8 +407,8 @@ defmodule Spear do
       :ok
   """
   @spec subscribe(
-          connection :: pid | GenServer.name(),
-          subscriber :: pid | GenServer.name(),
+          connection :: Spear.Connection.t(),
+          subscriber :: Spear.Connection.t(),
           stream_name :: String.t() | :all,
           opts :: Keyword.t()
         ) :: {:ok, subscription_reference :: reference()} | {:error, any()}
@@ -465,7 +465,7 @@ defmodule Spear do
       :ok
   """
   @spec cancel_subscription(
-          connection :: pid | GenServer.name(),
+          connection :: Spear.Connection.t(),
           subscription_reference :: reference(),
           timeout()
         ) :: :ok | {:error, any()}
@@ -494,7 +494,7 @@ defmodule Spear do
   ```elixir
   iex> [Spear.Event.new("delete_test", %{})] |> Spear.append(conn, "delete_test_0")
   :ok
-  iex> Spear.delete_stream(conn, "delete_test_0")
+  iex> Spear.delete_stream(conn, "delete_test_0", tombstone?: true)
   :ok
   iex> [Spear.Event.new("delete_test", %{})] |> Spear.append(conn, "delete_test_0")
   {:error,
@@ -522,9 +522,11 @@ defmodule Spear do
       :ok
       iex> Spear.delete_stream(conn, "my_stream")
       :ok
+      iex> Spear.stream!(conn, "my_stream") |> Enum.to_list()
+      []
   """
   @spec delete_stream(
-          connection :: pid | GenServer.name(),
+          connection :: Spear.Connection.t(),
           stream_name :: String.t(),
           opts :: Keyword.t()
         ) :: :ok | {:error, any()}
