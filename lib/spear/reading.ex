@@ -17,81 +17,11 @@ defmodule Spear.Reading do
     Spear.Grpc.decode_next_message(message, ReadResp)
   end
 
-  @doc """
-  Maps each read response element in a struct to the event body
-
-  `#{inspect(ReadResp)}` structures are not the easiest to work with because
-  of nested tuples and fields. Unless an author is developing meta-tooling
-  on top of this library or checking commit positions, the only really relevant
-  data in each `#{inspect(ReadResp)}` structure is the event body, typically
-  (but not necessarily) a JSON-encoded `t:String.t/0`.
-
-  This function destructures the `#{inspect(ReadResp)}` structures down to the
-  event data. It does not attempt to decode this data, however. A stream
-  composed with this function may then compose with `decode_as!/2` in
-  order to decode as JSON or as Erlang terms.
-
-  ## Options
-
-  * `:link?` - (default: `false`) whether to read the body of the event link,
-    if it exists. If the event does not contain a link, the body of the event
-    will be returned instead. See the module documentation for `Spear` for
-    more information about links and resolution.
-
-  ## Examples
-
-      iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false)
-      ...> |> Spear.Reading.decode_to_event_body()
-      ...> |> Enum.take(1)
-      ["0@es_supported_clients"]
-      iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: true)
-      ...> |> Spear.Reading.decode_to_event_body(link?: true)
-      ...> |> Enum.take(1)
-      ["0@es_supported_clients"]
-      iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: true)
-      ...> |> Spear.Reading.decode_to_event_body(link?: false)
-      ...> |> Enum.take(1)
-      ["{\\"languages\\":[\\"typescript\\",\\"javascript\\"],\\"runtime\\":\\"NodeJS\\"}"]
-      iex> Spear.stream!(conn, "es_supported_clients", chunk_size: 1)
-      ...> |> Spear.Reading.decode_to_event_body()
-      ...> |> Enum.take(1)
-      ["{\\"languages\\":[\\"typescript\\",\\"javascript\\"],\\"runtime\\":\\"NodeJS\\"}"]
-  """
-  def decode_to_event_body(event_stream, opts \\ []) do
-    link? = Keyword.get(opts, :link?, false)
-
-    Stream.map(event_stream, &decode_read_response(&1, link?))
-  end
-
-  defp decode_read_response(
-         %ReadResp{
-           content:
-             {:event,
-              %ReadResp.ReadEvent{link: nil, event: %ReadResp.ReadEvent.RecordedEvent{data: data}}}
-         },
-         _link?
-       ) do
-    data
-  end
-
-  defp decode_read_response(
-         %ReadResp{
-           content:
-             {:event, %ReadResp.ReadEvent{link: %ReadResp.ReadEvent.RecordedEvent{data: data}}}
-         },
-         _link? = true
-       ) do
-    data
-  end
-
-  defp decode_read_response(
-         %ReadResp{
-           content:
-             {:event, %ReadResp.ReadEvent{event: %ReadResp.ReadEvent.RecordedEvent{data: data}}}
-         },
-         _link? = false
-       ) do
-    data
+  def decode_read_response(%ReadResp{content: {kind, _body}} = read_resp) do
+    case kind do
+      :event -> Spear.Event.from_read_response(read_resp)
+      :checkpoint -> Spear.Filter.Checkpoint.from_read_response(read_resp)
+    end
   end
 
   def build_read_request(params) do
@@ -151,6 +81,14 @@ defmodule Spear.Reading do
          {:position,
           %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
 
+  defp map_all_position(%Spear.Filter.Checkpoint{
+         commit_position: commit,
+         prepare_position: prepare
+       }),
+       do:
+         {:position,
+          %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+
   defp map_all_position(:start), do: {:start, %Shared.Empty{}}
 
   defp map_all_position(%{commit_position: commit, prepare_position: prepare}),
@@ -170,6 +108,9 @@ defmodule Spear.Reading do
   defp map_stream_revision(:start), do: {:start, %Shared.Empty{}}
   defp map_stream_revision(n) when is_integer(n), do: {:revision, n}
   defp map_stream_revision(:end), do: {:end, %Shared.Empty{}}
+
+  defp map_filter(%Spear.Filter{} = filter),
+    do: {:filter, Spear.Filter._to_filter_options(filter)}
 
   defp map_filter(nil), do: {:no_filter, %Shared.Empty{}}
 

@@ -77,8 +77,8 @@ And the docket for getting v0.1.0 up into Hex:
 
 - [x] basic streams API
 - [x] reasonable first-draft of documentation
-- [ ] server-side filtering implementation
-- [ ] server-side filtering documentation
+- [x] server-side filtering implementation
+- [x] server-side filtering documentation
 - [ ] testing
 - [ ] library QoL improvements
     - CI

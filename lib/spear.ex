@@ -46,7 +46,6 @@ defmodule Spear do
     Reading the EventStore stream forwards will return events in the order
     in which they were written to the EventStore; reading backwards will
     return events in the opposite order.
-  * `:filter` - (default: `nil`) TODO
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
@@ -116,7 +115,6 @@ defmodule Spear do
       from: :start,
       direction: :forwards,
       chunk_size: 128,
-      filter: nil,
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
@@ -137,7 +135,6 @@ defmodule Spear do
       stream: stream_name,
       from: opts[:from],
       max_count: opts[:chunk_size],
-      filter: opts[:filter],
       direction: opts[:direction],
       resolve_links?: opts[:resolve_links?],
       timeout: opts[:timeout]
@@ -170,7 +167,6 @@ defmodule Spear do
     Reading the EventStore stream forwards will return events in the order
     in which they were written to the EventStore; reading backwards will
     return events in the opposite order.
-  * `:filter` - (default: `nil`) TODO
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
@@ -244,7 +240,6 @@ defmodule Spear do
       from: :start,
       direction: :forwards,
       max_count: 42,
-      filter: nil,
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
@@ -385,9 +380,12 @@ defmodule Spear do
     numbers are exclusive (e.g. reading from `0` will first return the
     event numbered `1` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
-    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
-    be supplied and will be treated as exclusive.
-  * `:filter` - (default: `nil`) TODO
+    the stream).  Events and checkpoints (`t:Spear.Event.t/0`, ReadResp
+    structs, or `t:Spear.Filter.Checkpoint.t/0`) can also be supplied and will
+    be treated as exclusive.
+  * `:filter` - (default: `nil`) the server-side filter to apply. This option
+    is only valid if the `stream_name` is `:all`. See `Spear.Filter` for more
+    information.
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
@@ -402,8 +400,8 @@ defmodule Spear do
       iex> Spear.subscribe(conn, self(), "my_stream", from: 0)
       {:ok, #Reference<0.1160763861.3015180291.51238>}
       iex> flush
-      {:spear_event, %Spear.Event{}} # second event
-      {:spear_event, %Spear.Event{}} # third event
+      %Spear.Event{} # second event
+      %Spear.Event{} # third event
       :ok
   """
   @spec subscribe(
@@ -412,7 +410,10 @@ defmodule Spear do
           stream_name :: String.t() | :all,
           opts :: Keyword.t()
         ) :: {:ok, subscription_reference :: reference()} | {:error, any()}
-  def subscribe(conn, subscriber, stream_name, opts \\ []) do
+  def subscribe(conn, subscriber, stream_name, opts \\ [])
+
+  def subscribe(conn, subscriber, stream_name, opts)
+      when (is_binary(stream_name) or stream_name == :all) and is_list(opts) do
     default_subscribe_opts = [
       direction: :forwards,
       from: :start,
@@ -420,7 +421,7 @@ defmodule Spear do
       resolve_links?: true,
       timeout: 5_000,
       raw?: false,
-      through: &Spear.Event.from_read_response/1
+      through: &Spear.Reading.decode_read_response/1
     ]
 
     opts =
@@ -438,7 +439,7 @@ defmodule Spear do
     on_data = fn message ->
       subscriber
       |> GenServer.whereis()
-      |> send({:spear_event, through.(message)})
+      |> send(through.(message))
     end
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()

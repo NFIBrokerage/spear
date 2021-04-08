@@ -3,3 +3,11 @@ make_server = fn ->
 
   pid
 end
+
+conn = make_server.()
+
+subscribe = fn ->
+  import Spear.Filter
+
+  Spear.subscribe(conn, self(), :all, filter: ~f/grpc-/pt)
+end

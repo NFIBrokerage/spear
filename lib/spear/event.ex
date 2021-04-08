@@ -284,6 +284,20 @@ defmodule Spear.Event do
     |> from_recorded_event(remaining_opts)
   end
 
+  @doc """
+  Converts an event into a checkpoint
+
+  This is useful when storing stream position in `Spear.subscribe/4`
+  subscriptions.
+  """
+  @spec to_checkpoint(t()) :: Spear.Filter.Checkpoint.t()
+  def to_checkpoint(%__MODULE__{metadata: %{commit_position: commit, prepare_position: prepare}}) do
+    %Spear.Filter.Checkpoint{
+      commit_position: commit,
+      prepare_position: prepare
+    }
+  end
+
   @doc false
   def from_recorded_event(
         %ReadResp.ReadEvent.RecordedEvent{
