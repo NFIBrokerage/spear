@@ -63,7 +63,7 @@ https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215
 
 Here's the general plan:
 
-- v0.1.0: Streams API (`streams.proto`) [IN PROGRESS]
+- v0.1.0: Streams API (`streams.proto`) [**in progress**]
 - v0.1.1: TLS documentation
 - v0.2.0: Operations API (`operations.proto`)
 - v0.3.0: Users API (`users.proto`)
