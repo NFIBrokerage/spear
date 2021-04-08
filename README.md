@@ -47,3 +47,28 @@ That project looks good but it depends on
 [`:gun`](https://github.com/ninenines/gun) which doesn't play nice with
 other dependencies. It also provides a server and client implementation in
 one library. This library only needs a client.
+
+**How close is this to being usable?**
+
+Here's the general plan:
+
+- v0.1.0: Streams API (`streams.proto`) [IN PROGRESS]
+- v0.1.1: TLS documentation
+- v0.2.0: Operations API (`operations.proto`)
+- v0.3.0: Users API (`users.proto`)
+- v0.4.0: Projections API (`projections.proto`)
+- v0.5.0: Persistent Subscriptions API (`persistent.proto`)
+- Broadway integration for persistent subscriptions API
+    - see [`NFIBrokerage/radical`](https://github.com/NFIBrokerage/radical) for the TCP-client driven version of this
+    - tentative name: `volley`
+
+And the docket for getting v0.1.0 up into Hex:
+
+- [x] basic streams API
+- [x] reasonable first-draft of documentation
+- [ ] server-side filtering implementation
+- [ ] server-side filtering documentation
+- [ ] testing
+- [ ] library QoL improvements
+    - CI
+    - auto-publish on tag push
