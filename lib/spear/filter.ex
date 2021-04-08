@@ -25,7 +25,7 @@ defmodule Spear.Filter do
   ```
 
   If possible, the list of prefixes should be used as the `:by` option as
-  they are unambiguous and anecdotally seem faster.
+  they are unambiguous.
 
   ## Checkpoints
 

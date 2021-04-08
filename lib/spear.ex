@@ -360,13 +360,13 @@ defmodule Spear do
   the signature
 
   ```elixir
-  {:spear_event, Spear.Event.t()}
+  Spear.Event.t() | Spear.Filter.Checkpoint.t()
   ```
 
   or this signature if the `raw?: true` option is provided
 
   ```elixir
-  {:spear_event, Spear.Protos.EventStore.Client.Streams.ReadResp.t()}
+  Spear.Protos.EventStore.Client.Streams.ReadResp.t()
   ```
 
   This function will block the caller until the subscription has been
@@ -397,11 +397,24 @@ defmodule Spear do
   ## Examples
 
       # say there are 3 events in the EventStore stream "my_stream"
-      iex> Spear.subscribe(conn, self(), "my_stream", from: 0)
+      iex> {:ok, sub} = Spear.subscribe(conn, self(), "my_stream", from: 0)
       {:ok, #Reference<0.1160763861.3015180291.51238>}
       iex> flush
       %Spear.Event{} # second event
       %Spear.Event{} # third event
+      :ok
+      iex> Spear.cancel_subscription(conn, sub)
+      :ok
+
+      iex> {:ok, sub} = Spear.subscribe(conn, self(), :all, filter: Spear.Filter.exclude_system_events())
+      iex> flush()
+      %Spear.Filter.Checkpoint{}
+      %Spear.Filter.Checkpoint{}
+      %Spear.Event{}
+      %Spear.Event{}
+      %Spear.Filter.Checkpoint{}
+      %Spear.Event{}
+      %Spear.Filter.Checkpoint{}
       :ok
   """
   @spec subscribe(
