@@ -110,7 +110,7 @@ defmodule Spear.Filter do
   ## Examples
 
       iex> import Spear.Filter
-      iex> filter = ~f/^[^\\$].*/rs # exclude system events which start with "$"
+      iex> ~f/^[^\\$].*/rs # exclude system events which start with "$"
       %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 1024, on: :stream_name}
   """
   @type t :: %__MODULE__{
@@ -167,6 +167,12 @@ defmodule Spear.Filter do
 
   Works the same as `sigil_f/2` but does not allow interpolation or escape
   sequences.
+
+  ## Examples
+
+      iex> import Spear.Filter
+      iex> ~F/^[^\\$].*/rs
+      %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 1024, on: :stream_name}
   """
   @spec sigil_F(binary(), charlist()) :: t()
   def sigil_F(source, mods) do
