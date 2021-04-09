@@ -2,13 +2,32 @@ defmodule Spear.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/NFIBrokerage/spear"
+  @version_file Path.join(__DIR__, ".version")
+  @external_resource @version_file
+  @version (case Regex.run(~r/^v([\d\.\w-]+)/, File.read!(@version_file), capture: :all_but_first) do
+              [version] -> version
+              nil -> "0.1.0"
+            end)
 
   def project do
     [
       app: :spear,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        credo: :test,
+        coveralls: :test,
+        "coveralls.html": :test,
+        "coveralls.github": :test,
+        inch: :dev,
+        bless: :test,
+        test: :test,
+        dialyzer: :test
+      ],
+      name: "Spear",
+      source_url: @source_url,
       deps: deps(),
       docs: docs(),
       package: package(),
@@ -24,17 +43,25 @@ defmodule Spear.MixProject do
 
   defp deps do
     [
+      # hard dependencies
       {:mint, "~> 1.0"},
       {:protobuf, "~> 0.7"},
+      # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
+      # dev/test utilities
       {:castore, ">= 0.0.0", only: [:dev, :test]},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      # testing suite
+      {:mox, "~> 1.0", only: [:dev, :test]},
+      {:credo, "~> 1.5", only: :test},
+      {:bless, "~> 1.0", only: :test},
+      {:excoveralls, "~> 0.7", only: :test}
     ]
   end
 
   defp package do
     [
-      name: "Spear",
+      name: "spear",
       files: ~w(lib .formatter.exs mix.exs README.md .version),
       licenses: ["Apache-2.0"],
       links: %{
