@@ -173,7 +173,7 @@ defmodule Spear.Client do
       end
 
       @impl unquote(__MODULE__)
-      def subscribe(subscriber, stream_name, opts) do
+      def subscribe(subscriber, stream_name, opts \\ []) do
         Spear.subscribe(__MODULE__, subscriber, stream_name, opts)
       end
     end

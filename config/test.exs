@@ -1,3 +1,3 @@
 import Config
 
-config :spear, :mint, MintMock
+config :spear, Spear.Test.ClientFixture, connection_string: "esdb://localhost:2113"
