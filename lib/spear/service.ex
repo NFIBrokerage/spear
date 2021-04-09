@@ -14,7 +14,7 @@ defmodule Spear.Service do
   # generator tool force library choice
   # and I think this macro _should_ belong to the Protobuf library
   #
-  # TODO replace this with a behaviour and pure function calls and just bite
+  # YARD replace this with a behaviour and pure function calls and just bite
   # the bullet when translating protobuf definitions :facepalm:
   #
   # begin quote

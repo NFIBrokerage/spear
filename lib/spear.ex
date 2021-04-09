@@ -457,7 +457,7 @@ defmodule Spear do
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
-    # TODO deal with broken subscriptions
+    # YARD deal with broken subscriptions
     GenServer.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
   end
 
