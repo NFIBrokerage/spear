@@ -136,6 +136,13 @@ defmodule Spear.Client do
     quote do
       @behaviour unquote(__MODULE__)
 
+      def child_spec(opts) do
+        %{
+          id: __MODULE__,
+          start: {__MODULE__, :start_link, [opts]}
+        }
+      end
+
       @impl unquote(__MODULE__)
       unquote(start_link_helper(opts))
       defoverridable start_link: 1

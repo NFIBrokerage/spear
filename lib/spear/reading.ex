@@ -28,7 +28,7 @@ defmodule Spear.Reading do
     %ReadReq{
       options: %ReadReq.Options{
         count_option: {:count, params.max_count},
-        filter_option: map_filter(params.filter),
+        filter_option: map_filter(nil),
         read_direction: map_direction(params.direction),
         resolve_links: params.resolve_links?,
         stream_option: map_stream(params.stream, params.from),

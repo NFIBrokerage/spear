@@ -133,20 +133,6 @@ defmodule Spear.Connection do
     end
   end
 
-  defp request_and_stream_body(state, request, from, request_type) do
-    with {:ok, conn, request_ref} <-
-           @mint.request(state.conn, @post, request.path, request.headers, :stream),
-         request = Request.new(request, request_ref, from, request_type),
-         state = put_in(state.conn, conn),
-         state = put_in(state.requests[request_ref], request),
-         {:ok, state} <- Request.emit_messages(state, request) do
-      {:ok, state}
-    else
-      {:error, %__MODULE__{} = state, reason} -> {:error, state, reason}
-      {:error, conn, reason} -> {:error, put_in(state.conn, conn), reason}
-    end
-  end
-
   @impl GenServer
   def handle_info(message, %{conn: conn} = state) do
     case @mint.stream(conn, message) do
@@ -195,6 +181,20 @@ defmodule Spear.Connection do
   end
 
   defp process_response(_unknown, state), do: state
+
+  defp request_and_stream_body(state, request, from, request_type) do
+    with {:ok, conn, request_ref} <-
+           @mint.request(state.conn, @post, request.path, request.headers, :stream),
+         request = Request.new(request, request_ref, from, request_type),
+         state = put_in(state.conn, conn),
+         state = put_in(state.requests[request_ref], request),
+         {:ok, state} <- Request.emit_messages(state, request) do
+      {:ok, state}
+    else
+      {:error, %__MODULE__{} = state, reason} -> {:error, state, reason}
+      {:error, conn, reason} -> {:error, put_in(state.conn, conn), reason}
+    end
+  end
 
   defp set_esdb_scheme(%URI{scheme: "esdb"} = uri), do: %URI{uri | scheme: :http}
   defp set_esdb_scheme(%URI{scheme: "http"} = uri), do: %URI{uri | scheme: :http}
