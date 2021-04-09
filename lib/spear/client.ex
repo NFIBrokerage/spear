@@ -133,33 +133,11 @@ defmodule Spear.Client do
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
-    start_link_helper =
-      case Keyword.fetch(opts, :otp_app) do
-        {:ok, otp_app} ->
-          quote do
-            def start_link(args) do
-              Application.get_env(unquote(otp_app), __MODULE__)
-              |> Keyword.merge(args)
-              |> Keyword.put(:name, __MODULE__)
-              |> Spear.Connection.start_link()
-            end
-          end
-
-        :error ->
-          quote do
-            def start_link(args) do
-              args
-              |> Keyword.put(:name, __MODULE__)
-              |> Spear.Connection.start_link()
-            end
-          end
-      end
-
     quote do
       @behaviour unquote(__MODULE__)
 
       @impl unquote(__MODULE__)
-      unquote(start_link_helper)
+      unquote(start_link_helper(opts))
       defoverridable start_link: 1
 
       @impl unquote(__MODULE__)
@@ -191,6 +169,29 @@ defmodule Spear.Client do
       def subscribe(subscriber, stream_name, opts) do
         Spear.subscribe(__MODULE__, subscriber, stream_name, opts)
       end
+    end
+  end
+
+  defp start_link_helper(opts) do
+    case Keyword.fetch(opts, :otp_app) do
+      {:ok, otp_app} ->
+        quote do
+          def start_link(args) do
+            Application.get_env(unquote(otp_app), __MODULE__)
+            |> Keyword.merge(args)
+            |> Keyword.put(:name, __MODULE__)
+            |> Spear.Connection.start_link()
+          end
+        end
+
+      :error ->
+        quote do
+          def start_link(args) do
+            args
+            |> Keyword.put(:name, __MODULE__)
+            |> Spear.Connection.start_link()
+          end
+        end
     end
   end
 end
