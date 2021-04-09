@@ -5,6 +5,7 @@
   },
   "skip_files": [
     "^test",
-    "^deps"
+    "^deps",
+    "^lib/spear/protos/"
   ]
 }

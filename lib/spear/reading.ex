@@ -12,11 +12,6 @@ defmodule Spear.Reading do
 
   @uuid %ReadReq.Options.UUIDOption{content: {:string, %Shared.Empty{}}}
 
-  @doc false
-  def decode_next_message(message) do
-    Spear.Grpc.decode_next_message(message, ReadResp)
-  end
-
   def decode_read_response(%ReadResp{content: {kind, _body}} = read_resp) do
     case kind do
       :event -> Spear.Event.from_read_response(read_resp)
@@ -116,22 +111,4 @@ defmodule Spear.Reading do
 
   defp map_direction(:forwards), do: :Forwards
   defp map_direction(:backwards), do: :Backwards
-
-  @spec revision(ReadResp.t()) :: non_neg_integer()
-  def revision(%ReadResp{
-        content:
-          {:event,
-           %ReadResp.ReadEvent{
-             link: nil,
-             event: %ReadResp.ReadEvent.RecordedEvent{stream_revision: revision}
-           }}
-      }),
-      do: revision
-
-  def revision(%ReadResp{
-        content:
-          {:event,
-           %ReadResp.ReadEvent{link: %ReadResp.ReadEvent.RecordedEvent{stream_revision: revision}}}
-      }),
-      do: revision
 end

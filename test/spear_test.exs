@@ -39,6 +39,13 @@ defmodule SpearTest do
       assert reason == %Spear.ExpectationViolation{current: 6, expected: :empty}
     end
 
+    test "an empty expectation will fail on the wrong stream revision", c do
+      assert {:error, reason} =
+               Spear.append([random_event()], c.conn, c.stream_name, expect: 3)
+
+      assert reason == %Spear.ExpectationViolation{current: 6, expected: 3}
+    end
+
     test "reading a stream from `0` starts at the _second_ event in the stream", c do
       # `:from` is exclusive, it will start at the event _after_ that revision
       assert %Spear.Event{body: 1} =
@@ -96,6 +103,39 @@ defmodule SpearTest do
       end
 
       :ok = Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "deleting a stream makes it read as an empty list", c do
+      assert Spear.delete_stream(c.conn, c.stream_name) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
+    end
+
+    test "a deletion request will fail if the expectation mismatches", c do
+      assert Spear.delete_stream(c.conn, c.stream_name, expect: :empty) ==
+               {:error,
+                %Spear.Grpc.Response{
+                  data: "",
+                  message:
+                    "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: -1, Actual version: ",
+                  status: :failed_precondition,
+                  status_code: 9
+                }}
+
+      assert Spear.delete_stream(c.conn, c.stream_name, expect: 3) ==
+               {:error,
+                %Spear.Grpc.Response{
+                  data: "",
+                  message:
+                    "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: 3, Actual version: ",
+                  status: :failed_precondition,
+                  status_code: 9
+                }}
+    end
+
+    test "we can read events by passing an event to a `:from` option", c do
+      [one, two] = Spear.stream!(c.conn, c.stream_name) |> Enum.take(2)
+      assert [^two] = Spear.stream!(c.conn, c.stream_name, from: one) |> Enum.take(1)
     end
   end
 
@@ -184,7 +224,8 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Event{body: 0}, 1_000
+      assert_receive %Spear.Event{body: 0} = event, 1_000
+      assert %Spear.Filter.Checkpoint{} = Spear.Event.to_checkpoint(event)
 
       for n <- 1..4//1 do
         assert_receive %Spear.Event{body: ^n}
