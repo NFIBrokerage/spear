@@ -2,8 +2,9 @@ defmodule Spear.Grpc do
   @moduledoc false
 
   # gRPC utilities for making requests to the EventStore
-  # You could say this little mint-backed client is the "thrust" of the library
-  # (hehe).
+  #
+  # You could say this little mint-backed client is the "thrust"
+  # of the library (hehe).
 
   {:ok, mint_version} = :application.get_key(:mint, :vsn)
   @mint_version mint_version
@@ -42,6 +43,9 @@ defmodule Spear.Grpc do
   #   default according to the Elixir documentation is big endian).
   #     - it _does_ matter for message_length however which is 4 bytes
   #     - this is why the specification says "big endian" for the message_length
+  # - the signature of this function makes it very easy to use with
+  #   Stream.unfold/2
+  @spec decode_next_message(binary(), module()) :: nil | {struct(), binary()}
   def decode_next_message(
         <<0::unsigned-integer-8, message_length::unsigned-big-integer-8-unit(4),
           encoded_message::binary-size(message_length), rest::binary>>,
