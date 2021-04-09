@@ -34,12 +34,14 @@ defmodule Spear.ExpectationViolation do
   This struct is returned on calls to `Spear.append/4` which set an expectation
   on the current stream revision with the `:expect` option.
 
-  A positive integer as `:current` means that the EventStore stream contains
-  that number of events at time of (attempted) writing.
+  `:current` is not the number of events in the EventStore stream but rather
+  the current event revision. If three events are appended to an empty stream,
+  the `:current` will be `2`. Note that deletions do not reset a stream's
+  revision number.
 
   ## Examples
 
-      # say EventStore stream "stream_that_should_be_empty" has 5 events
+      # say EventStore stream "stream_that_should_be_empty" has 6 events
       iex> Spear.append(events, conn, "stream_that_should_be_empty", expect: :empty)
       {:error, %Spear.ExpectationViolation{current: 5, expected: :empty}}
 
