@@ -265,7 +265,7 @@ defmodule Spear.Filter do
   end
 
   defp map_filter_type(:event_type), do: :event_type
-  defp map_filter_type(:stream_name), do: :stream_name
+  defp map_filter_type(:stream_name), do: :stream_identifier
 
   defp map_filter_expression(%Regex{} = regex) do
     regex |> Regex.source() |> map_filter_expression()

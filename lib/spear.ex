@@ -1,5 +1,5 @@
 defmodule Spear do
-  @moduledoc ~S"""
+  @moduledoc """
   A sharp EventStore 20+ client backed by mint
 
   ## Streams
@@ -337,8 +337,8 @@ defmodule Spear do
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
     else
-      {:error, %Spear.Connection.Response{} = response} ->
-        {:error, response}
+      {:error, reason} ->
+        {:error, reason}
 
       %Spear.Grpc.Response{
         status: :ok,
@@ -564,7 +564,7 @@ defmodule Spear do
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
     else
-      {:error, %Spear.Connection.Response{} = response} -> {:error, response}
+      {:error, reason} -> {:error, reason}
       %Spear.Grpc.Response{} = response -> {:error, response}
     end
   end

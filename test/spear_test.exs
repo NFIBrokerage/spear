@@ -3,12 +3,18 @@ defmodule SpearTest do
 
   alias Spear.Protos.EventStore.Client.Streams.ReadResp
 
-  setup_all do
-    [conn: start_supervised!({Spear.Connection, connection_string: "http://localhost:2113"})]
-  end
+  @moduletag :capture_log
+
+  # bytes
+  @max_append_bytes 1_048_576
 
   setup do
-    [stream_name: random_stream_name()]
+    conn = start_supervised!({Spear.Connection, connection_string: "http://localhost:2113"})
+
+    [
+      conn: conn,
+      stream_name: random_stream_name()
+    ]
   end
 
   describe "given a stream contains events" do
@@ -17,10 +23,6 @@ defmodule SpearTest do
         random_events()
         |> Stream.take(7)
         |> Spear.append(c.conn, c.stream_name, expect: :empty)
-
-      on_exit(fn ->
-        :ok = Spear.delete_stream(c.conn, c.stream_name)
-      end)
     end
 
     test "the stream evens may be read in chunks with stream!/3", c do
@@ -48,11 +50,12 @@ defmodule SpearTest do
       expected_event_numbers = Enum.to_list(6..0//-1)
 
       assert ^expected_event_numbers =
-        Spear.stream!(c.conn, c.stream_name, direction: :backwards, from: :end)
-        |> then(to_event_numbers)
+               Spear.stream!(c.conn, c.stream_name, direction: :backwards, from: :end)
+               |> then(to_event_numbers)
 
       # and with read_stream/3
-      assert {:ok, events} = Spear.read_stream(c.conn, c.stream_name, direction: :backwards, from: :end)
+      assert {:ok, events} =
+               Spear.read_stream(c.conn, c.stream_name, direction: :backwards, from: :end)
 
       assert to_event_numbers.(events) == expected_event_numbers
     end
@@ -70,21 +73,17 @@ defmodule SpearTest do
     test "subscribing at the beginning of a stream emits all of the events", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :start)
 
-      on_exit(fn ->
-        :ok = Spear.cancel_subscription(c.conn, sub)
-      end)
-
       for n <- 0..6//1 do
         assert_receive %Spear.Event{body: ^n}
       end
+
+      :ok = Spear.cancel_subscription(c.conn, sub)
     end
 
     test "subscribing to the end of the stream emits no events in the stream", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :end)
 
-      on_exit(fn ->
-        :ok = Spear.cancel_subscription(c.conn, sub)
-      end)
+      :ok = Spear.cancel_subscription(c.conn, sub)
 
       refute_receive %Spear.Event{body: _}
     end
@@ -92,23 +91,17 @@ defmodule SpearTest do
     test "a raw subscription will return ReadResp structs", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, raw?: true)
 
-      on_exit(fn ->
-        :ok = Spear.cancel_subscription(c.conn, sub)
-      end)
-
       for _n <- 0..6//1 do
         assert_receive %ReadResp{}
       end
+
+      :ok = Spear.cancel_subscription(c.conn, sub)
     end
   end
 
   describe "given a subscription to a stream" do
     setup c do
       {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name)
-
-      on_exit(fn ->
-        :ok = Spear.cancel_subscription(c.conn, sub)
-      end)
 
       [sub: sub]
     end
@@ -133,23 +126,24 @@ defmodule SpearTest do
     end
 
     test "attempting to append an infinite stream of events fails with a gRPC error", c do
-      # why such large events? if we do this with the tiny events from
+      # why ~10KB events? if we do this with the tiny events from
       # random_event/0 we get the same results but it's much slower and I want
       # to keep this test suite fast
-      assert {:error, reason} =
-               Stream.repeatedly(fn ->
-                 Spear.Event.new("biggish-event", :binary.copy(<<0>>, 10_000),
-                   content_type: "application/octet"
-                 )
-               end)
-               |> Spear.append(c.conn, c.stream_name)
+      events =
+        Stream.repeatedly(fn ->
+          Spear.Event.new("biggish-event", :binary.copy(<<0>>, 10_000),
+            content_type: "application/octet"
+          )
+        end)
+
+      assert {:error, reason} = Spear.append(events, c.conn, c.stream_name)
 
       assert reason == maximum_append_size_error()
     end
 
     test "if we try to write a gigantic event, we get a gRPC error", c do
       big_event =
-        Spear.Event.new("biggish-event", :binary.copy(<<0>>, 1_048_756 + 1),
+        Spear.Event.new("biggish-event", :binary.copy(<<0>>, @max_append_bytes + 1),
           content_type: "application/octet"
         )
 
@@ -176,6 +170,54 @@ defmodule SpearTest do
 
       assert reason == %Spear.ExpectationViolation{current: :empty, expected: :exists}
     end
+
+    test "a subscription to :all will eventually catch a stream pattern", c do
+      <<"Spear.Test-", first_four::binary-size(4), _::binary>> = c.stream_name
+      prefix = "Spear.Test-" <> first_four
+
+      :ok =
+        random_events()
+        |> Stream.take(5)
+        |> Spear.append(c.conn, c.stream_name, expect: :empty)
+
+      filter = %Spear.Filter{on: :stream_name, by: [prefix]}
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
+
+      assert_receive %Spear.Event{body: 0}, 1_000
+
+      for n <- 1..4//1 do
+        assert_receive %Spear.Event{body: ^n}
+      end
+
+      Spear.cancel_subscription(c.conn, sub)
+
+      # and it works with a regex/binary
+      regex = Regex.compile!("^" <> prefix)
+      filter = %Spear.Filter{on: :stream_name, by: regex}
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
+
+      assert_receive %Spear.Event{body: 0}, 1_000
+
+      for n <- 1..4//1 do
+        assert_receive %Spear.Event{body: ^n}
+      end
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "the exclude_system_events/0 filter produces non-system events", c do
+      :ok = [random_event()] |> Spear.append(c.conn, c.stream_name)
+
+      {:ok, sub} =
+        Spear.subscribe(c.conn, self(), :all, filter: Spear.Filter.exclude_system_events())
+
+      assert_receive %Spear.Event{type: type}
+
+      refute match?("$" <> _, type)
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
   end
 
   defp random_stream_name do
@@ -193,7 +235,7 @@ defmodule SpearTest do
   defp maximum_append_size_error do
     %Spear.Grpc.Response{
       data: "",
-      message: "Maximum Append Size of 1048576 Exceeded.",
+      message: "Maximum Append Size of #{@max_append_bytes} Exceeded.",
       status: :invalid_argument,
       status_code: 3
     }

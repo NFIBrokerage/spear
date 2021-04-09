@@ -1,3 +1,4 @@
+# coveralls-ignore-start
 defmodule Spear.Service do
   @moduledoc false
 
@@ -77,3 +78,5 @@ defmodule Spear.Service do
 
   # end quote
 end
+
+# coveralls-ignore-stop

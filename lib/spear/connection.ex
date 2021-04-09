@@ -142,6 +142,14 @@ defmodule Spear.Connection do
         state = put_in(state.conn, conn)
 
         {:noreply, handle_responses(state, responses)}
+
+      {:error, conn, reason, responses} ->
+        IO.inspect(reason)
+        # YARD error handling
+
+        state = put_in(state.conn, conn)
+
+        {:noreply, handle_responses(state, responses)}
     end
   end
 
