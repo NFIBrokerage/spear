@@ -354,14 +354,14 @@ defmodule Spear.Event do
 
   defp destructure_read_response(
          %ReadResp{content: {:event, %ReadResp.ReadEvent{link: event}}},
-         _link? = true
+         true = _link?
        ) do
     event
   end
 
   defp destructure_read_response(
          %ReadResp{content: {:event, %ReadResp.ReadEvent{event: event}}},
-         _link? = false
+         false = _link?
        ) do
     event
   end
