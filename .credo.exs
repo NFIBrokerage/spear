@@ -134,6 +134,7 @@
         {Credo.Check.Warning.UnusedStringOperation},
         {Credo.Check.Warning.UnusedTupleOperation},
         {Credo.Check.Warning.RaiseInsideRescue},
+        {Credo.Check.Warning.ApplicationConfigInModuleAttribute, false},
 
         #
         # Controversial and experimental checks (opt-in, just remove `, false`)

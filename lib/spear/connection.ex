@@ -24,6 +24,8 @@ defmodule Spear.Connection do
   use GenServer
   alias Spear.Connection.Request
 
+  @mint Application.fetch_env!(:spear, :mint)
+
   defstruct [:conn, requests: %{}]
 
   @typedoc """
@@ -94,7 +96,7 @@ defmodule Spear.Connection do
 
     # YARD determine scheme from query params
     # YARD boot this to a handle_continue/2 or handle_cast/2?
-    case Mint.HTTP.connect(uri.scheme, uri.host, uri.port,
+    case @mint.connect(uri.scheme, uri.host, uri.port,
            protocols: [:http2],
            mode: :active
          ) do
@@ -109,7 +111,7 @@ defmodule Spear.Connection do
   @impl GenServer
   def handle_call({:cancel, request_ref}, _from, state) when is_reference(request_ref) do
     with true <- Map.has_key?(state.requests, request_ref),
-         {:ok, conn} <- Mint.HTTP2.cancel_request(state.conn, request_ref) do
+         {:ok, conn} <- @mint.cancel_request(state.conn, request_ref) do
       {:reply, :ok, put_in(state.conn, conn)}
     else
       false ->
@@ -133,7 +135,7 @@ defmodule Spear.Connection do
 
   defp request_and_stream_body(state, request, from, request_type) do
     with {:ok, conn, request_ref} <-
-           Mint.HTTP.request(state.conn, @post, request.path, request.headers, :stream),
+           @mint.request(state.conn, @post, request.path, request.headers, :stream),
          request = Request.new(request, request_ref, from, request_type),
          state = put_in(state.conn, conn),
          state = put_in(state.requests[request_ref], request),
@@ -147,7 +149,7 @@ defmodule Spear.Connection do
 
   @impl GenServer
   def handle_info(message, %{conn: conn} = state) do
-    case Mint.HTTP.stream(conn, message) do
+    case @mint.stream(conn, message) do
       :unknown ->
         # YARD error handling
         {:noreply, state}

@@ -14,6 +14,7 @@ defmodule Spear.MixProject do
       app: :spear,
       version: @version,
       elixir: "~> 1.6",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
@@ -58,6 +59,9 @@ defmodule Spear.MixProject do
       {:excoveralls, "~> 0.7", only: :test}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/fixtures"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp package do
     [

@@ -5,6 +5,8 @@ defmodule Spear.Connection.Request do
 
   alias Spear.Protos.EventStore.Client.Streams.ReadResp
 
+  @mint Application.fetch_env!(:spear, :mint)
+
   @type t :: %{
           continuation: Enumerable.continuation(),
           request_ref: Mint.Types.request_ref(),
@@ -155,7 +157,7 @@ defmodule Spear.Connection.Request do
   end
 
   defp stream_single(state, request_ref, body) do
-    case Mint.HTTP.stream_request_body(state.conn, request_ref, body) do
+    case @mint.stream_request_body(state.conn, request_ref, body) do
       {:ok, conn} ->
         {:ok, put_in(state.conn, conn)}
 
@@ -170,14 +172,14 @@ defmodule Spear.Connection.Request do
 
   defp get_smallest_window(conn, request_ref) do
     min(
-      Mint.HTTP2.get_window_size(conn, :connection),
+      @mint.get_window_size(conn, :connection),
       safe_get_request_window_size(conn, request_ref)
     )
   end
 
   defp safe_get_request_window_size(conn, request_ref) do
     if Map.has_key?(conn.ref_to_stream_id, request_ref) do
-      Mint.HTTP2.get_window_size(conn, {:request, request_ref})
+      @mint.get_window_size(conn, {:request, request_ref})
     else
       :infinity
     end
