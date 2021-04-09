@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Design.DuplicatedCode
 alias Spear.Protos.EventStore
 
 defmodule EventStore.Client.Streams.ReadReq.Options.ReadDirection do
