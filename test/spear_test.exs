@@ -263,47 +263,49 @@ defmodule SpearTest do
 
     test "a subscription can pick up from where it left off", c do
       filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
+      type = "pickup-test"
 
-      event = Spear.Event.new("pickup-test", 0)
+      event = Spear.Event.new(type, 0)
       :ok = Spear.append([event], c.conn, c.stream_name)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Event{body: 0} = first_event
+      assert_receive %Spear.Event{body: 0, type: ^type} = first_event
 
       Spear.cancel_subscription(c.conn, sub)
 
-      next_event = Spear.Event.new("pickup-test", 1)
+      next_event = Spear.Event.new(type, 1)
       :ok = Spear.append([next_event], c.conn, c.stream_name)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: first_event)
 
       # note: exclusive on the :from
-      refute_receive %Spear.Event{body: 0}
-      assert_receive %Spear.Event{body: 1}
+      refute_receive %Spear.Event{body: 0, type: ^type}
+      assert_receive %Spear.Event{body: 1, type: ^type}
 
       Spear.cancel_subscription(c.conn, sub)
     end
 
     test "a subscription can pick up from a checkpoint", c do
       filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
+      type = "checkpoint-test"
 
-      event = Spear.Event.new("checkpoint-test", 0)
+      event = Spear.Event.new(type, 0)
       :ok = Spear.append([event], c.conn, c.stream_name)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Event{body: 0}
+      assert_receive %Spear.Event{body: 0, type: ^type}
       assert_receive %Spear.Filter.Checkpoint{} = checkpoint
 
       Spear.cancel_subscription(c.conn, sub)
 
-      next_event = Spear.Event.new("checkpoint-test", 1)
+      next_event = Spear.Event.new(type, 1)
       :ok = Spear.append([next_event], c.conn, c.stream_name)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: checkpoint)
 
-      assert_receive %Spear.Event{body: 1}
+      assert_receive %Spear.Event{body: 1, type: ^type}
 
       Spear.cancel_subscription(c.conn, sub)
     end
