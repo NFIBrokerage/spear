@@ -278,6 +278,8 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: first_event)
 
+      # note: exclusive on the :from
+      refute_receive %Spear.Event{body: 0}
       assert_receive %Spear.Event{body: 1}
 
       Spear.cancel_subscription(c.conn, sub)
