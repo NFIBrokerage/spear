@@ -7,6 +7,7 @@ defmodule SpearTest do
 
   # bytes
   @max_append_bytes 1_048_576
+  @checkpoint_after Integer.pow(32, 3)
 
   setup do
     conn = start_supervised!({Spear.Connection, connection_string: "http://localhost:2113"})
@@ -220,7 +221,7 @@ defmodule SpearTest do
         |> Stream.take(5)
         |> Spear.append(c.conn, c.stream_name, expect: :empty)
 
-      filter = %Spear.Filter{on: :stream_name, by: [prefix]}
+      filter = %Spear.Filter{on: :stream_name, by: [prefix], checkpoint_after: @checkpoint_after}
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
@@ -235,7 +236,7 @@ defmodule SpearTest do
 
       # and it works with a regex/binary
       regex = Regex.compile!("^" <> prefix)
-      filter = %Spear.Filter{on: :stream_name, by: regex}
+      filter = %Spear.Filter{on: :stream_name, by: regex, checkpoint_after: @checkpoint_after}
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
       assert_receive %Spear.Event{body: 0}, 1_000
@@ -249,13 +250,58 @@ defmodule SpearTest do
 
     test "the exclude_system_events/0 filter produces non-system events", c do
       :ok = [random_event()] |> Spear.append(c.conn, c.stream_name)
+      filter = Spear.Filter.exclude_system_events() |> Spear.Filter.checkpoint_after(@checkpoint_after)
 
-      {:ok, sub} =
-        Spear.subscribe(c.conn, self(), :all, filter: Spear.Filter.exclude_system_events())
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
       assert_receive %Spear.Event{type: type}
 
       refute match?("$" <> _, type)
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "a subscription can pick up from where it left off", c do
+      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
+
+      event = Spear.Event.new("pickup-test", 0)
+      :ok = Spear.append([event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
+
+      assert_receive %Spear.Event{body: 0} = first_event
+
+      Spear.cancel_subscription(c.conn, sub)
+
+      next_event = Spear.Event.new("pickup-test", 1)
+      :ok = Spear.append([next_event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: first_event)
+
+      assert_receive %Spear.Event{body: 1}
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "a subscription can pick up from a checkpoint", c do
+      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
+
+      event = Spear.Event.new("checkpoint-test", 0)
+      :ok = Spear.append([event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
+
+      assert_receive %Spear.Event{body: 0}
+      assert_receive %Spear.Filter.Checkpoint{} = checkpoint
+
+      Spear.cancel_subscription(c.conn, sub)
+
+      next_event = Spear.Event.new("checkpoint-test", 1)
+      :ok = Spear.append([next_event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: checkpoint)
+
+      assert_receive %Spear.Event{body: 1}
 
       Spear.cancel_subscription(c.conn, sub)
     end
