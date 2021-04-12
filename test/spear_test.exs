@@ -41,8 +41,7 @@ defmodule SpearTest do
     end
 
     test "an empty expectation will fail on the wrong stream revision", c do
-      assert {:error, reason} =
-               Spear.append([random_event()], c.conn, c.stream_name, expect: 3)
+      assert {:error, reason} = Spear.append([random_event()], c.conn, c.stream_name, expect: 3)
 
       assert reason == %Spear.ExpectationViolation{current: 6, expected: 3}
     end
@@ -250,7 +249,9 @@ defmodule SpearTest do
 
     test "the exclude_system_events/0 filter produces non-system events", c do
       :ok = [random_event()] |> Spear.append(c.conn, c.stream_name)
-      filter = Spear.Filter.exclude_system_events() |> Spear.Filter.checkpoint_after(@checkpoint_after)
+
+      filter =
+        Spear.Filter.exclude_system_events() |> Spear.Filter.checkpoint_after(@checkpoint_after)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
