@@ -2,6 +2,8 @@
 
 ![CI](https://github.com/NFIBrokerage/spear/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/NFIBrokerage/spear/badge.svg)](https://coveralls.io/github/NFIBrokerage/spear)
+[![hex.pm version](https://img.shields.io/hexpm/v/spear.svg)](https://hex.pm/packages/spear)
+[![hex.pm license](https://img.shields.io/hexpm/l/spear.svg)](https://github.com/NFIBrokerage/spear/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/NFIBrokerage/spear.svg)](https://github.com/NFIBrokerage/spear/commits/main)
 
 A sharp EventStore 20+ client backed by mint :yum:
