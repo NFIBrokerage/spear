@@ -172,7 +172,7 @@ defmodule SpearTest do
       events =
         Stream.repeatedly(fn ->
           Spear.Event.new("biggish-event", :binary.copy(<<0>>, 10_000),
-            content_type: "application/octet"
+            content_type: "application/octet-stream"
           )
         end)
 
@@ -184,7 +184,7 @@ defmodule SpearTest do
     test "if we try to write a gigantic event, we get a gRPC error", c do
       big_event =
         Spear.Event.new("biggish-event", :binary.copy(<<0>>, @max_append_bytes + 1),
-          content_type: "application/octet"
+          content_type: "application/octet-stream"
         )
 
       assert {:error, reason} = Spear.append([big_event], c.conn, c.stream_name)
