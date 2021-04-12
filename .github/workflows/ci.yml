@@ -16,6 +16,8 @@ jobs:
     services:
       eventstore:
         image: eventstore/eventstore:21.2.0-buster-slim
+        env:
+          EVENTSTORE_INSECURE: "true"
         ports:
           - 2113:2113
 
