@@ -260,12 +260,15 @@ defmodule SpearTest do
       refute match?("$" <> _, type)
 
       Spear.cancel_subscription(c.conn, sub)
-      # note: just showing that this can be done idempotently and return :ok
-      assert Spear.cancel_subscription(c.conn, sub) == :ok
     end
 
     test "a subscription can pick up from where it left off with a Spear.Event", c do
-      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
+      filter = %Spear.Filter{
+        on: :stream_name,
+        by: [c.stream_name],
+        checkpoint_after: @checkpoint_after
+      }
+
       type = "pickup-test"
 
       event = Spear.Event.new(type, 0)
@@ -329,7 +332,6 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Event{body: 0, type: ^type}
       assert_receive %Spear.Filter.Checkpoint{} = checkpoint
 
       Spear.cancel_subscription(c.conn, sub)
@@ -337,6 +339,7 @@ defmodule SpearTest do
       next_event = Spear.Event.new(type, 1)
       :ok = Spear.append([next_event], c.conn, c.stream_name)
 
+      filter = Spear.Filter.checkpoint_after(filter, @checkpoint_after)
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: checkpoint)
 
       assert_receive %Spear.Event{body: 1, type: ^type}

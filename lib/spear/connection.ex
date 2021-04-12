@@ -128,8 +128,10 @@ defmodule Spear.Connection do
       {:ok, state} ->
         {:noreply, state}
 
+      # coveralls-ignore-start
       {:error, state, reason} ->
         {:reply, {:error, reason}, state}
+        # coveralls-ignore-stop
     end
   end
 
@@ -144,13 +146,14 @@ defmodule Spear.Connection do
 
         {:noreply, handle_responses(state, responses)}
 
-      {:error, conn, reason, responses} ->
-        IO.inspect({reason, responses}, label: "error,conn,reason,responses")
+      {:error, conn, _reason, responses} ->
+        # coveralls-ignore-start
         # YARD error handling
 
         state = put_in(state.conn, conn)
 
         {:noreply, handle_responses(state, responses)}
+        # coveralls-ignore-stop
     end
   end
 
