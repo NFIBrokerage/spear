@@ -14,27 +14,6 @@ A sharp EventStore 20+ client backed by mint :yum:
 1. obligatory reference to ancient greek, roman, or egyptian history
 1. sounds cool :sunglasses:
 
-<!--
-
-haven't added any formatter exports yet, but reserve the right
-
-**Why is the formatter doing weird stuff to my definitions?**
-
-No. It's just trying to do its job you leave it alone.
-
-Every once in a while it needs a hint. After adding `:spear` to the
-`deps/0` in your `mix.exs`, add this to the keyword list in
-the `.formatter.exs` (creating if not already there):
-
-```elixir
-# formatter.exs
-[
-  import_deps: [:spear]
-]
-```
-
--->
-
 **Backed by... Mint?**
 
 [`elixir-mint/mint`](https://github.com/elixir-mint/mint) is a functional
@@ -63,26 +42,154 @@ https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215
 
 **How close is this to being usable?**
 
-Here's the general plan:
+The streams API is now published and usable! Looking for more of a roadmap
+kind of document? Here's the general plan:
 
-- v0.1.0: Streams API (`streams.proto`) [**in progress**]
-- v0.1.1: TLS documentation
-- v0.2.0: Operations API (`operations.proto`)
-- v0.3.0: Users API (`users.proto`)
-- v0.4.0: Projections API (`projections.proto`)
-- v0.5.0: Persistent Subscriptions API (`persistent.proto`)
-- Broadway integration for persistent subscriptions API
+- [x] v0.1.0: Streams API (`streams.proto`)
+- [ ] v0.1.1: TLS functionality & documentation [**in progress**]
+- [ ] v0.2.0: Operations API (`operations.proto`)
+- [ ] v0.3.0: Users API (`users.proto`)
+- [ ] v0.4.0: Projections API (`projections.proto`)
+- [ ] v0.5.0: Persistent Subscriptions API (`persistent.proto`)
+- [ ] Broadway integration for persistent subscriptions API
     - see [`NFIBrokerage/radical`](https://github.com/NFIBrokerage/radical) for the TCP-client driven version of this
-    - tentative name: `volley`
 
-And the docket for getting v0.1.0 up into Hex:
+<!--
 
-- [x] basic streams API
-- [x] reasonable first-draft of documentation
-- [x] server-side filtering implementation
-- [x] server-side filtering documentation
-- [x] testing
-- [x] library QoL improvements
-    - CI
-    - auto-publish on tag push
-- [x] replace/upgrade Spear.Service implementation
+Broadway integration tentatively called `volley`. Please don't squat the hexpm
+package for that :)
+
+-->
+
+## Installation
+
+Add `:spear` to your mix dependencies in `mix.exs`
+
+```elixir
+def deps do
+  [
+    {:spear, "~> 0.1"},
+    # If you want to encode events as JSON, :jason is a great library for
+    # encoding and decoding and works out-of-the-box with spear.
+    # Any JSON (de)serializer should work though, so you don't *need* to add
+    # :jason to your dependencies.
+    {:jason, "~> 1.0"}
+  ]
+end
+```
+
+## Usage
+
+Familiar with [`Ecto.Repo`](https://hexdocs.pm/ecto/Ecto.Repo.html)? It lets
+you write a database connection like a module
+
+```elixir
+# note this is for illustration purposes and NOT directly related to Spear
+# lib/my_app/repo.ex
+defmodule MyApp.Repo do
+  use Ecto.Repo,
+    otp_app: :my_app,
+    adapter: Ecto.Adapters.Postgres
+end
+```
+
+and then configure it with application-config (`config/*.exs`)
+
+```elixir
+# note this is for illustration purposes and NOT directly related to Spear
+# config/config.exs
+config :my_app, MyApp.Repo,
+  url: "ecto://postgres:postgres@localhost/my_database"
+```
+
+Spear lets you do the same with a connection to the EventStoreDB:
+
+```elixir
+# lib/my_app/event_store_db_client.ex
+defmodule MyApp.EventStoreDbClient do
+  use Spear.Client,
+    otp_app: :my_app
+end
+```
+
+and configure it,
+
+```elixir
+# config/config.exs
+config :my_app, MyApp.EventStoreDbClient,
+  connection_string: "esdb://localhost:2113"
+```
+
+add it to your application's supervision tree in `lib/my_app/application.ex`
+
+```elixir
+# lib/my_app/application.ex
+defmodule MyApp.Application do
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      MyApp.EventStoreDbClient
+    ]
+    
+    Supervisor.start_link(children, strategy: :one_for_one, name: MyApp.Supervisor)
+  end
+end
+```
+
+And now you're ready to use spear! Check out the [Spear
+documentation](https://hexdocs.pm/spear/Spear.html).
+
+<details><summary>Alternate usages...</summary>
+<br>
+
+A `Spear.Connection` is just a regular ole' GenServer with a default of pulling
+configuration from application-config. You can start a `Spear.Connection`
+like any other process, even in IEx!
+
+Let's use the new `Mix.install/1` function from Elixir 1.12 to try out
+Spear. Say that you have an EventStoreDB instance running locally with the
+`--insecure option`.
+
+```elixir
+iex> Mix.install([:spear, :jason])
+# a bunch of installation text here
+:ok
+iex> {:ok, conn} = Spear.Connection.start_link(connection_string: "esdb://localhost:2113")
+{:ok, #PID<0.1518.0>}
+iex> event = Spear.Event.new("IExAndSpear", %{"hello" => "world"})      
+%Spear.Event{
+  body: %{"hello" => "world"},
+  id: "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8",
+  metadata: %{content_type: "application/json", custom_metadata: ""},
+  type: "IExAndSpear"
+}
+iex> [event] |> Spear.append(conn, "MySpearDemo")
+:ok
+iex> Spear.stream!(conn, "MySpearDemo")
+#Stream<[
+  enum: #Function<62.80860365/2 in Stream.unfold/2>,
+  funs: [#Function<48.80860365/1 in Stream.map/2>]
+]>
+iex> Spear.stream!(conn, "MySpearDemo") |> Enum.to_list()
+[
+  %Spear.Event{
+    body: %{"hello" => "world"},
+    id: "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8",
+    metadata: %{
+      commit_position: 18446744073709551615,
+      content_type: "application/json",
+      created: ~U[2021-04-12 20:05:17.757215Z],
+      custom_metadata: "",
+      prepare_position: 18446744073709551615,
+      stream_name: "MySpearDemo",
+      stream_revision: 0
+    },
+    type: "IExAndSpear"
+  }
+]
+```
+
+And we're up and running reading and writing events!
+
+</details>
