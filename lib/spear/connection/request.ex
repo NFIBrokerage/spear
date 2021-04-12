@@ -139,8 +139,13 @@ defmodule Spear.Connection.Request do
 
   defp stream_messages(state, request_ref, [:eof | others]) do
     case stream_messages(state, request_ref, others) do
-      {:ok, state} -> stream_single(state, request_ref, :eof)
-      error -> error
+      {:ok, state} ->
+        stream_single(state, request_ref, :eof)
+
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -160,7 +165,9 @@ defmodule Spear.Connection.Request do
         {:ok, put_in(state.conn, conn)}
 
       {:error, conn, reason} ->
+        # coveralls-ignore-start
         {:error, put_in(state.conn, conn), reason}
+        # coveralls-ignore-stop
     end
   end
 
@@ -192,11 +199,13 @@ defmodule Spear.Connection.Request do
           state
 
         {:error, state, reason} ->
+          # coveralls-ignore-start
           {%{from: from}, state} = pop_in(state.requests[request_ref])
 
           GenServer.reply(from, {:error, reason})
 
           state
+          # coveralls-ignore-stop
       end
     end)
   end
@@ -218,7 +227,9 @@ defmodule Spear.Connection.Request do
         put_in(request.response.data, rest)
 
       nil ->
+        # coveralls-ignore-start
         update_in(request.response.data, fn data -> data <> new_data end)
+        # coveralls-ignore-stop
     end
   end
 end

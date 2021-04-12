@@ -290,7 +290,12 @@ defmodule SpearTest do
     end
 
     test "a subscription can pick up from where it left off with a ReadResp", c do
-      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name], checkpoint_after: @checkpoint_after}
+      filter = %Spear.Filter{
+        on: :stream_name,
+        by: [c.stream_name],
+        checkpoint_after: @checkpoint_after
+      }
+
       type = "readresp-pickup-test"
 
       event = Spear.Event.new(type, 0)
@@ -340,7 +345,12 @@ defmodule SpearTest do
     end
 
     test "a subscription to the end of the :all stream will pickup a new event", c do
-      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name], checkpoint_after: @checkpoint_after}
+      filter = %Spear.Filter{
+        on: :stream_name,
+        by: [c.stream_name],
+        checkpoint_after: @checkpoint_after
+      }
+
       type = "subscription-end-test"
 
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: :end)
