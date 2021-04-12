@@ -12,6 +12,13 @@ jobs:
     env:
       MIX_ENV: test
 
+    # YARD run eventstore/erlang versions in a matrix?
+    services:
+      eventstore:
+        image: eventstore/eventstore:release-21.2.0.0
+        ports:
+          - 1113:1113
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
