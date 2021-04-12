@@ -85,4 +85,4 @@ And the docket for getting v0.1.0 up into Hex:
 - [x] library QoL improvements
     - CI
     - auto-publish on tag push
-- [ ] replace/upgrade Spear.Service implementation
+- [x] replace/upgrade Spear.Service implementation
