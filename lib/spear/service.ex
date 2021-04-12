@@ -2,7 +2,7 @@
 defmodule Spear.Service do
   @moduledoc false
 
-  # N.B. this is copied whole-sale from
+  # N.B. this was originally copied whole-sale from
   #
   # https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215e/lib/grpc/service.ex
   #
@@ -15,20 +15,8 @@ defmodule Spear.Service do
   # generator tool force library choice
   # and I think this macro _should_ belong to the Protobuf library
   #
-  # YARD replace this with a behaviour and pure function calls and just bite
-  # the bullet when translating protobuf definitions :facepalm:
-  #
-  # begin quote
-
-  # Define gRPC service used by Stub and Server. You should use `Protobuf` to
-  # to generate code instead of using this module directly.
-  # It imports DSL functions like `rpc/3` and `stream/1` for defining the RPC
-  # functions easily:
-  #
-  #     defmodule Greeter.Service do
-  #       use Spear.Service, name: "helloworld.Greeter"
-  #       rpc :SayHello, HelloRequest, stream(HelloReply)
-  #     end
+  # the original implementation has been modified to have a friendlier
+  # API
 
   defmacro __using__(opts) do
     quote do
@@ -37,15 +25,35 @@ defmodule Spear.Service do
       Module.register_attribute(__MODULE__, :rpc_calls, accumulate: true)
       @before_compile Spear.Service
 
-      def __meta__(:name), do: unquote(opts[:name])
+      def name, do: unquote(opts[:name])
     end
   end
 
   defmacro __before_compile__(env) do
     rpc_calls = Module.get_attribute(env.module, :rpc_calls)
+    all_rpcs = Enum.map(rpc_calls, fn {name, _req, _res} -> name end)
+
+    rpc_details =
+      for {name, {request_type, request_stream?}, {response_type, response_stream?}} <- rpc_calls do
+        quote do
+          def rpc(unquote(name)) do
+            %Spear.Rpc{
+              service: __MODULE__,
+              name: unquote(name),
+              path: "/#{name()}/#{unquote(name)}",
+              request_type: unquote(request_type),
+              request_stream?: unquote(request_stream?),
+              response_type: unquote(response_type),
+              response_stream?: unquote(response_stream?)
+            }
+          end
+        end
+      end
 
     quote do
-      def __rpc_calls__, do: unquote(rpc_calls |> Macro.escape() |> Enum.reverse())
+      def rpcs, do: unquote(all_rpcs)
+
+      unquote(rpc_details)
     end
   end
 
@@ -55,14 +63,10 @@ defmodule Spear.Service do
     end
   end
 
-  @doc """
-  Specify if the request/reply is streaming.
-  """
   def stream(param) do
     quote do: {unquote(param), true}
   end
 
-  @doc false
   def wrap_stream({:stream, _, _} = param) do
     quote do: unquote(param)
   end
@@ -70,13 +74,6 @@ defmodule Spear.Service do
   def wrap_stream(param) do
     quote do: {unquote(param), false}
   end
-
-  def grpc_type({_, {_, false}, {_, false}}), do: :unary
-  def grpc_type({_, {_, true}, {_, false}}), do: :client_stream
-  def grpc_type({_, {_, false}, {_, true}}), do: :server_stream
-  def grpc_type({_, {_, true}, {_, true}}), do: :bidi_stream
-
-  # end quote
 end
 
 # coveralls-ignore-stop

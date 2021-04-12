@@ -18,7 +18,7 @@ defmodule Spear.Connection.Request do
   defstruct [:continuation, :buffer, :request_ref, :from, :response, :status, :type]
 
   def new(
-        %Spear.Request{messages: event_stream, response_module: response_module},
+        %Spear.Request{messages: event_stream, rpc: %Spear.Rpc{response_type: response_module}},
         request_ref,
         from,
         type

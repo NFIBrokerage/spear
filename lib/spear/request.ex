@@ -17,26 +17,14 @@ defmodule Spear.Request do
   ]
 
   def expand(%__MODULE__{service: service, rpc: rpc} = request) do
-    {^rpc, {request_module, request_is_stream?}, {response_module, response_is_stream?}} =
-      service.__rpc_calls__()
-      |> Enum.find(fn {proposed_rpc, _request_info, _response_info} ->
-        proposed_rpc == rpc
-      end)
+    rpc = service.rpc(rpc)
 
     %__MODULE__{
       request
-      | path: path(service, rpc),
-        headers: headers(request_module),
-        request_module: request_module,
-        request_is_stream?: request_is_stream?,
-        response_module: response_module,
-        response_is_stream?: response_is_stream?
+      | path: rpc.path,
+        headers: headers(rpc.request_type),
+        rpc: rpc
     }
-  end
-
-  @spec path(module(), atom()) :: Path.t()
-  defp path(service, rpc) do
-    "/#{service.__meta__(:name)}/#{rpc}"
   end
 
   # N.B. these headers are in a particular order according to the gRPC
@@ -66,7 +54,7 @@ defmodule Spear.Request do
     ]
   end
 
-  @spec to_wire_data(struct()) :: iodata()
+  @spec to_wire_data(struct()) :: {iodata(), pos_integer()}
   def to_wire_data(%_{} = message) do
     encoded_message = encode(message)
     message_length = IO.iodata_length(encoded_message)
