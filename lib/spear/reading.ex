@@ -86,9 +86,6 @@ defmodule Spear.Reading do
 
   defp map_all_position(:start), do: {:start, %Shared.Empty{}}
 
-  defp map_all_position(%{commit_position: commit, prepare_position: prepare}),
-    do: {:position, %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
-
   defp map_all_position(:end), do: {:end, %Shared.Empty{}}
 
   defp map_stream_revision(%ReadResp{} = read_resp) do

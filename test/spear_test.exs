@@ -264,7 +264,7 @@ defmodule SpearTest do
       assert Spear.cancel_subscription(c.conn, sub) == :ok
     end
 
-    test "a subscription can pick up from where it left off", c do
+    test "a subscription can pick up from where it left off with a Spear.Event", c do
       filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
       type = "pickup-test"
 
@@ -274,6 +274,32 @@ defmodule SpearTest do
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
       assert_receive %Spear.Event{body: 0, type: ^type} = first_event
+
+      Spear.cancel_subscription(c.conn, sub)
+
+      next_event = Spear.Event.new(type, 1)
+      :ok = Spear.append([next_event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: first_event)
+
+      # note: exclusive on the :from
+      refute_receive %Spear.Event{body: 0, type: ^type}
+      assert_receive %Spear.Event{body: 1, type: ^type}
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "a subscription can pick up from where it left off with a ReadResp", c do
+      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name], checkpoint_after: @checkpoint_after}
+      type = "readresp-pickup-test"
+
+      event = Spear.Event.new(type, 0)
+      :ok = Spear.append([event], c.conn, c.stream_name)
+
+      {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, raw?: true)
+
+      assert_receive %ReadResp{content: {:event, _}} = first_event
+      assert %Spear.Event{body: 0, type: ^type} = Spear.Event.from_read_response(first_event)
 
       Spear.cancel_subscription(c.conn, sub)
 
@@ -309,6 +335,22 @@ defmodule SpearTest do
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: checkpoint)
 
       assert_receive %Spear.Event{body: 1, type: ^type}
+
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    test "a subscription to the end of the :all stream will pickup a new event", c do
+      filter = %Spear.Filter{on: :stream_name, by: [c.stream_name], checkpoint_after: @checkpoint_after}
+      type = "subscription-end-test"
+
+      assert {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: :end)
+
+      refute_receive %Spear.Event{type: ^type, body: 0}
+
+      event = Spear.Event.new(type, 0)
+      :ok = Spear.append([event], c.conn, c.stream_name)
+
+      assert_receive %Spear.Event{type: ^type, body: 0}
 
       Spear.cancel_subscription(c.conn, sub)
     end
