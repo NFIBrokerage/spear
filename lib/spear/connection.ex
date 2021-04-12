@@ -112,12 +112,14 @@ defmodule Spear.Connection do
          {:ok, conn} <- Mint.HTTP2.cancel_request(state.conn, request_ref) do
       {:reply, :ok, put_in(state.conn, conn)}
     else
+      # coveralls-ignore-start
       false ->
         # idempotent success when the request_ref is not active
         {:reply, :ok, state}
 
       {:error, conn, reason} ->
         {:reply, {:error, reason}, put_in(state.conn, conn)}
+        # coveralls-ignore-stop
     end
   end
 
@@ -135,7 +137,6 @@ defmodule Spear.Connection do
   def handle_info(message, %{conn: conn} = state) do
     case Mint.HTTP2.stream(conn, message) do
       :unknown ->
-        # YARD error handling
         {:noreply, state}
 
       {:ok, conn, responses} ->
@@ -186,7 +187,9 @@ defmodule Spear.Connection do
     state
   end
 
+  # coveralls-ignore-start
   defp process_response(_unknown, state), do: state
+  # coveralls-ignore-stop
 
   defp request_and_stream_body(state, request, from, request_type) do
     with {:ok, conn, request_ref} <-
@@ -197,8 +200,13 @@ defmodule Spear.Connection do
          {:ok, state} <- Request.emit_messages(state, request) do
       {:ok, state}
     else
-      {:error, %__MODULE__{} = state, reason} -> {:error, state, reason}
-      {:error, conn, reason} -> {:error, put_in(state.conn, conn), reason}
+      # coveralls-ignore-start
+      {:error, %__MODULE__{} = state, reason} ->
+        {:error, state, reason}
+
+      {:error, conn, reason} ->
+        {:error, put_in(state.conn, conn), reason}
+        # coveralls-ignore-stop
     end
   end
 
