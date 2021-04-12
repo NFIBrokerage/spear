@@ -104,6 +104,7 @@ defmodule Spear do
       iex> Spear.stream!(MyConnection, "es_supported_clients", chunk_size: 3) |> Enum.count()
       5
   """
+  @doc since: "0.1.0"
   @spec stream!(
           connection :: Spear.Connection.t(),
           stream_name :: String.t() | :all,
@@ -233,6 +234,7 @@ defmodule Spear do
         }
       ]
   """
+  @doc since: "0.1.0"
   @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
@@ -315,6 +317,7 @@ defmodule Spear do
       ...> |> Spear.append(conn, expect: :empty)
       {:error, %Spear.ExpectationViolation{current: 1, expected: :empty}}
   """
+  @doc since: "0.1.0"
   @spec append(
           event_stream :: Enumerable.t(),
           connection :: Spear.Connection.t(),
@@ -426,6 +429,7 @@ defmodule Spear do
       %Spear.Filter.Checkpoint{}
       :ok
   """
+  @doc since: "0.1.0"
   @spec subscribe(
           connection :: Spear.Connection.t(),
           subscriber :: pid() | GenServer.name(),
@@ -487,6 +491,7 @@ defmodule Spear do
       iex> Spear.cancel_subscription(conn, subscription)
       :ok
   """
+  @doc since: "0.1.0"
   @spec cancel_subscription(
           connection :: Spear.Connection.t(),
           subscription_reference :: reference(),
@@ -548,6 +553,7 @@ defmodule Spear do
       iex> Spear.stream!(conn, "my_stream") |> Enum.to_list()
       []
   """
+  @doc since: "0.1.0"
   @spec delete_stream(
           connection :: Spear.Connection.t(),
           stream_name :: String.t(),

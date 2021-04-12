@@ -157,6 +157,7 @@ defmodule Spear.Filter do
       iex> ~f/^[^\\$].*/rs
       %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 1024, on: :stream_name}
   """
+  @doc since: "0.1.0"
   @spec sigil_f(binary(), charlist()) :: t()
   def sigil_f(source, mods) do
     to_filter(source, mods)
@@ -174,6 +175,7 @@ defmodule Spear.Filter do
       iex> ~F/^[^\\$].*/rs
       %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 1024, on: :stream_name}
   """
+  @doc since: "0.1.0"
   @spec sigil_F(binary(), charlist()) :: t()
   def sigil_F(source, mods) do
     to_filter(source, mods)
@@ -231,6 +233,7 @@ defmodule Spear.Filter do
       iex> checkpoint_after(~f/^[^\\$].*/rs, 32 * 8)
       %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 256, on: :stream_name}
   """
+  @doc since: "0.1.0"
   @spec checkpoint_after(t(), pos_integer()) :: t()
   def checkpoint_after(%__MODULE__{} = filter, interval)
       when is_integer(interval) and interval > 0 do
@@ -253,6 +256,7 @@ defmodule Spear.Filter do
       iex> Spear.Filter.exclude_system_events()
       %Spear.Filter{by: ~r/^[^\\$].*/, checkpoint_after: 1024, on: :stream_name}
   """
+  @doc since: "0.1.0"
   @spec exclude_system_events() :: t()
   def exclude_system_events, do: ~f/^[^\$].*/rs
 

@@ -21,6 +21,7 @@ defmodule Spear.Filter.Checkpoint do
 
   See the `Spear.Filter` documentation for more information.
   """
+  @typedoc since: "0.1.0"
   @type t :: %__MODULE__{
           commit_position: non_neg_integer(),
           prepare_position: non_neg_integer()

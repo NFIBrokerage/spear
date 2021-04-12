@@ -45,6 +45,7 @@ defmodule Spear.Connection do
          funs: [#Function<48.80860365/1 in Stream.map/2>]
        ]>}
   """
+  @typedoc since: "0.1.0"
   @type t :: pid() | GenServer.name()
 
   @post "POST"
@@ -76,6 +77,7 @@ defmodule Spear.Connection do
       ]
       Supervisor.start_link(children, strategy: :one_for_one)
   """
+  @typedoc since: "0.1.0"
   @spec start_link(opts :: Keyword.t()) :: {:ok, t()} | GenServer.on_start()
   def start_link(opts) do
     name = Keyword.take(opts, [:name])

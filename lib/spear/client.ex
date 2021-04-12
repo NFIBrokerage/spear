@@ -58,72 +58,85 @@ defmodule Spear.Client do
       ]
       |> Supervisor.start_link(strategy: :one_for_one)
   """
+  @doc since: "0.1.0"
   @callback start_link(args :: Keyword.t()) :: GenServer.on_start()
 
   @doc """
   A wrapper around `Spear.append/3`
   """
+  @doc since: "0.1.0"
   @callback append(event_stream :: Enumerable.t(), stream_name :: String.t()) ::
               :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.append/4`
   """
+  @doc since: "0.1.0"
   @callback append(event_stream :: Enumerable.t(), stream_name :: String.t(), opts :: Keyword.t()) ::
               :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.cancel_subscription/2`
   """
+  @doc since: "0.1.0"
   @callback cancel_subscription(subscription_reference :: reference()) :: :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.cancel_subscription/3`
   """
+  @doc since: "0.1.0"
   @callback cancel_subscription(subscription_reference :: reference(), timeout()) ::
               :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.delete_stream/2`
   """
+  @doc since: "0.1.0"
   @callback delete_stream(stream_name :: String.t()) :: :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.delete_stream/3`
   """
+  @doc since: "0.1.0"
   @callback delete_stream(stream_name :: String.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.read_stream/2`
   """
+  @doc since: "0.1.0"
   @callback read_stream(stream_name :: String.t() | :all) ::
               {:ok, Enumerable.t()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.read_stream/3`
   """
+  @doc since: "0.1.0"
   @callback read_stream(stream_name :: String.t() | :all, opts :: Keyword.t()) ::
               {:ok, Enumerable.t()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.stream!/2`
   """
+  @doc since: "0.1.0"
   @callback stream!(stream_name :: String.t() | :all) :: Enumerable.t()
 
   @doc """
   A wrapper around `Spear.stream!/3`
   """
+  @doc since: "0.1.0"
   @callback stream!(stream_name :: String.t() | :all, opts :: Keyword.t()) :: Enumerable.t()
 
   @doc """
   A wrapper around `Spear.subscribe/3`
   """
+  @doc since: "0.1.0"
   @callback subscribe(subscriber :: pid() | GenServer.name(), stream_name :: String.t() | :all) ::
               {:ok, reference()} | {:error, any()}
 
   @doc """
   A wrapper around `Spear.subscribe/4`
   """
+  @doc since: "0.1.0"
   @callback subscribe(
               subscriber :: pid() | GenServer.name(),
               stream_name :: String.t() | :all,

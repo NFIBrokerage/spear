@@ -49,6 +49,7 @@ defmodule Spear.ExpectationViolation do
       iex> Spear.append(events, conn, "stream_that_should_have_events", expect: :exists)
       {:error, %Spear.ExpectationViolation{current: :empty, expected: :exists}}
   """
+  @typedoc since: "0.1.0"
   @type t :: %__MODULE__{
           current: pos_integer() | :empty,
           expected: pos_integer() | :empty | :exists | :any

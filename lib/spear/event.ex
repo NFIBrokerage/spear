@@ -50,6 +50,7 @@ defmodule Spear.Event do
         type: "grpc-client"
       }
   """
+  @typedoc since: "0.1.0"
   @type t :: %__MODULE__{
           id: String.t(),
           type: String.t(),
@@ -126,6 +127,7 @@ defmodule Spear.Event do
       end)
       |> Spear.append(conn, "ChargesFromCsvs", batch_size: 20)
   """
+  @doc since: "0.1.0"
   @spec new(String.t(), term(), Keyword.t()) :: t()
   def new(type, body, opts \\ []) when is_binary(type) do
     %__MODULE__{
@@ -184,6 +186,7 @@ defmodule Spear.Event do
       iex> events |> Enum.map(&Spear.Event.to_proposed_message/1)
       [%EventStore.Client.Streams.AppendReq{}, ..]
   """
+  @doc since: "0.1.0"
   @spec to_proposed_message(t(), encoder_mapping :: %{}) :: AppendReq.t()
   def to_proposed_message(
         %__MODULE__{} = event,
@@ -275,6 +278,7 @@ defmodule Spear.Event do
       |> Enum.to_list()
       # => [%Spear.Event{}, %Spear.Event{}, ..]
   """
+  @doc since: "0.1.0"
   @spec from_read_response(ReadResp.t(), Keyword.t()) :: t()
   def from_read_response(read_response, opts \\ []) do
     {force_follow_link?, remaining_opts} = Keyword.pop(opts, :link?, false)
@@ -290,6 +294,7 @@ defmodule Spear.Event do
   This is useful when storing stream position in `Spear.subscribe/4`
   subscriptions.
   """
+  @doc since: "0.1.0"
   @spec to_checkpoint(t()) :: Spear.Filter.Checkpoint.t()
   def to_checkpoint(%__MODULE__{metadata: %{commit_position: commit, prepare_position: prepare}}) do
     %Spear.Filter.Checkpoint{
@@ -412,6 +417,7 @@ defmodule Spear.Event do
       iex> Spear.Event.uuid_v4                   
       "2629ea4b-d165-45c9-8a2f-92b5e20b894e"
   """
+  @doc since: "0.1.0"
   @spec uuid_v4() :: binary()
   def uuid_v4 do
     16 |> :crypto.strong_rand_bytes() |> uuid_v4()
@@ -437,6 +443,7 @@ defmodule Spear.Event do
       iex> Spear.Event.uuid_v4 %{"foo" => "bar"}
       "33323639-3934-4339-b332-363939343339"
   """
+  @doc since: "0.1.0"
   @spec uuid_v4(term()) :: binary()
   def uuid_v4(term)
 
