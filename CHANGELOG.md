@@ -12,6 +12,16 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ### Added
 
-- TODO
+- foo
+- bar
+- baz
 
 -->
+
+## 0.1.0 - 2021-04-12
+
+### Added
+
+- Initial implementation of a client for the streams API
+    - all notable functions are labeled with the `since: "0.1.0"` doc
+      attribute
