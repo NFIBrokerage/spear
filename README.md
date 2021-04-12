@@ -147,7 +147,8 @@ documentation](https://hexdocs.pm/spear/Spear.html).
 
 A `Spear.Connection` is just a regular ole' GenServer with a default of pulling
 configuration from application-config. You can start a `Spear.Connection`
-like any other process, even in IEx!
+like any other process, even in IEx! Plus you can provide the configuration
+straight to the `Spear.Connection.start_link/1` function.
 
 Let's use the new `Mix.install/1` function from Elixir 1.12 to try out
 Spear. Say that you have an EventStoreDB instance running locally with the
