@@ -79,7 +79,7 @@ And the docket for getting v0.1.0 up into Hex:
 - [x] reasonable first-draft of documentation
 - [x] server-side filtering implementation
 - [x] server-side filtering documentation
-- [ ] testing
+- [x] testing
 - [ ] library QoL improvements
     - CI
     - auto-publish on tag push
