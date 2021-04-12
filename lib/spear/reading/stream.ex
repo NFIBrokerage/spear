@@ -43,8 +43,10 @@ defmodule Spear.Reading.Stream do
 
         {:ok, stream}
 
+      # coveralls-ignore-start
       error ->
         error
+        # coveralls-ignore-stop
     end
   end
 
