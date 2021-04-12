@@ -268,8 +268,14 @@ defmodule Spear do
       )
 
     case chunk_read_response do
-      {:ok, stream} -> {:ok, through.(stream)}
-      error -> error
+      {:ok, stream} ->
+        {:ok, through.(stream)}
+
+      # coveralls-ignore-start
+      error ->
+        error
+
+        # coveralls-ignore-stop
     end
   end
 
@@ -337,8 +343,11 @@ defmodule Spear do
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
     else
+      # coveralls-ignore-start
       {:error, reason} ->
         {:error, reason}
+
+      # coveralls-ignore-stop
 
       %Spear.Grpc.Response{
         status: :ok,
@@ -564,7 +573,9 @@ defmodule Spear do
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
     else
+      # coveralls-ignore-start
       {:error, reason} -> {:error, reason}
+      # coveralls-ignore-stop
       %Spear.Grpc.Response{} = response -> {:error, response}
     end
   end
