@@ -312,6 +312,13 @@ defmodule SpearTest do
 
       Spear.cancel_subscription(c.conn, sub)
     end
+
+    test "an octet-stream event is not JSON decoded", c do
+      body = :binary.copy(<<0>>, Enum.random(1..25))
+      event = Spear.Event.new("octet-kind", body, content_type: "application/octet-stream")
+      :ok = Spear.append([event], c.conn, c.stream_name)
+      assert [%Spear.Event{body: ^body}] = Spear.stream!(c.conn, c.stream_name) |> Enum.to_list()
+    end
   end
 
   defp random_stream_name do
