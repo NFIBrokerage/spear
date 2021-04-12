@@ -48,7 +48,8 @@ The streams API is now published and usable! Looking for more of a roadmap
 kind of document? Here's the general plan:
 
 - [x] v0.1.0: Streams API (`streams.proto`)
-- [ ] v0.1.1: TLS functionality & documentation [**in progress**]
+- [ ] v0.1.x: Resolve #4 [**in progress**]
+- [ ] v0.1.x: TLS functionality & documentation
 - [ ] v0.2.0: Operations API (`operations.proto`)
 - [ ] v0.3.0: Users API (`users.proto`)
 - [ ] v0.4.0: Projections API (`projections.proto`)
