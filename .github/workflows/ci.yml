@@ -15,7 +15,11 @@ jobs:
     # YARD run eventstore/erlang versions in a matrix?
     services:
       eventstore:
-        image: eventstore/eventstore:21.2.0-bionic
+        # image: eventstore/eventstore:21.2.0-bionic
+        image: docker.pkg.github.com/eventstore/eventstore/eventstore:ci
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           EVENTSTORE_INSECURE: "true"
         ports:
