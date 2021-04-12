@@ -15,7 +15,7 @@ jobs:
     # YARD run eventstore/erlang versions in a matrix?
     services:
       eventstore:
-        image: eventstore/eventstore:21.2.0-buster-slim
+        image: eventstore/eventstore:21.2.0-bionic
         env:
           EVENTSTORE_INSECURE: "true"
         ports:
