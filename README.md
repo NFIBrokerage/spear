@@ -13,7 +13,7 @@ A sharp EventStore 20+ client backed by mint :yum:
 **Why the name "spear"?**
 
 1. best gum flavor
-1. obligatory reference to ancient greek, roman, or egyptian history
+1. obligatory programmer reference to ancient greek, roman, or egyptian history
 1. sounds cool :sunglasses:
 
 **Backed by... Mint?**
