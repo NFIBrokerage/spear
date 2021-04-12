@@ -260,6 +260,8 @@ defmodule SpearTest do
       refute match?("$" <> _, type)
 
       Spear.cancel_subscription(c.conn, sub)
+      # note: just showing that this can be done idempotently and return :ok
+      assert Spear.cancel_subscription(c.conn, sub) == :ok
     end
 
     test "a subscription can pick up from where it left off", c do
