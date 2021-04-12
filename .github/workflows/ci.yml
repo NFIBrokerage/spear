@@ -17,7 +17,7 @@ jobs:
       eventstore:
         image: eventstore/eventstore:21.2.0-buster-slim
         ports:
-          - 1113:1113
+          - 2113:2113
 
     steps:
     - name: Checkout
