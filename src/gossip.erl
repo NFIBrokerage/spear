@@ -46,7 +46,7 @@
 -export([gpb_version_as_string/0, gpb_version_as_list/0]).
 
 -include("gossip.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 -type 'event_store.client.gossip.MemberInfo.VNodeState'() :: 'Initializing' | 'DiscoverLeader' | 'Unknown' | 'PreReplica' | 'CatchingUp' | 'Clone' | 'Follower' | 'PreLeader' | 'Leader' | 'Manager' | 'ShuttingDown' | 'Shutdown' | 'ReadOnlyLeaderless' | 'PreReadOnlyReplica' | 'ReadOnlyReplica' | 'ResigningLeader'.

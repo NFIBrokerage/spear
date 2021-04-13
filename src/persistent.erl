@@ -48,7 +48,7 @@
 -export([gpb_version_as_string/0, gpb_version_as_list/0]).
 
 -include("persistent.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 -type 'event_store.client.persistent_subscriptions.ReadReq.Nack.Action'() :: 'Unknown' | 'Park' | 'Retry' | 'Skip' | 'Stop'.

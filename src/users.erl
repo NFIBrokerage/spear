@@ -45,7 +45,7 @@
 -export([gpb_version_as_string/0, gpb_version_as_list/0]).
 
 -include("users.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 

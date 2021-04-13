@@ -46,7 +46,7 @@
 -export([gpb_version_as_string/0, gpb_version_as_list/0]).
 
 -include("projections.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 -type 'google.protobuf.NullValue'() :: 'NULL_VALUE'.

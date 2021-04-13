@@ -14,6 +14,10 @@ EventStore/EventStore@6eedacecd6a4da8ab705a82d5229f5c630f60277
     mkdir -p src/
     ./deps/gpb/bin/protoc-erl -I priv/protos/ -pkgs priv/protos/shared.proto -o src/ priv/protos/*.proto
     ```
+1. Now switch all includes for `gpb.hrl` to library includes. With [`fastmod`](https://github.com/facebookincubator/fastmod) this can be done like so. `sed` may also be used, or manual operation.
+    ```
+    fastmod --fixed-strings --accept-all --print-changed-files 'include("gpb.hrl")' 'include_lib("gpb/include/gpb.hrl")'
+    ```
 
 ## The google proto
 
