@@ -46,7 +46,7 @@ defmodule Spear.MixProject do
     [
       # hard dependencies
       {:mint, "~> 1.0"},
-      {:protobuf, "~> 0.6"},
+      {:gpb, "~> 4.0"},
       # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
       # dev/test utilities
