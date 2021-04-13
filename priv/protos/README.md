@@ -12,11 +12,11 @@ EventStore/EventStore@6eedacecd6a4da8ab705a82d5229f5c630f60277
 1. Run the following from the root of this repo:
     ```
     mkdir -p src/
-    ./deps/gpb/bin/protoc-erl -I priv/protos/ -pkgs priv/protos/shared.proto -o src/ priv/protos/*.proto
+    ./deps/gpb/bin/protoc-erl -strbin -I priv/protos/ -pkgs priv/protos/shared.proto -o src -modprefix 'spear_proto_' priv/protos/*.proto
     ```
 1. Now switch all includes for `gpb.hrl` to library includes. With [`fastmod`](https://github.com/facebookincubator/fastmod) this can be done like so. `sed` may also be used, or manual operation.
     ```
-    fastmod --fixed-strings --accept-all --print-changed-files 'include("gpb.hrl")' 'include_lib("gpb/include/gpb.hrl")'
+    fastmod --fixed-strings --accept-all --print-changed-files 'include_lib("gpb/include/gpb.hrl")' 'include_lib("gpb/include/gpb.hrl")'
     ```
 
 ## The google proto
