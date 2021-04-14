@@ -134,13 +134,13 @@ defmodule Spear.Client do
               {:ok, reference()} | {:error, any()}
 
   @doc """
-  A wrapper around `Spear.ping/0`
+  A wrapper around `Spear.ping/1`
   """
   @doc since: "0.1.2"
   @callback ping() :: :pong | {:error, any()}
 
   @doc """
-  A wrapper around `Spear.ping/1`
+  A wrapper around `Spear.ping/2`
   """
   @doc since: "0.1.2"
   @callback ping(timeout()) :: :pong | {:error, any()}
