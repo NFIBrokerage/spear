@@ -21,10 +21,14 @@ defmodule Spear.Connection do
   # documentation:
   # https://github.com/elixir-mint/mint/blob/796b8db097d69ede7163acba223ab2045c2773a4/pages/Architecture.md
 
-  use GenServer
+  use Connection
+  require Logger
+
   alias Spear.Connection.Request
 
-  defstruct [:conn, requests: %{}]
+  defstruct [:config, :conn, requests: %{}]
+
+  @closed %Mint.TransportError{reason: :closed}
 
   @typedoc """
   A connection process
@@ -52,12 +56,10 @@ defmodule Spear.Connection do
 
   @doc false
   def child_spec(init_arg) do
-    default = %{
+    %{
       id: __MODULE__,
       start: {__MODULE__, :start_link, [init_arg]}
     }
-
-    Supervisor.child_spec(default, [])
   end
 
   @doc """
@@ -83,136 +85,197 @@ defmodule Spear.Connection do
     name = Keyword.take(opts, [:name])
     rest = Keyword.delete(opts, :name)
 
-    GenServer.start_link(__MODULE__, rest, name)
+    Connection.start_link(__MODULE__, rest, name)
   end
 
-  @impl GenServer
+  @impl Connection
   def init(config) do
+    if valid_config?(config) do
+      {:connect, config, %__MODULE__{config: config}}
+    else
+      Logger.error("""
+      #{inspect(__MODULE__)} did not find enough information to start a connection.
+      Check the #{inspect(__MODULE__)} moduledocs for configuration information.
+      """)
+
+      :ignore
+    end
+  end
+
+  @impl Connection
+  def connect(config, s) do
+    case do_connect(config) do
+      {:ok, conn} -> {:ok, %__MODULE__{s | conn: conn}}
+      {:error, _reason} -> {:backoff, 500, s}
+    end
+  end
+
+  @impl Connection
+  def disconnect(info, %__MODULE__{conn: conn} = s) do
+    {:ok, _conn} = Mint.HTTP.close(conn)
+
+    case info do
+      {:close, from} -> Connection.reply(from, {:ok, :closed})
+      :closed -> :ok
+    end
+
+    {:connect, s.config, %__MODULE__{s | conn: nil}}
+  end
+
+  @impl Connection
+  def handle_call(_call, _from, %__MODULE__{conn: nil} = s) do
+    {:reply, {:error, :closed}, s}
+  end
+
+  def handle_call(:close, from, s), do: {:disconnect, {:close, from}, s}
+
+  def handle_call(:ping, from, s) do
+    case Mint.HTTP2.ping(s.conn) do
+      {:ok, conn, request_ref} ->
+        s = put_in(s.conn, conn)
+        s = put_in(s.requests[request_ref], {:ping, from})
+        # put request ref
+        {:noreply, s}
+
+      {:error, conn, @closed} ->
+        {:disconnect, :closed, {:error, :closed}, put_in(s.conn, conn)}
+
+      {:error, conn, reason} ->
+        {:reply, {:error, reason}, put_in(s.conn, conn)}
+    end
+  end
+
+  def handle_call({:cancel, request_ref}, _from, s) when is_reference(request_ref) do
+    with true <- Map.has_key?(s.requests, request_ref),
+         {:ok, conn} <- Mint.HTTP2.cancel_request(s.conn, request_ref) do
+      {:reply, :ok, put_in(s.conn, conn)}
+    else
+      # coveralls-ignore-start
+      false ->
+        # idempotent success when the request_ref is not active
+        {:reply, :ok, s}
+
+      {:error, conn, @closed} ->
+        {:disconnect, :closed, {:error, :closed}, put_in(s.conn, conn)}
+
+      {:error, conn, reason} ->
+        {:reply, {:error, reason}, put_in(s.conn, conn)}
+        # coveralls-ignore-stop
+    end
+  end
+
+  def handle_call({type, request}, from, s) do
+    case request_and_stream_body(s, request, from, type) do
+      {:ok, s} ->
+        {:noreply, s}
+
+      # coveralls-ignore-start
+      {:error, s, @closed} ->
+        {:disconnect, :closed, {:error, :closed}, s}
+
+      {:error, s, reason} ->
+        {:reply, {:error, reason}, s}
+        # coveralls-ignore-stop
+    end
+  end
+
+  @impl Connection
+  def handle_info(message, s) do
+    with %Mint.HTTP2{} = conn <- s.conn,
+         {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
+      {:noreply, put_in(s.conn, conn) |> handle_responses(responses)}
+    else
+      {:error, conn, reason, responses} ->
+        s = put_in(s.conn, conn) |> handle_responses(responses)
+
+        # YARD error handling
+        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+
+      # unknown message / no active conn in state
+      _ -> {:noreply, s}
+    end
+  end
+
+  @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
+  defp handle_responses(s, responses) do
+    responses
+    |> Enum.reduce(s, &process_response/2)
+    |> Request.continue_requests()
+  end
+
+  defp process_response({:status, request_ref, status}, s) do
+    put_in(s.requests[request_ref].response.status, status)
+  end
+
+  defp process_response({:headers, request_ref, new_headers}, s) do
+    update_in(
+      s.requests[request_ref].response.headers,
+      fn headers -> headers ++ new_headers end
+    )
+  end
+
+  defp process_response({:data, request_ref, new_data}, s) do
+    update_in(
+      s.requests[request_ref],
+      &Request.handle_data(&1, new_data)
+    )
+  end
+
+  defp process_response({:pong, request_ref}, s) do
+    {{:ping, from}, s} = pop_in(s.requests[request_ref])
+
+    Connection.reply(from, :pong)
+
+    s
+  end
+
+  defp process_response({:done, request_ref}, s) do
+    {%{response: response, from: from}, s} = pop_in(s.requests[request_ref])
+
+    Connection.reply(from, {:ok, response})
+
+    s
+  end
+
+  # coveralls-ignore-start
+  defp process_response(_unknown, s), do: s
+  # coveralls-ignore-stop
+
+  defp request_and_stream_body(s, request, from, request_type) do
+    with {:ok, conn, request_ref} <-
+           Mint.HTTP2.request(s.conn, @post, request.path, request.headers, :stream),
+         request = Request.new(request, request_ref, from, request_type),
+         s = put_in(s.conn, conn),
+         s = put_in(s.requests[request_ref], request),
+         {:ok, s} <- Request.emit_messages(s, request) do
+      {:ok, s}
+    else
+      # coveralls-ignore-start
+      {:error, %__MODULE__{} = s, reason} ->
+        {:error, s, reason}
+
+      {:error, conn, reason} ->
+        {:error, put_in(s.conn, conn), reason}
+        # coveralls-ignore-stop
+    end
+  end
+
+  defp valid_config?(config) do
+    case Keyword.fetch(config, :connection_string) do
+      {:ok, connection_string} when is_binary(connection_string) ->
+        true
+      _ -> false
+    end
+  end
+
+  defp do_connect(config) do
     uri =
       config
       |> Keyword.fetch!(:connection_string)
       |> URI.parse()
       |> set_esdb_scheme()
 
-    # YARD determine scheme from query params
-    # YARD boot this to a handle_continue/2 or handle_cast/2?
-    case Mint.HTTP.connect(uri.scheme, uri.host, uri.port,
-           protocols: [:http2],
-           mode: :active
-         ) do
-      {:ok, conn} ->
-        {:ok, %__MODULE__{conn: conn}}
-
-      {:error, reason} ->
-        {:stop, reason}
-    end
-  end
-
-  @impl GenServer
-  def handle_call({:cancel, request_ref}, _from, state) when is_reference(request_ref) do
-    with true <- Map.has_key?(state.requests, request_ref),
-         {:ok, conn} <- Mint.HTTP2.cancel_request(state.conn, request_ref) do
-      {:reply, :ok, put_in(state.conn, conn)}
-    else
-      # coveralls-ignore-start
-      false ->
-        # idempotent success when the request_ref is not active
-        {:reply, :ok, state}
-
-      {:error, conn, reason} ->
-        {:reply, {:error, reason}, put_in(state.conn, conn)}
-        # coveralls-ignore-stop
-    end
-  end
-
-  def handle_call({type, request}, from, state) do
-    case request_and_stream_body(state, request, from, type) do
-      {:ok, state} ->
-        {:noreply, state}
-
-      # coveralls-ignore-start
-      {:error, state, reason} ->
-        {:reply, {:error, reason}, state}
-        # coveralls-ignore-stop
-    end
-  end
-
-  @impl GenServer
-  def handle_info(message, %{conn: conn} = state) do
-    case Mint.HTTP2.stream(conn, message) do
-      :unknown ->
-        {:noreply, state}
-
-      {:ok, conn, responses} ->
-        state = put_in(state.conn, conn)
-
-        {:noreply, handle_responses(state, responses)}
-
-      {:error, conn, _reason, responses} ->
-        # coveralls-ignore-start
-        # YARD error handling
-
-        state = put_in(state.conn, conn)
-
-        {:noreply, handle_responses(state, responses)}
-        # coveralls-ignore-stop
-    end
-  end
-
-  @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
-  defp handle_responses(state, responses) do
-    responses
-    |> Enum.reduce(state, &process_response/2)
-    |> Request.continue_requests()
-  end
-
-  defp process_response({:status, request_ref, status}, state) do
-    put_in(state.requests[request_ref].response.status, status)
-  end
-
-  defp process_response({:headers, request_ref, new_headers}, state) do
-    update_in(
-      state.requests[request_ref].response.headers,
-      fn headers -> headers ++ new_headers end
-    )
-  end
-
-  defp process_response({:data, request_ref, new_data}, state) do
-    update_in(
-      state.requests[request_ref],
-      &Request.handle_data(&1, new_data)
-    )
-  end
-
-  defp process_response({:done, request_ref}, state) do
-    {%{response: response, from: from}, state} = pop_in(state.requests[request_ref])
-
-    GenServer.reply(from, {:ok, response})
-
-    state
-  end
-
-  # coveralls-ignore-start
-  defp process_response(_unknown, state), do: state
-  # coveralls-ignore-stop
-
-  defp request_and_stream_body(state, request, from, request_type) do
-    with {:ok, conn, request_ref} <-
-           Mint.HTTP2.request(state.conn, @post, request.path, request.headers, :stream),
-         request = Request.new(request, request_ref, from, request_type),
-         state = put_in(state.conn, conn),
-         state = put_in(state.requests[request_ref], request),
-         {:ok, state} <- Request.emit_messages(state, request) do
-      {:ok, state}
-    else
-      # coveralls-ignore-start
-      {:error, %__MODULE__{} = state, reason} ->
-        {:error, state, reason}
-
-      {:error, conn, reason} ->
-        {:error, put_in(state.conn, conn), reason}
-        # coveralls-ignore-stop
-    end
+    Mint.HTTP.connect(uri.scheme, uri.host, uri.port, protocols: [:http2], mode: :active)
   end
 
   defp set_esdb_scheme(%URI{scheme: "esdb"} = uri), do: %URI{uri | scheme: :http}
