@@ -1,4 +1,3 @@
-# coveralls-ignore-start
 defmodule Spear.Records do
   @moduledoc false
 
@@ -57,5 +56,3 @@ defmodule Spear.Records do
     |> String.to_atom()
   end
 end
-
-# coveralls-ignore-stop

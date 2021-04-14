@@ -6,6 +6,7 @@
   "skip_files": [
     "^test",
     "^deps",
-    "^src"
+    "^src",
+    "^lib/spear/records"
   ]
 }
