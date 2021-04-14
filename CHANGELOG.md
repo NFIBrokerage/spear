@@ -18,6 +18,20 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 -->
 
+## 0.1.1 - 2021-04-14
+
+### Removed
+
+- Removed dependency on `elixir-protobuf/protobuf`
+    - see #4
+    - also removed all generated files from protobuf
+
+### Added
+
+- Added dependency on `:gpb`
+    - and associated generated erlang files
+- Added `Spear.Records.*` interface for interacting with gpb-generated records
+
 ## 0.1.0 - 2021-04-12
 
 ### Added
