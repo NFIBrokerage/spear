@@ -13,6 +13,26 @@ defmodule Spear do
   - Elixir `Stream`s
 
   Descriptions of each are given in the [Streams guide](guides/streams.md).
+
+  ## Record interfaces
+
+  The `Spear.Records.*` modules provide macro interfaces for matching and
+  creating messages sent and received from the EventStoreDB. These are mostly
+  used for internal uses, such as the mapping between a
+  `Spear.Records.Streams.read_resp/0` and a `t:Spear.Event.t/0`. They can also
+  be used to extract values from any Spear function response with the
+  `raw?: true` option
+
+      iex> import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
+      iex> event = Spear.stream!(conn, "my_stream", raw?: true) |> Enum.take(1) |> List.first()
+      {:"event_store.client.streams.ReadResp", {checkpoint, ..}}
+      iex> match?(read_resp(), event)
+      true
+      iex> match?(read_resp(content: {:checkpoint, _}), event)
+      true
+
+  Macros in these modules are generated with `Record.defrecord/2` with the
+  contents extracted from the protobuf messages (indirectly via `:gpb`).
   """
 
   import Spear.Records.Streams, only: [append_resp: 1]
