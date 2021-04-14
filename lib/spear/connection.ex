@@ -115,12 +115,20 @@ defmodule Spear.Connection do
     {:ok, _conn} = Mint.HTTP.close(conn)
 
     case info do
-      {:close, from} -> Connection.reply(from, {:ok, :closed})
-      :closed -> :ok
-    end
+      {:close, from} ->
+        Connection.reply(from, {:ok, :closed})
 
-    {:connect, s.config, %__MODULE__{s | conn: nil}}
+        {:noconnect, %__MODULE__{s | conn: nil}}
+
+      # coveralls-ignore-start
+      :closed -> :ok
+        {:connect, s.config, %__MODULE__{s | conn: nil}}
+        # coveralls-ignore-stop
+    end
   end
+
+  @impl Connection
+  def handle_cast(:connect, s), do: {:connect, s.config, s}
 
   @impl Connection
   def handle_call(_call, _from, %__MODULE__{conn: nil} = s) do
@@ -137,11 +145,13 @@ defmodule Spear.Connection do
         # put request ref
         {:noreply, s}
 
+      # coveralls-ignore-start
       {:error, conn, @closed} ->
         {:disconnect, :closed, {:error, :closed}, put_in(s.conn, conn)}
 
       {:error, conn, reason} ->
         {:reply, {:error, reason}, put_in(s.conn, conn)}
+        # coveralls-ignore-stop
     end
   end
 
@@ -185,11 +195,13 @@ defmodule Spear.Connection do
          {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
       {:noreply, put_in(s.conn, conn) |> handle_responses(responses)}
     else
+      # coveralls-ignore-start
       {:error, conn, reason, responses} ->
         s = put_in(s.conn, conn) |> handle_responses(responses)
 
         # YARD error handling
         if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+        # coveralls-ignore-stop
 
       # unknown message / no active conn in state
       _ -> {:noreply, s}
