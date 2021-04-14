@@ -25,7 +25,7 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 - Added dependency on [`connection`](https://hex.pm/packages/connection)
 - Added ping functionality for `Spear.Connection`s
     - `Spear.ping/1` and `Spear.ping/2`
-    - `Spear.Client.ping/0` and `Spear.Client.ping/1`
+    - `c:Spear.Client.ping/0` and `c:Spear.Client.ping/1`
 - Added the ability to disconnect a connection by `GenServer.call/3`ing it
   with `:close` as the message
 - Added the ability to explicitly reconnect a connection by `GenServer.cast/2`ing
