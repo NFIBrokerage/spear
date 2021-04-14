@@ -134,6 +134,18 @@ defmodule Spear.Client do
               {:ok, reference()} | {:error, any()}
 
   @doc """
+  A wrapper around `Spear.ping/0`
+  """
+  @doc since: "0.1.2"
+  @callback ping() :: :pong | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.ping/1`
+  """
+  @doc since: "0.1.2"
+  @callback ping(timeout()) :: :pong | {:error, any()}
+
+  @doc """
   A wrapper around `Spear.subscribe/4`
   """
   @doc since: "0.1.0"
@@ -188,6 +200,11 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def subscribe(subscriber, stream_name, opts \\ []) do
         Spear.subscribe(__MODULE__, subscriber, stream_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def ping(timeout \\ 5_000) do
+        Spear.ping(__MODULE__, timeout)
       end
     end
   end

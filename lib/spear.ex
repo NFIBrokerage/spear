@@ -632,4 +632,19 @@ defmodule Spear do
       %Spear.Grpc.Response{} = response -> {:error, response}
     end
   end
+
+  @doc """
+  Pings the connection
+
+  This can be used to ensure that the connection process is alive, or to
+  roughly measure the latency between the connection process and EventStoreDB.
+
+  ## Examples
+
+      iex> Spear.ping(conn)
+      :pong
+  """
+  @doc since: "0.1.2"
+  @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
+  def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
 end
