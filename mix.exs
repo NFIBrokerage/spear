@@ -46,7 +46,7 @@ defmodule Spear.MixProject do
     [
       # hard dependencies
       {:mint, "~> 1.0"},
-      {:protobuf, "~> 0.6"},
+      {:gpb, "~> 4.0"},
       # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
       # dev/test utilities
@@ -92,6 +92,12 @@ defmodule Spear.MixProject do
       ],
       groups_for_extras: [
         Guides: Path.wildcard("guides/*.md")
+      ],
+      groups_for_modules: [
+        "Record interfaces": [
+          Spear.Records.Shared,
+          Spear.Records.Streams
+        ]
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"

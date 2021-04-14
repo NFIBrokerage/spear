@@ -4,8 +4,8 @@ defmodule Spear do
 
   ## Streams
 
-  Spear uses the term "stream" across different contexts. There are four
-  possible contexts for the term "stream" in Spear:
+  Spear uses the term _stream_ across different contexts. There are four
+  possible contexts for the term _stream_ in Spear:
 
   - HTTP2 streams of data
   - gRPC stream requests, responses, and bidirectional communication
@@ -13,7 +13,57 @@ defmodule Spear do
   - Elixir `Stream`s
 
   Descriptions of each are given in the [Streams guide](guides/streams.md).
+
+  ## Connections
+
+  Spear needs a connection to interact with an EventStoreDB. Spear provides
+  the `Spear.Connection` GenServer for this purpose. Connections are referred
+  to as "`conn`" in the documentation.
+
+  Like an `Ecto.Repo`, it can be handy to have a module which itself represents
+  a connection to an EventStoreDB. For this, Spear provides `Spear.Client`
+  which allows one to call any function in `Spear` without the `conn` argument
+  on the client module.
+
+  ```elixir
+  defmodule MyApp.MyClient do
+    use Spear.Client,
+      otp_app: :my_app
+  end
+
+  iex> MyApp.MyClient.start_link(connection_string: "esdb://localhost:2113")
+  iex> MyApp.MyClient.stream!("my_stream") |> Enum.to_list()
+  [
+    %Spear.Event{},
+    %Spear.Event{},
+    ..
+  ]
+  ```
+
+  See the `Spear.Client` module for more information.
+
+  ## Record interfaces
+
+  The `Spear.Records.*` modules provide macro interfaces for matching and
+  creating messages sent and received from the EventStoreDB. These are mostly
+  intended for internal uses such as the mapping between a
+  `Spear.Records.Streams.read_resp/0` and a `t:Spear.Event.t/0`, but they can
+  also be used to extract values from any raw response records (e.g. those
+  returned from functions where the `raw?: true` option is passed).
+
+      iex> import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
+      iex> event = Spear.stream!(conn, "my_stream", raw?: true) |> Enum.take(1) |> List.first()
+      {:"event_store.client.streams.ReadResp", {checkpoint, ..}}
+      iex> match?(read_resp(), event)
+      true
+      iex> match?(read_resp(content: {:checkpoint, _}), event)
+      true
+
+  Macros in these modules are generated with `Record.defrecord/2` with the
+  contents extracted from the protobuf messages (indirectly via `:gpb`).
   """
+
+  import Spear.Records.Streams, only: [append_resp: 1]
 
   @doc """
   Collects an EventStore stream into an enumerable
@@ -39,7 +89,7 @@ defmodule Spear do
     numbers are exclusive (e.g. reading from `0` will first return the
     event numbered `1` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
-    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
+    the stream).  Events (either `Spear.Event` or ReadResp records) can also
     be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStore stream. Valid values include `:forwards` and `:backwards`.
@@ -161,7 +211,7 @@ defmodule Spear do
     numbers are exclusive (e.g. reading from `0` will first return the
     event numbered `0` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
-    the stream).  Events (either `Spear.Event` or ReadResp structs) can also
+    the stream).  Events (either `Spear.Event` or ReadResp records) can also
     be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStore stream. Valid values include `:forwards` and `:backwards`.
@@ -342,7 +392,7 @@ defmodule Spear do
 
     with {:ok, %Spear.Connection.Response{} = response} <-
            GenServer.call(conn, {:request, request}, opts[:timeout]),
-         %Spear.Grpc.Response{status: :ok, data: %{result: {:success, _}}} <-
+         %Spear.Grpc.Response{status: :ok, data: append_resp(result: {:success, _})} <-
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
     else
@@ -354,7 +404,7 @@ defmodule Spear do
 
       %Spear.Grpc.Response{
         status: :ok,
-        data: %{result: {:wrong_expected_version, expectation_violation}}
+        data: append_resp(result: {:wrong_expected_version, expectation_violation})
       } ->
         {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
 
@@ -375,11 +425,8 @@ defmodule Spear do
   Spear.Event.t() | Spear.Filter.Checkpoint.t()
   ```
 
-  or this signature if the `raw?: true` option is provided
-
-  ```elixir
-  Spear.Protos.EventStore.Client.Streams.ReadResp.t()
-  ```
+  or if the `raw?: true` option is provided, `ReadResp` records will be
+  returned.
 
   This function will block the caller until the subscription has been
   confirmed by the EventStore.
@@ -393,7 +440,7 @@ defmodule Spear do
     event numbered `1` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
     the stream).  Events and checkpoints (`t:Spear.Event.t/0`, ReadResp
-    structs, or `t:Spear.Filter.Checkpoint.t/0`) can also be supplied and will
+    records, or `t:Spear.Filter.Checkpoint.t/0`) can also be supplied and will
     be treated as exclusive.
   * `:filter` - (default: `nil`) the server-side filter to apply. This option
     is only valid if the `stream_name` is `:all`. See `Spear.Filter` for more
@@ -404,7 +451,7 @@ defmodule Spear do
   * `:timeout` - (default: `5_000`) the time to wait for the EventStore
     to confirm the subscription request.
   * `:raw?` - (default: `false`) controls whether the events are sent as
-    raw `ReadResp` structs or decoded into `t:Spear.Event.t/0`s
+    raw `ReadResp` records or decoded into `t:Spear.Event.t/0`s
 
   ## Examples
 

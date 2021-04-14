@@ -41,7 +41,7 @@ defmodule Grpc.Response do
 
   def from_connection_response(%Response{type: type, headers: headers, data: data, status: 200}) do
     with {"grpc-status", "0"} <- List.keyfind(headers, "grpc-status", 0),
-         {%_{} = parsed_data, <<>>} <- Grpc.decode_next_message(data, type) do
+         {parsed_data, <<>>} <- Grpc.decode_next_message(data, type) do
       %__MODULE__{
         status_code: 0,
         status: :ok,

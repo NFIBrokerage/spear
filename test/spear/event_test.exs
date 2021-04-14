@@ -9,11 +9,11 @@ defmodule Spear.EventTest do
     setup :projected_event
 
     test "the spear event follows the link", c do
-      assert %Spear.Event{body: <<0, 0, 0, _::binary>>} = Spear.Event.from_read_response(c.event)
+      assert %Spear.Event{body: %{"hello" => "world"}} = Spear.Event.from_read_response(c.event)
     end
 
     test "force-following the link produces a spear event with link body", c do
-      assert %Spear.Event{body: "0@Spear.Test-a6b0" <> _} =
+      assert %Spear.Event{id: "5fc66e27-" <> _} =
                Spear.Event.from_read_response(c.event, link?: true)
     end
   end
@@ -22,8 +22,7 @@ defmodule Spear.EventTest do
     setup :deleted_event
 
     test "a spear event shows the link body", c do
-      assert %Spear.Event{body: "0@Spear.Test-172af" <> _} =
-               Spear.Event.from_read_response(c.event)
+      assert %Spear.Event{id: "b58ab56c-" <> _} = Spear.Event.from_read_response(c.event)
     end
   end
 
@@ -32,51 +31,30 @@ defmodule Spear.EventTest do
   defp projected_event do
     # a fixture event from my eventstore
     # looks to be from one of the tests
-    # iex> Spear.stream!(conn, "$streams", raw?: true) |> Enum.take(-1)
-    %Spear.Protos.EventStore.Client.Streams.ReadResp{
-      content:
-        {:event,
-         %Spear.Protos.EventStore.Client.Streams.ReadResp.ReadEvent{
-           event: %Spear.Protos.EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent{
-             commit_position: 18_446_744_073_709_551_615,
-             custom_metadata: "",
-             data: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>,
-             id: %Spear.Protos.EventStore.Client.Shared.UUID{
-               value: {:string, "7b44b3a1-ef45-4435-a931-aff40b889fa6"}
-             },
-             metadata: %{
-               "content-type" => "application/octet-stream",
-               "created" => "16182381307214066",
-               "type" => "octet-kind"
-             },
-             prepare_position: 18_446_744_073_709_551_615,
-             stream_identifier: %Spear.Protos.EventStore.Client.Shared.StreamIdentifier{
-               streamName: "Spear.Test-a6b09656-0ec9-4acd-a24a-06a30013e83e"
-             },
-             stream_revision: 0
-           },
-           link: %Spear.Protos.EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent{
-             commit_position: 18_446_744_073_709_551_615,
-             custom_metadata:
-               "{\"$v\":\"1:-1:1:4\",\"$c\":1178658,\"$p\":1178658,\"$causedBy\":\"7b44b3a1-ef45-4435-a931-aff40b889fa6\"}",
-             data: "0@Spear.Test-a6b09656-0ec9-4acd-a24a-06a30013e83e",
-             id: %Spear.Protos.EventStore.Client.Shared.UUID{
-               value: {:string, "09efcdc8-fd88-4e1b-bac8-8ed0c6f6bee7"}
-             },
-             metadata: %{
-               "content-type" => "application/octet-stream",
-               "created" => "16182381833305735",
-               "type" => "$>"
-             },
-             prepare_position: 18_446_744_073_709_551_615,
-             stream_identifier: %Spear.Protos.EventStore.Client.Shared.StreamIdentifier{
-               streamName: "$streams"
-             },
-             stream_revision: 1467
-           },
-           position: {:no_position, %Spear.Protos.EventStore.Client.Shared.Empty{}}
-         }}
-    }
+    # iex> Spear.stream!(conn, "$streams", raw?: true, from: :end, direction: :backwards) |> Enum.take(1) |> List.first()
+    {:"event_store.client.streams.ReadResp",
+     {:event,
+      {:"event_store.client.streams.ReadResp.ReadEvent",
+       {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
+        {:"event_store.client.shared.UUID", {:string, "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8"}},
+        {:"event_store.client.shared.StreamIdentifier", "MySpearDemo"}, 0,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        [
+          {"content-type", "application/json"},
+          {"type", "IExAndSpear"},
+          {"created", "16182579177572156"}
+        ], "", "{\"hello\":\"world\"}"},
+       {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
+        {:"event_store.client.shared.UUID", {:string, "5fc66e27-b9ff-44fe-b463-9bfc29e05a01"}},
+        {:"event_store.client.shared.StreamIdentifier", "$streams"}, 1949,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        [
+          {"content-type", "application/octet-stream"},
+          {"type", "$>"},
+          {"created", "16182579177661961"}
+        ],
+        "{\"$v\":\"1:-1:1:4\",\"$c\":8068857,\"$p\":8068857,\"$causedBy\":\"9e3a8bcf-0c22-4a38-85c6-2054a0342ec8\"}",
+        "0@MySpearDemo"}, {:no_position, {:"event_store.client.shared.Empty"}}}}}
   end
 
   defp deleted_event(_c), do: [event: deleted_event()]
@@ -85,32 +63,20 @@ defmodule Spear.EventTest do
     # this is an internal kind of event to EventStore that I pulled from my
     # local eventstore instance
     # iex> Spear.stream!(conn, "$et-$deleted", raw?: true, from: :end, direction: :backwards) |> Enum.take(1) |> List.first()
-    %Spear.Protos.EventStore.Client.Streams.ReadResp{
-      content:
-        {:event,
-         %Spear.Protos.EventStore.Client.Streams.ReadResp.ReadEvent{
-           event: nil,
-           link: %Spear.Protos.EventStore.Client.Streams.ReadResp.ReadEvent.RecordedEvent{
-             commit_position: 18_446_744_073_709_551_615,
-             custom_metadata:
-               "{\"$v\":\"4:-1:1:4\",\"$c\":6455388,\"$p\":6455388,\"$deleted\":-1,\"$causedBy\":\"b1029b99-283d-41c2-b7bf-90adc1d905e9\"}",
-             data: "0@Spear.Test-172afb92-ad28-4589-82e5-3c358031e2a4",
-             id: %Spear.Protos.EventStore.Client.Shared.UUID{
-               value: {:string, "91d6e024-8888-4782-aa0b-8b9c60c84a05"}
-             },
-             metadata: %{
-               "content-type" => "application/octet-stream",
-               "created" => "16182386815261258",
-               "type" => "$>"
-             },
-             prepare_position: 18_446_744_073_709_551_615,
-             stream_identifier: %Spear.Protos.EventStore.Client.Shared.StreamIdentifier{
-               streamName: "$et-$deleted"
-             },
-             stream_revision: 216
-           },
-           position: {:no_position, %Spear.Protos.EventStore.Client.Shared.Empty{}}
-         }}
-    }
+    {:"event_store.client.streams.ReadResp",
+     {:event,
+      {:"event_store.client.streams.ReadResp.ReadEvent", :undefined,
+       {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
+        {:"event_store.client.shared.UUID", {:string, "b58ab56c-58c5-44f1-ba20-6e292a6310d6"}},
+        {:"event_store.client.shared.StreamIdentifier", "$et-$deleted"}, 254,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        [
+          {"content-type", "application/octet-stream"},
+          {"type", "$>"},
+          {"created", "16182457401612475"}
+        ],
+        "{\"$v\":\"4:-1:1:4\",\"$c\":8039193,\"$p\":8039193,\"$deleted\":-1,\"$causedBy\":\"566823ae-f4a0-4288-9072-61870b7c0516\"}",
+        "0@Spear.Test-fca49a09-e219-4292-a1b8-01a199dc4538"},
+       {:no_position, {:"event_store.client.shared.Empty"}}}}}
   end
 end

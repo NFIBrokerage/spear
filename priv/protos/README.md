@@ -6,21 +6,18 @@ Last time the protobufs were copied from the upstream:
 EventStore/EventStore@6eedacecd6a4da8ab705a82d5229f5c630f60277
 ```
 
-## How to generate the Elixir modules from these protobufs
+## How to generate the erl/hrl files from these protobufs
 
-1. Follow the [`elixir-protobuf/protobuf` guide for installing `protoc` and `protoc-gen-elixir`](https://github.com/elixir-protobuf/protobuf#generate-elixir-code)
-1. For each `.proto` file in this directory (excluding the google directory), run the following, replacing `<file>` with each file name
+1. Get deps for this repo: `mix deps.get`
+1. Run the following from the root of this repo:
     ```
-    protoc -I priv/protos --elixir_out=plugins=grpc:./lib/spear/protos priv/protos/<file>
+    mkdir -p src/
+    ./deps/gpb/bin/protoc-erl -strbin -I priv/protos/ -pkgs priv/protos/shared.proto -o src -modprefix 'spear_proto_' priv/protos/*.proto
     ```
-1. Edit `lib/spear/protos/*.pb.ex` to add the following to the top of the file
-    ```elixir
-    alias Spear.Protos.EventStore
+1. Now switch all includes for `gpb.hrl` to library includes. With [`fastmod`](https://github.com/facebookincubator/fastmod) this can be done like so. `sed` may also be used, or manual operation.
     ```
-1. Also delete all modules with `Stub` in their names
-1. Implement the `Spear.TypedMessage` behaviour for all message types ending in `Req` (e.g. `AppendReq`)
-    - see [these lines](https://github.com/NFIBrokerage/spear/blob/2811a59050bc3e46cd1ca477eb44b52a1a517aec/lib/spear/protos/streams.pb.ex#L582-L585) for a good example
-1. Run `mix format`
+    fastmod --fixed-strings --accept-all --print-changed-files 'include_lib("gpb/include/gpb.hrl")' 'include_lib("gpb/include/gpb.hrl")'
+    ```
 
 ## The google proto
 

@@ -5,26 +5,17 @@ defmodule Spear.Request do
 
   defstruct [
     :service,
+    :service_module,
     :rpc,
     :path,
     :headers,
-    :messages,
-    :batch_size,
-    :request_module,
-    :response_module,
-    :request_is_stream?,
-    :response_is_stream?
+    :messages
   ]
 
-  def expand(%__MODULE__{service: service, rpc: rpc} = request) do
-    rpc = service.rpc(rpc)
+  def expand(%__MODULE__{service: service, service_module: service_module, rpc: rpc} = request) do
+    rpc = Spear.Rpc.expand(service_module, service, rpc)
 
-    %__MODULE__{
-      request
-      | path: rpc.path,
-        headers: headers(rpc.request_type),
-        rpc: rpc
-    }
+    %__MODULE__{request | path: rpc.path, headers: headers(), rpc: rpc}
   end
 
   # N.B. these headers are in a particular order according to the gRPC
@@ -40,13 +31,12 @@ defmodule Spear.Request do
   # - custom_metadata may come after the headers returned by this function
   #     - this makes `++/2` a good choice for appending custom metadata
   #     - note that custom headers may not begin with "grpc-"
-  @spec headers(module()) :: [{String.t(), String.t()}]
-  defp headers(request_module) do
+  @spec headers() :: [{String.t(), String.t()}]
+  defp headers do
     [
       {"te", "trailers"},
       # {"grpc-timeout", "10S"},
       {"content-type", "application/grpc+proto"},
-      {"grpc-message-type", request_module.message_type()},
       {"grpc-endcoding", "identity"},
       {"grpc-accept-encoding", "identity,deflate,gzip"},
       {"accept-encoding", "identity"},
@@ -54,15 +44,12 @@ defmodule Spear.Request do
     ]
   end
 
-  @spec to_wire_data(struct()) :: {iodata(), pos_integer()}
-  def to_wire_data(%_{} = message) do
-    encoded_message = encode(message)
-    message_length = IO.iodata_length(encoded_message)
+  @spec to_wire_data(tuple(), module(), atom()) :: {iodata(), pos_integer()}
+  def to_wire_data(message, service_module, type) do
+    encoded_message = service_module.encode_msg(message, type)
+    message_length = byte_size(encoded_message)
 
     {[<<0::unsigned-integer-8, message_length::unsigned-big-integer-8-unit(4)>>, encoded_message],
      1 + 4 + message_length}
   end
-
-  @spec encode(struct()) :: iodata()
-  defp encode(%_{} = message), do: Protobuf.Encoder.encode(message, iolist: true)
 end

@@ -15,7 +15,12 @@ defmodule Spear.Reading.Stream do
   @type t :: %__MODULE__{}
 
   alias Spear.Reading
-  alias Spear.Protos.EventStore.Client.Streams.{ReadReq, ReadResp, Streams.Service}
+
+  import Spear.Records.Streams,
+    only: [
+      read_resp: 1,
+      read_resp_stream_not_found: 0
+    ]
 
   def new!(opts) do
     state = struct(__MODULE__, opts)
@@ -52,7 +57,7 @@ defmodule Spear.Reading.Stream do
 
   def wrap_buffer_in_decode_stream(state, buffer, unfold_fn) do
     case unfold_chunk(buffer) do
-      {%ReadResp{content: {:stream_not_found, %ReadResp.StreamNotFound{}}}, _rest} ->
+      {read_resp(content: {:stream_not_found, read_resp_stream_not_found()}), _rest} ->
         []
 
       {message, rest} ->
@@ -82,7 +87,8 @@ defmodule Spear.Reading.Stream do
 
   defp build_request(message) do
     %Spear.Request{
-      service: Service,
+      service: :"event_store.client.streams.Streams",
+      service_module: :spear_proto_streams,
       rpc: :Read,
       messages: [message]
     }
@@ -93,12 +99,15 @@ defmodule Spear.Reading.Stream do
   def unfold_chunk(%__MODULE__{} = state), do: unfold_chunk(state.buffer)
 
   def unfold_chunk(buffer) when is_binary(buffer) do
-    Spear.Grpc.decode_next_message(buffer, ReadResp)
+    Spear.Grpc.decode_next_message(
+      buffer,
+      {:spear_proto_streams, :"event_store.client.streams.ReadResp"}
+    )
   end
 
   # in this case the buffer has run dry and we need to request more events
   # (a new buffer) with a new ReadReq
-  @spec unfold_continuous(t()) :: {emitted_element :: ReadReq.t(), t()} | nil
+  @spec unfold_continuous(t()) :: {emitted_element :: tuple(), t()} | nil
   defp unfold_continuous(%__MODULE__{buffer: <<>>, from: from} = state) do
     response = request!(%__MODULE__{state | max_count: state.max_count + 1})
 
@@ -114,7 +123,7 @@ defmodule Spear.Reading.Stream do
 
   defp unfold_continuous(%__MODULE__{buffer: buffer} = state) do
     case unfold_chunk(buffer) do
-      {%_{} = message, remaining_buffer} ->
+      {message, remaining_buffer} ->
         {message, %__MODULE__{state | buffer: remaining_buffer, from: message}}
 
       _ ->

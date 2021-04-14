@@ -45,15 +45,15 @@ defmodule Spear.Grpc do
   #     - this is why the specification says "big endian" for the message_length
   # - the signature of this function makes it very easy to use with
   #   Stream.unfold/2
-  @spec decode_next_message(binary(), module()) :: nil | {struct(), binary()}
+  @spec decode_next_message(binary(), {module(), atom()}) :: nil | {tuple(), binary()}
   def decode_next_message(
         <<0::unsigned-integer-8, message_length::unsigned-big-integer-8-unit(4),
           encoded_message::binary-size(message_length), rest::binary>>,
-        response_module
+        {module, type}
       ) do
     # YARD decompression
-    {encoded_message |> Protobuf.Decoder.decode(response_module), rest}
+    {module.decode_msg(encoded_message, type), rest}
   end
 
-  def decode_next_message(_empty_or_malformed, _request), do: nil
+  def decode_next_message(_empty_or_malformed, {_module, _type}), do: nil
 end

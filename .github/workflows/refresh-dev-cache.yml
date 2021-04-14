@@ -76,6 +76,9 @@ jobs:
         mix local.hex --force
         mix deps.get
 
+    - name: "(YARD remove on merge of gpb#205) make gpb ebin dir"
+      run: mkdir -p deps/gpb/ebin
+
     - name: Compile dependencies
       if: steps.deps-cache.outputs.cache-hit != 'true'
       run: mix deps.compile
