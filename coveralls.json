@@ -6,6 +6,6 @@
   "skip_files": [
     "^test",
     "^deps",
-    "^lib/spear/protos/"
+    "^src"
   ]
 }
