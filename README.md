@@ -42,27 +42,9 @@ https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215
 
 -->
 
-**How close is this to being usable?**
+**How close is this to being able to be used?**
 
-The streams API is now published and usable! Looking for more of a roadmap
-kind of document? Here's the general plan:
-
-- [x] v0.1.0: Streams API (`streams.proto`)
-- [ ] v0.1.x: Resolve #4 [**in progress**]
-- [ ] v0.1.x: TLS functionality & documentation
-- [ ] v0.2.0: Operations API (`operations.proto`)
-- [ ] v0.3.0: Users API (`users.proto`)
-- [ ] v0.4.0: Projections API (`projections.proto`)
-- [ ] v0.5.0: Persistent Subscriptions API (`persistent.proto`)
-- [ ] Broadway integration for persistent subscriptions API
-    - see [`NFIBrokerage/radical`](https://github.com/NFIBrokerage/radical) for the TCP-client driven version of this
-
-<!--
-
-Broadway integration tentatively called `volley`. Please don't squat the hexpm
-package for that :)
-
--->
+Check out the roadmap in [#7](https://github.com/NFIBrokerage/spear/issues/7)
 
 ## Installation
 
