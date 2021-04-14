@@ -46,7 +46,8 @@ defmodule Spear.MixProject do
     [
       # hard dependencies
       {:mint, "~> 1.0"},
-      {:gpb, "~> 4.0"},
+      # {:gpb, "~> 4.0"},
+      {:gpb, git: "https://github.com/the-mikedavis/gpb", ref: "265f40a1230bfc38071df2877c6e73645163de93"},
       # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
       # dev/test utilities
