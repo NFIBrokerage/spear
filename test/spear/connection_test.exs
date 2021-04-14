@@ -9,7 +9,9 @@ defmodule Spear.ConnectionTest do
     end
 
     test "a connection will start but fail ping checks", c do
-      assert {:ok, conn} = start_supervised({Spear.Connection, connection_string: c.connection_string})
+      assert {:ok, conn} =
+               start_supervised({Spear.Connection, connection_string: c.connection_string})
+
       assert Spear.ping(conn) == {:error, :closed}
       assert Spear.ping(conn) == {:error, :closed}
       assert Spear.ping(conn) == {:error, :closed}
@@ -22,9 +24,10 @@ defmodule Spear.ConnectionTest do
     end
 
     test "the connection does an :ignore start-up and logs an error", c do
-      log = capture_log([level: :error], fn ->
-        assert start_supervised({Spear.Connection, c.params}) == {:ok, :undefined}
-      end)
+      log =
+        capture_log([level: :error], fn ->
+          assert start_supervised({Spear.Connection, c.params}) == {:ok, :undefined}
+        end)
 
       assert log =~ "Spear.Connection"
       assert log =~ "did not find enough information"

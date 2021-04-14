@@ -121,7 +121,8 @@ defmodule Spear.Connection do
         {:noconnect, %__MODULE__{s | conn: nil}}
 
       # coveralls-ignore-start
-      :closed -> :ok
+      :closed ->
+        :ok
         {:connect, s.config, %__MODULE__{s | conn: nil}}
         # coveralls-ignore-stop
     end
@@ -201,10 +202,12 @@ defmodule Spear.Connection do
 
         # YARD error handling
         if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
-        # coveralls-ignore-stop
+
+      # coveralls-ignore-stop
 
       # unknown message / no active conn in state
-      _ -> {:noreply, s}
+      _ ->
+        {:noreply, s}
     end
   end
 
@@ -276,7 +279,9 @@ defmodule Spear.Connection do
     case Keyword.fetch(config, :connection_string) do
       {:ok, connection_string} when is_binary(connection_string) ->
         true
-      _ -> false
+
+      _ ->
+        false
     end
   end
 
