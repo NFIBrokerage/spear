@@ -1,6 +1,6 @@
 defmodule Spear do
   @moduledoc """
-  A sharp EventStore 20+ client backed by mint
+  A sharp EventStoreDB 20+ client backed by mint
 
   ## Streams
 
@@ -9,7 +9,7 @@ defmodule Spear do
 
   - HTTP2 streams of data
   - gRPC stream requests, responses, and bidirectional communication
-  - EventStore streams of events
+  - EventStoreDB streams of events
   - Elixir `Stream`s
 
   Descriptions of each are given in the [Streams guide](guides/streams.md).
@@ -66,10 +66,10 @@ defmodule Spear do
   import Spear.Records.Streams, only: [append_resp: 1]
 
   @doc """
-  Collects an EventStore stream into an enumerable
+  Collects an EventStoreDB stream into an enumerable
 
   This function may raise in cases where the gRPC requests fail to read events
-  from the EventStore (in cases of timeout or unavailability).
+  from the EventStoreDB (in cases of timeout or unavailability).
 
   This function does not raise if a stream does not exist (is empty), instead
   returning an empty enumerable `[]`.
@@ -79,11 +79,11 @@ defmodule Spear do
 
   `stream_name` can be any stream, existing or not, including projected
   streams such as category streams or event-type streams. The `:all` atom
-  may be passed as `stream_name` to read all events in the EventStore.
+  may be passed as `stream_name` to read all events in the EventStoreDB.
 
   ## Options
 
-  * `:from` - (default: `:start`) the EventStore stream revision from which to
+  * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
     numbers are exclusive (e.g. reading from `0` will first return the
@@ -92,20 +92,20 @@ defmodule Spear do
     the stream).  Events (either `Spear.Event` or ReadResp records) can also
     be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
-    EventStore stream. Valid values include `:forwards` and `:backwards`.
-    Reading the EventStore stream forwards will return events in the order
-    in which they were written to the EventStore; reading backwards will
+    EventStoreDB stream. Valid values include `:forwards` and `:backwards`.
+    Reading the EventStoreDB stream forwards will return events in the order
+    in which they were written to the EventStoreDB; reading backwards will
     return events in the opposite order.
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
   * `:chunk_size` - (default: `128`) the number of events to read from the
-    EventStore at a time. Any positive integer is valid. See the enumeration
+    EventStoreDB at a time. Any positive integer is valid. See the enumeration
     characteristics section below for more information about how `:chunk_size`
     works and how to tune it.
   * `:timeout` - (default: `5_000` - 5s) the time allowed for the read of a
-    single chunk of events in the EventStore stream. This time is _not_
-    cumulative: an EventStore stream 100 events long which takes 5s to read
+    single chunk of events in the EventStoreDB stream. This time is _not_
+    cumulative: an EventStoreDB stream 100 events long which takes 5s to read
     each chunk may be read in chunks of 20 events culumaltively in 25s. A
     timeout of `5_001`ms would not raise a timeout error in that scenario
     (assuming the chunk read consistently takes `<= 5_000` ms).
@@ -121,8 +121,8 @@ defmodule Spear do
   contains a buffer of bytes from the first read of the stream `stream_name`.
   This buffer potentially contains up to `:chunk_size` messages when run.
   The enumerable is written as a formula which abstracts away the chunking
-  nature of the gRPC requests, however, so even though the EventStore stream is
-  read in chunks (per the `:chunk_size` option), the entire EventStore stream
+  nature of the gRPC requests, however, so even though the EventStoreDB stream is
+  read in chunks (per the `:chunk_size` option), the entire EventStoreDB stream
   can be read by running the enumeration (e.g. with `Enum.to_list/1`). Note
   that the stream will make a gRPC request to read more events whenever the
   buffer runs dry with up to `:chunk_size` messages filling the buffer on each
@@ -194,18 +194,18 @@ defmodule Spear do
   end
 
   @doc """
-  Reads a chunk of events from an EventStore stream into an enumerable
+  Reads a chunk of events from an EventStoreDB stream into an enumerable
 
   Unlike `stream!/3`, this function will only read one chunk of events at a time
   specified by the `:max_count` option. This function also does not raise in
   cases of error, instead returning an ok- or error-tuple.
 
-  If the `stream_name` EventStore stream does not exist (is empty) and the
+  If the `stream_name` EventStoreDB stream does not exist (is empty) and the
   gRPC request succeeds for this function, `{:ok, []}` will be returned.
 
   ## Options
 
-  * `:from` - (default: `:start`) the EventStore stream revision from which to
+  * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
     numbers are exclusive (e.g. reading from `0` will first return the
@@ -214,22 +214,22 @@ defmodule Spear do
     the stream).  Events (either `Spear.Event` or ReadResp records) can also
     be supplied and will be treated as exclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
-    EventStore stream. Valid values include `:forwards` and `:backwards`.
-    Reading the EventStore stream forwards will return events in the order
-    in which they were written to the EventStore; reading backwards will
+    EventStoreDB stream. Valid values include `:forwards` and `:backwards`.
+    Reading the EventStoreDB stream forwards will return events in the order
+    in which they were written to the EventStoreDB; reading backwards will
     return events in the opposite order.
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
   * `:max_count` - (default: `42`) the maximum number of events to read from
-    the EventStore stream. Any positive integer is valid. Even if the stream
+    the EventStoreDB stream. Any positive integer is valid. Even if the stream
     is longer than this `:max_count` option, only `:max_count` events will
     be returned from this function. `:infinity` is _not_ a valid value for
-    `:max_count`. Use `stream!/3` for an enumerable which reads an EventStore
+    `:max_count`. Use `stream!/3` for an enumerable which reads an EventStoreDB
     stream in its entirety in chunked network requests.
   * `:timeout` - (default: `5_000` - 5s) the time allowed for the read of the
-    single chunk of events in the EventStore stream. Note that the gRPC request
-    which reads events from the EventStore is front-loaded in this function:
+    single chunk of events in the EventStoreDB stream. Note that the gRPC request
+    which reads events from the EventStoreDB is front-loaded in this function:
     the `:timeout` covers the time it takes to read the events. The timeout
     may be exceeded
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
@@ -240,7 +240,7 @@ defmodule Spear do
 
   ## Timing and Timeouts
 
-  The gRPC request which reads events from the EventStore is front-loaded
+  The gRPC request which reads events from the EventStoreDB is front-loaded
   in this function: this function returns immediately after receiving all data
   off the wire from the network request. This means that the `:timeout` option
   covers the gRPC request and response time but not any time spend decoding
@@ -251,7 +251,7 @@ defmodule Spear do
   very large numbers of events or reading events with very large bodies.
 
   Note that _up to_ the `:max_count` of events is returned from this call
-  depending on however many events are in the EventStore stream being read.
+  depending on however many events are in the EventStoreDB stream being read.
   When tuning the `:timeout` option, make sure to test against a stream which
   is at least as long as `:max_count` events.
 
@@ -332,11 +332,11 @@ defmodule Spear do
   end
 
   @doc """
-  Appends an enumeration of events to an EventStore stream
+  Appends an enumeration of events to an EventStoreDB stream
 
   `event_stream` is an enumerable which may either be a collection of
   `t:Spear.Event.t/0` structs or more low-level
-  `t:Spear.Protos.EventStore.Client.Streams.AppendReq.t/0`
+  `t:Spear.Protos.EventStoreDB.Client.Streams.AppendReq.t/0`
   structs. In cases where the enumerable produces `t:Spear.Event.t/0` structs,
   they will be lazily mapped to `AppendReq` structs before being encoded to
   wire data.
@@ -414,7 +414,7 @@ defmodule Spear do
   end
 
   @doc """
-  Subscribes a process to an EventStore stream
+  Subscribes a process to an EventStoreDB stream
 
   Unlike `read_stream/3` or `stream!/3`, this function does not return an
   enumerable. Instead the `subscriber` process is signed up to receive messages
@@ -429,11 +429,11 @@ defmodule Spear do
   returned.
 
   This function will block the caller until the subscription has been
-  confirmed by the EventStore.
+  confirmed by the EventStoreDB.
 
   ## Options
 
-  * `:from` - (default: `:start`) the EventStore stream revision from which to
+  * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
     numbers are exclusive (e.g. reading from `0` will first return the
@@ -448,14 +448,14 @@ defmodule Spear do
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
-  * `:timeout` - (default: `5_000`) the time to wait for the EventStore
+  * `:timeout` - (default: `5_000`) the time to wait for the EventStoreDB
     to confirm the subscription request.
   * `:raw?` - (default: `false`) controls whether the events are sent as
     raw `ReadResp` records or decoded into `t:Spear.Event.t/0`s
 
   ## Examples
 
-      # say there are 3 events in the EventStore stream "my_stream"
+      # say there are 3 events in the EventStoreDB stream "my_stream"
       iex> {:ok, sub} = Spear.subscribe(conn, self(), "my_stream", from: 0)
       {:ok, #Reference<0.1160763861.3015180291.51238>}
       iex> flush
@@ -550,9 +550,9 @@ defmodule Spear do
   end
 
   @doc """
-  Deletes an EventStore stream
+  Deletes an EventStoreDB stream
 
-  EventStore supports two kinds of stream deletions: soft-deletes and
+  EventStoreDB supports two kinds of stream deletions: soft-deletes and
   tombstones. By default this function will perform a soft-delete. Pass the
   `tombstone?: true` option to tombstone the stream.
 
@@ -586,7 +586,7 @@ defmodule Spear do
   * `:tombstone?` - (default: `false`) controls whether the stream is
     soft-deleted or tombstoned.
   * `:timeout` - (default: `5_000` - 5s) the time allowed to block while
-    waiting for the EventStore to delete the stream.
+    waiting for the EventStoreDB to delete the stream.
   * `:expect` - (default: `:any`) the expected state of the stream when
     performing the deleteion. See `append/4` and `Spear.ExpectationViolation`
     for more information.

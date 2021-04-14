@@ -76,7 +76,7 @@ defmodule Spear.MixProject do
   end
 
   defp description do
-    "A sharp EventStore 20+ client backed by mint"
+    "A sharp EventStoreDB 20+ client backed by mint"
   end
 
   defp docs do

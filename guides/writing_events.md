@@ -6,7 +6,7 @@ information about the event-writing functionality.
 ## Enumeration Characteristics
 
 `event_stream` is an `t:Enumerable.t/0` which will be lazily written to the
-EventStore as elements of the stream are computed and serialized on to the
+EventStoreDB as elements of the stream are computed and serialized on to the
 wire.
 
 This means a few things:
@@ -41,13 +41,13 @@ iex> Stream.iterate(0, &(&1 + 1))
  }}
 ```
 
-Note that while EventStore streams can in theory store infinitely long
-streams, they are not practically able to do so. EventStore limits the size
+Note that while EventStoreDB streams can in theory store infinitely long
+streams, they are not practically able to do so. EventStoreDB limits the size
 of a single write to `1_048_576` cumulative bytes. This budget can be spent
 on one very large event or, as shown above, many tiny events in a single
 call to `Spear.append/4`. Attempting to write more than the budget will fail
 the request with the above signature and no events in the request will be
-written to the EventStore. This value is configurable in the EventStoreDB
+written to the EventStoreDB. This value is configurable in the EventStoreDB
 configuration.
 
 ## Blocking

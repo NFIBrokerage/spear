@@ -1,6 +1,6 @@
 defmodule Spear.Connection do
   @moduledoc """
-  A GenServer which brokers a connection to an EventStore
+  A GenServer which brokers a connection to an EventStoreDB
 
   `Spear.Connection` will attempt to connect immediately after GenServer init.
   Failures to connect will result in back-off retries in segments of 500ms.

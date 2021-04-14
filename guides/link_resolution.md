@@ -12,7 +12,7 @@ When we read a projected stream (in this example an event-type stream) with
 `:resolve_links?` set to false, we see
 
 ```elixir
-iex> alias Spear.Protos.EventStore.Client.Streams.ReadResp
+iex> alias Spear.Protos.EventStoreDB.Client.Streams.ReadResp
 iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false, raw?: true) |> Enum.take(1)
 [
   %ReadResp{
@@ -32,7 +32,7 @@ only show the parts interesting to link resolution.)
 
 The `link` field on the read event is `nil` and the `event` field has a
 strange `data` body of `0@es_supported_clients`. With link resolution turned
-off, we are telling the EventStore that we'd like to read the stream
+off, we are telling the EventStoreDB that we'd like to read the stream
 literally: to receive just the links themselves.
 
 When we turn link resolution on, we see a different picture
@@ -57,7 +57,7 @@ iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: true,
 Now the `:link` field contains the reference to the original event and the
 `:event` contains the full data for the original event.
 
-What happens if you try to resolve links for an EventStore stream which is
+What happens if you try to resolve links for an EventStoreDB stream which is
 not a projected stream?
 
 ```elixir

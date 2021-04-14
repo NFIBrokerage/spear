@@ -148,7 +148,7 @@ defmodule SpearTest do
 
     test "appending an event emits a message to the subscription", c do
       # note that we are not matching on ^event
-      # because when an event is appended, the EventStore slaps a bunch of
+      # because when an event is appended, the EventStoreDB slaps a bunch of
       # metadata on it like timestamp of commit and such
       Spear.append([random_event()], c.conn, c.stream_name)
       assert_receive %Spear.Event{}

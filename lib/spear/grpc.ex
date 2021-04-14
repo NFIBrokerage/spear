@@ -1,7 +1,7 @@
 defmodule Spear.Grpc do
   @moduledoc false
 
-  # gRPC utilities for making requests to the EventStore
+  # gRPC utilities for making requests to the EventStoreDB
   #
   # You could say this little mint-backed client is the "thrust"
   # of the library (hehe).

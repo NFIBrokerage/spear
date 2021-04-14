@@ -11,7 +11,7 @@ iex> Spear.stream!(conn, "MyStream", chunk_size: 20) |> Enum.to_list()
 
 This call
 
-- reads an EventStore stream
+- reads an EventStoreDB stream
 - over an HTTP2 stream
 - which is typed as a gRPC stream response
 - and is collected into an Elixir `Stream`
@@ -20,7 +20,7 @@ There are four significant concepts for streams in Spear:
 
 - HTTP2 streams of data
 - gRPC stream requests, responses, and bidirectional communication
-- EventStore streams of events
+- EventStoreDB streams of events
 - Elixir `Stream`s
 
 We'll cover each topic separately to avoid confusion.
@@ -40,7 +40,7 @@ gRPC allows "unary" request-responses similar to a REST request-response
 over HTTP. This resembles synchronous function (or GenServer) calls. The true
 power of gRPC, though, comes from its ability to "stream" requests,
 responses, or requests and responses simultaneously. Consider this RPC
-definition from the EventStore gRPC protobufs:
+definition from the EventStoreDB gRPC protobufs:
 
 ```protobuf
 rpc Read (ReadReq) returns (stream ReadResp);
@@ -48,7 +48,7 @@ rpc Read (ReadReq) returns (stream ReadResp);
 
 In the `Spear.stream!/3` function, this "stream" response lends itself to
 an Elixir `Stream`. Conceptually the `ReadResp` messages are returned as an
-ordered list of events in an EventStore stream. These response messages are
+ordered list of events in an EventStoreDB stream. These response messages are
 returned as quickly as possible and resemble a unary request very closely.
 
 This same RPC is invoked to implement `Spear.subscribe/4`, though, which
@@ -60,7 +60,7 @@ gRPC streams may emulate synchronous calls returning lists as with
 subscription workflows as with `Spear.subscribe/4`.
 
 gRPC streams may even be fully asynchronous is both directions as with
-EventStore Persistent Subscriptions. This communication is known as
+EventStoreDB Persistent Subscriptions. This communication is known as
 bidirectional or "bidi-stream" and is covered more fully in the
 `Spear.PersistentSubscription` moduledoc.
 
@@ -68,20 +68,20 @@ gRPC streams are also an implementation-level detail in Spear and will
 not be mentioned otherwise in this documentation unless specifically called
 a "gRPC stream".
 
-#### EventStore streams
+#### EventStoreDB streams
 
-EventStore streams are append-only collections of events ordered by the
+EventStoreDB streams are append-only collections of events ordered by the
 timestamp of each event's commit (or commit preparation). Streams can be
 read forwards or backwards and from any revision (a fancy way of saying
 "position in a stream").
 
-EventStore streams will be referred to in this documentation as EventStore
+EventStoreDB streams will be referred to in this documentation as EventStoreDB
 streams, or simply "streams" where contextually appropriate.
 
 #### Elixir Streams
 
 Elixir `Stream`s are conceptually different than both gRPC/HTTP2 streams
-and EventStore streams. Elixir `Stream`s differ as well from lazy enumerables
+and EventStoreDB streams. Elixir `Stream`s differ as well from lazy enumerables
 in other languages like Haskell due to the lack of a "thunk" built-in.
 `Stream`s are simply formulas for producing enumerable collections such as
 `List`s.

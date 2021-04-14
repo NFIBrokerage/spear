@@ -9,12 +9,12 @@ defmodule Spear.ExpectationViolation do
   `Spear.append/4`:
 
   * `:any` - (default) any stream. Cannot be violated.
-  * `:exists` - the EventStore stream must exist prior to the proposed events
+  * `:exists` - the EventStoreDB stream must exist prior to the proposed events
     being written
-  * `:empty` - the EventStore stream must **not** exist prior to the
+  * `:empty` - the EventStoreDB stream must **not** exist prior to the
     proposed events being written
   * `revision` - any positive integer representing the current size of the
-    stream. The head of the EventStore stream must match this revision number
+    stream. The head of the EventStoreDB stream must match this revision number
     in order for the append request to succeed.
 
   If an expectation is violated, the return signature will be
@@ -34,18 +34,18 @@ defmodule Spear.ExpectationViolation do
   This struct is returned on calls to `Spear.append/4` which set an expectation
   on the current stream revision with the `:expect` option.
 
-  `:current` is not the number of events in the EventStore stream but rather
+  `:current` is not the number of events in the EventStoreDB stream but rather
   the current event revision. If three events are appended to an empty stream,
   the `:current` will be `2`. Note that deletions do not reset a stream's
   revision number.
 
   ## Examples
 
-      # say EventStore stream "stream_that_should_be_empty" has 6 events
+      # say EventStoreDB stream "stream_that_should_be_empty" has 6 events
       iex> Spear.append(events, conn, "stream_that_should_be_empty", expect: :empty)
       {:error, %Spear.ExpectationViolation{current: 5, expected: :empty}}
 
-      # say EventStore stream "stream_that_should_have_events" has no events
+      # say EventStoreDB stream "stream_that_should_have_events" has no events
       iex> Spear.append(events, conn, "stream_that_should_have_events", expect: :exists)
       {:error, %Spear.ExpectationViolation{current: :empty, expected: :exists}}
   """

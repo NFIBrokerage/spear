@@ -60,7 +60,7 @@ defmodule Spear.EventTest do
   defp deleted_event(_c), do: [event: deleted_event()]
 
   def deleted_event do
-    # this is an internal kind of event to EventStore that I pulled from my
+    # this is an internal kind of event to EventStoreDB that I pulled from my
     # local eventstore instance
     # iex> Spear.stream!(conn, "$et-$deleted", raw?: true, from: :end, direction: :backwards) |> Enum.take(1) |> List.first()
     {:"event_store.client.streams.ReadResp",

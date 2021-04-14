@@ -1,11 +1,11 @@
 defmodule Spear.Filter do
   @moduledoc """
-  A server-side filter to apply when reading events from an EventStore
+  A server-side filter to apply when reading events from an EventStoreDB
 
   ## Regular expressions
 
   Elixir's built-in `Regex` module and `Kernel.sigil_r/2`
-  use PCRE-compatible regular expressions, but from [the EventStore
+  use PCRE-compatible regular expressions, but from [the EventStoreDB
   codebase](https://github.com/EventStore/EventStore/commit/711a8622569cdee3b182a4bb0d2a32ab0c950a73#diff-f444f5f2feccef613b5a027880c6f810defd43d2f882b6b6a9c0612e50ca873aR3)
   it seems that at time of writing, filtering is done with C-sharp's
   `System.Text.RegularExpressions` built-in. C-sharp regular expressions
@@ -29,18 +29,18 @@ defmodule Spear.Filter do
 
   ## Checkpoints
 
-  The EventStore will emit checkpoint events to a subscriber regularly.
+  The EventStoreDB will emit checkpoint events to a subscriber regularly.
 
   This prevents a possible (and perhaps probable) scenario where
 
-  - the EventStore contains many events
+  - the EventStoreDB contains many events
   - the client is searching for a small number of events relative to the size
     of `:all`
   - (and/or) the target events are sparsely spread throughout `:all`
 
-  Under these conditions, the EventStore may progress through `:all` quite a
+  Under these conditions, the EventStoreDB may progress through `:all` quite a
   ways before finding an event. If the connection is severed between the client
-  and server while the EventStore is part-way through a large drought of
+  and server while the EventStoreDB is part-way through a large drought of
   targeted events, the server will need to re-seek through the drought
   when the client re-connects and passes an old `:from` option to
   `Spear.subscribe/4`.
@@ -81,7 +81,7 @@ defmodule Spear.Filter do
 
   ## Checkpoint Interval
 
-  The EventStore will send a checkpoint after filtering a configurable number
+  The EventStoreDB will send a checkpoint after filtering a configurable number
   of events. The `:checkpoint_after` field can be used to configure this
   behavior. Note that the `:checkpoint_after` is only allowed by the server
   to be a multiple of `32`. Other values will be rounded to the nearest
@@ -127,7 +127,7 @@ defmodule Spear.Filter do
   @doc """
   A sigil defining short-hand notation for writing filters
 
-  Filters may either filter _on_ EventStore stream name or event type and may
+  Filters may either filter _on_ EventStoreDB stream name or event type and may
   either filter _by_ a regular expression or a list of prefix strings.
 
   ## Modifiers

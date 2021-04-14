@@ -11,7 +11,7 @@ defmodule Spear.Filter.Checkpoint do
   network.
 
   Since the results of a server-side filtering subscription can be sparsely
-  spread out in the entire `:all` stream, the EventStore emits checkpoints
+  spread out in the entire `:all` stream, the EventStoreDB emits checkpoints
   as it reads through the events.
 
   A client can restore its position in a filter subscription by passing

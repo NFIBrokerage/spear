@@ -25,15 +25,15 @@ defmodule Spear.Event do
   defstruct [:id, :type, :body, metadata: %{}]
 
   @typedoc """
-  A struct representing an EventStore event
+  A struct representing an EventStoreDB event
 
-  `t:Spear.Event.t/0`s may be created to write to the EventStore with
+  `t:Spear.Event.t/0`s may be created to write to the EventStoreDB with
   `new/3`. `t:Spear.Event.t/0`s will be lazily mapped into
-  gRPC-compatible structs before being written to the EventStore with
+  gRPC-compatible structs before being written to the EventStoreDB with
   `to_proposed_message/2`.
 
   `t:Spear.Event.t/0`s typically look different between events which are
-  written to- and events which are read from the EventStore. Read events
+  written to- and events which are read from the EventStoreDB. Read events
   contain more metadata which pertains to EventStoreDB specifics like
   the creation timestamp of the event.
 
@@ -87,7 +87,7 @@ defmodule Spear.Event do
     on event IDs below.
   * `:content_type` - (default: `"application/json"`) the encoding used to
     turn the event's body into binary data. If the content-type is
-    `"application/json"`, the EventStore and Spear (in
+    `"application/json"`, the EventStoreDB and Spear (in
     `Spear.Event.from_read_response/2`)
   * `:custom_metadata` - (default: `""`) an event field outside of the body
     meant as a bag for storing custom attributes about an event. Usage of this
@@ -95,8 +95,8 @@ defmodule Spear.Event do
 
   ## Event IDs
 
-  EventStore uses event IDs to provide an idempotency feature. Any event
-  written to the EventStore with an already existing ID will be not be
+  EventStoreDB uses event IDs to provide an idempotency feature. Any event
+  written to the EventStoreDB with an already existing ID will be not be
   duplicated.
 
   ```elixir
@@ -160,7 +160,7 @@ defmodule Spear.Event do
   message
 
   Note that each event must be individually structured as an `AppendReq`
-  message in order to be written to an EventStore. The RPC definition for
+  message in order to be written to an EventStoreDB. The RPC definition for
   writing events specifies a stream input, though, so all `AppendReq` events
   passed to `Spear.append/4` will be batched into a single write operation.
 
@@ -169,7 +169,7 @@ defmodule Spear.Event do
   ```
 
   These messages are serialized to wire data before being sent to the
-  EventStore when using `Spear.append/4` to write events via protobuf encoding.
+  EventStoreDB when using `Spear.append/4` to write events via protobuf encoding.
 
   `encoder_mapping` is a mapping of content-types to 1-arity encode functions.
   The default is
@@ -248,7 +248,7 @@ defmodule Spear.Event do
 
   ## JSON decoding
 
-  Event bodies are commonly written to the EventStore in JSON format as the
+  Event bodies are commonly written to the EventStoreDB in JSON format as the
   format is a human-readable and supported in nearly any language. Events
   carry a small piece of metadata in the `ReadResp.ReadEvent.RecordedEvent`'s
   `:metadata` map field which declares the content-type of the event body:

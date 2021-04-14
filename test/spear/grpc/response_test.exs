@@ -3,7 +3,7 @@ defmodule Spear.Grpc.ResponseTest do
 
   # note that these tests are a bit un-ideal: I'd rather have a little http(2)
   # server included in the test suite to bounce these requests off of and get
-  # real responses, but the test noise just from the EventStore server is
+  # real responses, but the test noise just from the EventStoreDB server is
   # already very unstable, so just gonna do some very simple units to get
   # coverage
 

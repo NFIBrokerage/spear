@@ -6,7 +6,7 @@
 [![hex.pm license](https://img.shields.io/hexpm/l/spear.svg)](https://github.com/NFIBrokerage/spear/blob/master/LICENSE)
 [![Last Updated](https://img.shields.io/github/last-commit/NFIBrokerage/spear.svg)](https://github.com/NFIBrokerage/spear/commits/main)
 
-A sharp EventStore 20+ client backed by mint :yum:
+A sharp EventStoreDB 20+ client backed by mint :yum:
 
 ## FAQ
 

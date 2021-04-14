@@ -1,7 +1,7 @@
 defmodule Spear.Writing do
   @moduledoc false
 
-  # Helper functions for writing (appending) events to the EventStore
+  # Helper functions for writing (appending) events to the EventStoreDB
 
   import Spear.Records.Streams,
     only: [

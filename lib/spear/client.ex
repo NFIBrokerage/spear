@@ -1,6 +1,6 @@
 defmodule Spear.Client do
   @moduledoc """
-  A macro for defining a module which represents a connection to an EventStore
+  A macro for defining a module which represents a connection to an EventStoreDB
 
   Like an `Ecto.Repo` or an `Extreme` client, this macro allows you to call
   functions on the module representing the connection instead of passing
@@ -9,12 +9,12 @@ defmodule Spear.Client do
   provided by this module are implemented on clients created with
   `use Spear.Client`.
 
-  This pattern can be useful for applications which depend on an EventStore
+  This pattern can be useful for applications which depend on an EventStoreDB
   connection similar to applications which depend on a (e.g.) PostgreSQL
   connection via `Ecto.Repo`. Writing clients as modules provides an
-  intuitive "is-a" interface (e.g. "`MyEventStoreClient` _is_ an EventStore
+  intuitive "is-a" interface (e.g. "`MyEventStoreClient` _is_ an EventStoreDB
   client"). Since this module defines a complete behaviour for a client
-  module, mocking calls to the EventStore is easy via a test dependency
+  module, mocking calls to the EventStoreDB is easy via a test dependency
   like the wonderful Dashbit library [`Mox`](https://github.com/dashbitco/mox).
 
   If a service does not know which connections it may need until runtime, the
