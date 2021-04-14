@@ -391,7 +391,7 @@ defmodule Spear do
     request = opts |> Enum.into(%{}) |> Spear.Writing.build_write_request()
 
     with {:ok, %Spear.Connection.Response{} = response} <-
-           GenServer.call(conn, {:request, request}, opts[:timeout]),
+           Connection.call(conn, {:request, request}, opts[:timeout]),
          %Spear.Grpc.Response{status: :ok, data: append_resp(result: {:success, _})} <-
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
@@ -518,7 +518,7 @@ defmodule Spear do
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
     # YARD deal with broken subscriptions
-    GenServer.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
+    Connection.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
   end
 
   @doc """
@@ -546,7 +546,7 @@ defmodule Spear do
         ) :: :ok | {:error, any()}
   def cancel_subscription(conn, subscription_reference, timeout \\ 5_000)
       when is_reference(subscription_reference) do
-    GenServer.call(conn, {:cancel, subscription_reference}, timeout)
+    Connection.call(conn, {:cancel, subscription_reference}, timeout)
   end
 
   @doc """
@@ -621,7 +621,7 @@ defmodule Spear do
     request = opts |> Enum.into(%{}) |> Spear.Writing.build_delete_request()
 
     with {:ok, %Spear.Connection.Response{} = response} <-
-           GenServer.call(conn, {:request, request}, opts[:timeout]),
+           Connection.call(conn, {:request, request}, opts[:timeout]),
          %Spear.Grpc.Response{status: :ok} <-
            Spear.Grpc.Response.from_connection_response(response) do
       :ok
@@ -632,4 +632,19 @@ defmodule Spear do
       %Spear.Grpc.Response{} = response -> {:error, response}
     end
   end
+
+  @doc """
+  Pings the connection
+
+  This can be used to ensure that the connection process is alive, or to
+  roughly measure the latency between the connection process and EventStoreDB.
+
+  ## Examples
+
+      iex> Spear.ping(conn)
+      :pong
+  """
+  @doc since: "0.1.2"
+  @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
+  def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
 end
