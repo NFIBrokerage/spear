@@ -12,18 +12,20 @@ When we read a projected stream (in this example an event-type stream) with
 `:resolve_links?` set to false, we see
 
 ```elixir
+iex> import Spear.Records.Streams
 iex> alias Spear.Protos.EventStoreDB.Client.Streams.ReadResp
 iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false, raw?: true) |> Enum.take(1)
 [
-  %ReadResp{
+  read_resp(
     content: {:event,
-     %ReadResp.ReadEvent{
-       event: %ReadResp.ReadEvent.RecordedEvent{
+     read_resp_read_event(
+       event: read_resp_read_event_recorded_event(
          data: "0@es_supported_clients"
-       },
-       link: nil
-     }}
-  }
+       ),
+       link: :undefined
+     )
+    )
+  )
 ]
 ```
 
@@ -38,19 +40,20 @@ literally: to receive just the links themselves.
 When we turn link resolution on, we see a different picture
 
 ```elixir
+iex> import Spear.Records.Streams
 iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: true, raw?: true) |> Enum.take(1)
 [
-  %ReadResp{
+  read_resp(
     content: {:event,
-     %ReadResp.ReadEvent{
-       event: %ReadResp.ReadEvent.RecordedEvent{
+     read_resp_read_event(
+       event: read_resp_read_event_recorded_event(
          data: "{\"languages\":[\"typescript\",\"javascript\"],\"runtime\":\"NodeJS\"}",
-       },
-       link: %ReadResp.ReadEvent.RecordedEvent{
+       ),
+       link: read_resp_read_event_recorded_event(
          data: "0@es_supported_clients",
-       }
-     }}
-  }
+       )
+     ))
+  )
 ]
 ```
 
@@ -61,17 +64,18 @@ What happens if you try to resolve links for an EventStoreDB stream which is
 not a projected stream?
 
 ```elixir
+iex> import Spear.Records.Streams
 iex> Spear.stream!(conn, "es_supported_clients", chunk_size: 1, resolve_links?: true, raw?: true) |> Enum.take(1)
 [
-  %ReadResp{
+  read_resp(
     content: {:event,
-     %ReadResp.ReadEvent{
-       event: %ReadResp.ReadEvent.RecordedEvent{
+     read_resp_read_event(
+       event: read_resp_read_event_recorded_event(
          data: "{\"languages\":[\"typescript\",\"javascript\"],\"runtime\":\"NodeJS\"}",
-       },
-       link: nil
-     }}
-  }
+       ),
+       link: :undefined
+     ))
+  )
 ]
 ```
 

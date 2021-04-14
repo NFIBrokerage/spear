@@ -334,12 +334,11 @@ defmodule Spear do
   @doc """
   Appends an enumeration of events to an EventStoreDB stream
 
-  `event_stream` is an enumerable which may either be a collection of
-  `t:Spear.Event.t/0` structs or more low-level
-  `t:Spear.Protos.EventStoreDB.Client.Streams.AppendReq.t/0`
-  structs. In cases where the enumerable produces `t:Spear.Event.t/0` structs,
-  they will be lazily mapped to `AppendReq` structs before being encoded to
-  wire data.
+  `event_stream` is an enumerable which may either be a
+  collection of `t:Spear.Event.t/0` structs or more low-level
+  `Spear.Records.Streams.append_resp/0` records. In cases where the enumerable
+  produces `t:Spear.Event.t/0` structs, they will be lazily mapped to
+  `AppendReq` records before being encoded to wire data.
 
   See the [Writing Events](guides/writing_events.md) guide for more information
   about writing events.

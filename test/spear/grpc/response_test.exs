@@ -8,7 +8,7 @@ defmodule Spear.Grpc.ResponseTest do
   # coverage
 
   alias Spear.{Grpc, Connection}
-  alias Spear.Protos.EventStore.Client.Streams.ReadResp
+  alias :"event_store.client.streams.ReadResp", as: ReadResp
 
   test "a non-200 status code connection response is converted to an error code 2" do
     grpc_response =
