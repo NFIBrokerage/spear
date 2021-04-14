@@ -93,6 +93,12 @@ defmodule Spear.MixProject do
       groups_for_extras: [
         Guides: Path.wildcard("guides/*.md")
       ],
+      groups_for_modules: [
+        "Record interfaces": [
+          Spear.Records.Shared,
+          Spear.Records.Streams
+        ]
+      ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"
       ]
