@@ -4,8 +4,8 @@ defmodule Spear do
 
   ## Streams
 
-  Spear uses the term "stream" across different contexts. There are four
-  possible contexts for the term "stream" in Spear:
+  Spear uses the term _stream_ across different contexts. There are four
+  possible contexts for the term _stream_ in Spear:
 
   - HTTP2 streams of data
   - gRPC stream requests, responses, and bidirectional communication
@@ -14,14 +14,42 @@ defmodule Spear do
 
   Descriptions of each are given in the [Streams guide](guides/streams.md).
 
+  ## Connections
+
+  Spear needs a connection to interact with an EventStoreDB. Spear provides
+  the `Spear.Connection` GenServer for this purpose. Connections are referred
+  to as "`conn`" in the documentation.
+
+  Like an `Ecto.Repo`, it can be handy to have a module which itself represents
+  a connection to an EventStoreDB. For this, Spear provides `Spear.Client`
+  which allows one to call any function in `Spear` without the `conn` argument
+  on the client module.
+
+  ```elixir
+  defmodule MyApp.MyClient do
+    use Spear.Client,
+      otp_app: :my_app
+  end
+
+  iex> MyApp.MyClient.start_link(connection_string: "esdb://localhost:2113")
+  iex> MyApp.MyClient.stream!("my_stream") |> Enum.to_list()
+  [
+    %Spear.Event{},
+    %Spear.Event{},
+    ..
+  ]
+  ```
+
+  See the `Spear.Client` module for more information.
+
   ## Record interfaces
 
   The `Spear.Records.*` modules provide macro interfaces for matching and
   creating messages sent and received from the EventStoreDB. These are mostly
-  used for internal uses, such as the mapping between a
-  `Spear.Records.Streams.read_resp/0` and a `t:Spear.Event.t/0`. They can also
-  be used to extract values from any Spear function response with the
-  `raw?: true` option
+  intended for internal uses such as the mapping between a
+  `Spear.Records.Streams.read_resp/0` and a `t:Spear.Event.t/0`, but they can
+  also be used to extract values from any raw response records (e.g. those
+  returned from functions where the `raw?: true` option is passed).
 
       iex> import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
       iex> event = Spear.stream!(conn, "my_stream", raw?: true) |> Enum.take(1) |> List.first()
