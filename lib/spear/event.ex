@@ -357,28 +357,48 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         read_resp(content: {:event, read_resp_read_event(link: :undefined, event: read_resp_read_event_recorded_event() = event)}),
+         read_resp(
+           content:
+             {:event,
+              read_resp_read_event(
+                link: :undefined,
+                event: read_resp_read_event_recorded_event() = event
+              )}
+         ),
          _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         read_resp(content: {:event, read_resp_read_event(event: :undefined, link: read_resp_read_event_recorded_event() = event)}),
+         read_resp(
+           content:
+             {:event,
+              read_resp_read_event(
+                event: :undefined,
+                link: read_resp_read_event_recorded_event() = event
+              )}
+         ),
          _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         read_resp(content: {:event, read_resp_read_event(link: read_resp_read_event_recorded_event() = event)}),
+         read_resp(
+           content:
+             {:event, read_resp_read_event(link: read_resp_read_event_recorded_event() = event)}
+         ),
          true = _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         read_resp(content: {:event, read_resp_read_event(event: read_resp_read_event_recorded_event() = event)}),
+         read_resp(
+           content:
+             {:event, read_resp_read_event(event: read_resp_read_event_recorded_event() = event)}
+         ),
          false = _link?
        ) do
     event

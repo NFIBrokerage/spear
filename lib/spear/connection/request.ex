@@ -24,7 +24,13 @@ defmodule Spear.Connection.Request do
         type
       ) do
     reducer = &reduce_with_suspend/2
-    stream = Stream.map(event_stream, &Spear.Request.to_wire_data(&1, rpc.service_module, rpc.request_type))
+
+    stream =
+      Stream.map(
+        event_stream,
+        &Spear.Request.to_wire_data(&1, rpc.service_module, rpc.request_type)
+      )
+
     continuation = &Enumerable.reduce(stream, &1, reducer)
 
     %__MODULE__{

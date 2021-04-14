@@ -22,8 +22,7 @@ defmodule Spear.EventTest do
     setup :deleted_event
 
     test "a spear event shows the link body", c do
-      assert %Spear.Event{id: "b58ab56c-" <> _} =
-               Spear.Event.from_read_response(c.event)
+      assert %Spear.Event{id: "b58ab56c-" <> _} = Spear.Event.from_read_response(c.event)
     end
   end
 
@@ -37,20 +36,18 @@ defmodule Spear.EventTest do
      {:event,
       {:"event_store.client.streams.ReadResp.ReadEvent",
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID",
-         {:string, "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8"}},
+        {:"event_store.client.shared.UUID", {:string, "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8"}},
         {:"event_store.client.shared.StreamIdentifier", "MySpearDemo"}, 0,
-        18446744073709551615, 18446744073709551615,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
         [
           {"content-type", "application/json"},
           {"type", "IExAndSpear"},
           {"created", "16182579177572156"}
         ], "", "{\"hello\":\"world\"}"},
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID",
-         {:string, "5fc66e27-b9ff-44fe-b463-9bfc29e05a01"}},
+        {:"event_store.client.shared.UUID", {:string, "5fc66e27-b9ff-44fe-b463-9bfc29e05a01"}},
         {:"event_store.client.shared.StreamIdentifier", "$streams"}, 1949,
-        18446744073709551615, 18446744073709551615,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
         [
           {"content-type", "application/octet-stream"},
           {"type", "$>"},
@@ -70,10 +67,9 @@ defmodule Spear.EventTest do
      {:event,
       {:"event_store.client.streams.ReadResp.ReadEvent", :undefined,
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID",
-         {:string, "b58ab56c-58c5-44f1-ba20-6e292a6310d6"}},
+        {:"event_store.client.shared.UUID", {:string, "b58ab56c-58c5-44f1-ba20-6e292a6310d6"}},
         {:"event_store.client.shared.StreamIdentifier", "$et-$deleted"}, 254,
-        18446744073709551615, 18446744073709551615,
+        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
         [
           {"content-type", "application/octet-stream"},
           {"type", "$>"},
