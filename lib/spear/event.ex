@@ -3,10 +3,24 @@ defmodule Spear.Event do
   A simplified event struct
 
   This event struct is easier to work with than the protobuf definitions for
-  AppendReq and ReadResp structs
+  AppendReq and ReadResp records
   """
 
-  alias Spear.Protos.EventStore.Client.{Shared, Streams.AppendReq, Streams.ReadResp}
+  import Spear.Records.Streams,
+    only: [
+      append_req: 1,
+      append_req_proposed_message: 1,
+      read_resp: 1,
+      read_resp_read_event: 1,
+      read_resp_read_event_recorded_event: 0,
+      read_resp_read_event_recorded_event: 1
+    ]
+
+  import Spear.Records.Shared,
+    only: [
+      uuid: 1,
+      stream_identifier: 1
+    ]
 
   defstruct [:id, :type, :body, metadata: %{}]
 
@@ -194,19 +208,16 @@ defmodule Spear.Event do
       ) do
     encoder = Map.get(encoder_mapping, event.metadata.content_type, & &1)
 
-    %AppendReq{
+    append_req(
       content:
         {:proposed_message,
-         %AppendReq.ProposedMessage{
+         append_req_proposed_message(
            custom_metadata: event.metadata.custom_metadata,
            data: encoder.(event.body),
-           id: %Shared.UUID{value: {:string, event.id}},
-           metadata: %{
-             "content-type" => event.metadata.content_type,
-             "type" => event.type
-           }
-         }}
-    }
+           id: uuid(value: {:string, event.id}),
+           metadata: [{"content-type", event.metadata.content_type}, {"type", event.type}]
+         )}
+    )
   end
 
   @doc """
@@ -279,7 +290,7 @@ defmodule Spear.Event do
       # => [%Spear.Event{}, %Spear.Event{}, ..]
   """
   @doc since: "0.1.0"
-  @spec from_read_response(ReadResp.t(), Keyword.t()) :: t()
+  @spec from_read_response(tuple(), Keyword.t()) :: t()
   def from_read_response(read_response, opts \\ []) do
     {force_follow_link?, remaining_opts} = Keyword.pop(opts, :link?, false)
 
@@ -305,18 +316,20 @@ defmodule Spear.Event do
 
   @doc false
   def from_recorded_event(
-        %ReadResp.ReadEvent.RecordedEvent{
+        read_resp_read_event_recorded_event(
           custom_metadata: custom_metadata,
           commit_position: commit_position,
-          id: %Shared.UUID{value: {:string, id}},
+          id: uuid(value: {:string, id}),
           data: body,
           metadata: metadata,
           prepare_position: prepare_position,
-          stream_identifier: %Shared.StreamIdentifier{streamName: stream_name},
+          stream_identifier: stream_identifier(streamName: stream_name),
           stream_revision: stream_revision
-        },
+        ),
         opts
       ) do
+    # metadata comes in as [{k, v}, ..]
+    metadata = Map.new(metadata)
     content_type = Map.get(metadata, "content-type")
     {decoder, remaining_opts} = Keyword.pop(opts, :json_decoder, &Jason.decode!/2)
 
@@ -344,28 +357,28 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         %ReadResp{content: {:event, %ReadResp.ReadEvent{link: nil, event: event}}},
+         read_resp(content: {:event, read_resp_read_event(link: :undefined, event: read_resp_read_event_recorded_event() = event)}),
          _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         %ReadResp{content: {:event, %ReadResp.ReadEvent{event: nil, link: event}}},
+         read_resp(content: {:event, read_resp_read_event(event: :undefined, link: read_resp_read_event_recorded_event() = event)}),
          _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         %ReadResp{content: {:event, %ReadResp.ReadEvent{link: event}}},
+         read_resp(content: {:event, read_resp_read_event(link: read_resp_read_event_recorded_event() = event)}),
          true = _link?
        ) do
     event
   end
 
   defp destructure_read_response(
-         %ReadResp{content: {:event, %ReadResp.ReadEvent{event: event}}},
+         read_resp(content: {:event, read_resp_read_event(event: read_resp_read_event_recorded_event() = event)}),
          false = _link?
        ) do
     event

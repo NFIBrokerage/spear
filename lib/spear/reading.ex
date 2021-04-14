@@ -3,16 +3,27 @@ defmodule Spear.Reading do
 
   # Helper functions for reading streams
 
-  alias Spear.Protos.EventStore.Client.{
-    Shared,
-    Streams.ReadReq,
-    Streams.ReadResp,
-    Streams.Streams.Service
-  }
+  import Spear.Records.Streams,
+    only: [
+      read_resp: 0,
+      read_req: 1,
+      read_req_options: 1,
+      read_req_options_uuid_option: 1,
+      read_req_options_subscription_options: 0,
+      read_req_options_all_options: 1,
+      read_req_options_stream_options: 1,
+      read_req_options_position: 1
+    ]
 
-  @uuid %ReadReq.Options.UUIDOption{content: {:string, %Shared.Empty{}}}
+  import Spear.Records.Shared,
+    only: [
+      empty: 0,
+      stream_identifier: 1
+    ]
 
-  def decode_read_response(%ReadResp{content: {kind, _body}} = read_resp) do
+  @uuid read_req_options_uuid_option(content: {:string, empty()})
+
+  def decode_read_response({:"event_store.client.streams.ReadResp", {kind, _body}} = read_resp) do
     case kind do
       :event -> Spear.Event.from_read_response(read_resp)
       :checkpoint -> Spear.Filter.Checkpoint.from_read_response(read_resp)
@@ -20,50 +31,55 @@ defmodule Spear.Reading do
   end
 
   def build_read_request(params) do
-    %ReadReq{
-      options: %ReadReq.Options{
-        count_option: {:count, params.max_count},
-        filter_option: map_filter(nil),
-        read_direction: map_direction(params.direction),
-        resolve_links: params.resolve_links?,
-        stream_option: map_stream(params.stream, params.from),
-        uuid_option: @uuid
-      }
-    }
+    read_req(
+      options:
+        read_req_options(
+          stream_option: map_stream(params.stream, params.from),
+          read_direction: map_direction(params.direction),
+          resolve_links: params.resolve_links?,
+          count_option: {:count, params.max_count},
+          filter_option: map_filter(nil),
+          uuid_option: @uuid
+        )
+    )
   end
 
   def build_subscribe_request(params) do
-    message = %ReadReq{
-      options: %ReadReq.Options{
-        count_option: {:subscription, %ReadReq.Options.SubscriptionOptions{}},
-        filter_option: map_filter(params.filter),
-        read_direction: map_direction(params.direction),
-        resolve_links: params.resolve_links?,
-        stream_option: map_stream(params.stream, params.from),
-        uuid_option: @uuid
-      }
-    }
+    message =
+      read_req(
+        options:
+          read_req_options(
+            stream_option: map_stream(params.stream, params.from),
+            read_direction: map_direction(params.direction),
+            resolve_links: params.resolve_links?,
+            count_option: {:subscription, read_req_options_subscription_options()},
+            filter_option: map_filter(params.filter),
+            uuid_option: @uuid
+          )
+      )
 
     %Spear.Request{
-      service: Service,
+      service: :"event_store.client.streams.Streams",
+      service_module: :spear_proto_streams,
       rpc: :Read,
       messages: [message]
     }
     |> Spear.Request.expand()
   end
 
-  defp map_stream(:all, from),
-    do: {:all, %ReadReq.Options.AllOptions{all_option: map_all_position(from)}}
+  defp map_stream(:all, from) do
+    {:all, read_req_options_all_options(all_option: map_all_position(from))}
+  end
 
-  defp map_stream(stream_name, from) when is_binary(stream_name),
-    do:
-      {:stream,
-       %ReadReq.Options.StreamOptions{
-         revision_option: map_stream_revision(from),
-         stream_identifier: %Shared.StreamIdentifier{streamName: stream_name}
-       }}
+  defp map_stream(stream_name, from) when is_binary(stream_name) do
+    {:stream,
+     read_req_options_stream_options(
+       stream_identifier: stream_identifier(streamName: stream_name),
+       revision_option: map_stream_revision(from)
+     )}
+  end
 
-  defp map_all_position(%ReadResp{} = read_resp) do
+  defp map_all_position(read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)
     |> map_all_position()
@@ -71,24 +87,22 @@ defmodule Spear.Reading do
 
   defp map_all_position(%Spear.Event{
          metadata: %{commit_position: commit, prepare_position: prepare}
-       }),
-       do:
-         {:position,
-          %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+       }) do
+    {:position, read_req_options_position(commit_position: commit, prepare_position: prepare)}
+  end
 
   defp map_all_position(%Spear.Filter.Checkpoint{
          commit_position: commit,
          prepare_position: prepare
-       }),
-       do:
-         {:position,
-          %ReadReq.Options.Position{commit_position: commit, prepare_position: prepare}}
+       }) do
+    {:position, read_req_options_position(commit_position: commit, prepare_position: prepare)}
+  end
 
-  defp map_all_position(:start), do: {:start, %Shared.Empty{}}
+  defp map_all_position(:start), do: {:start, empty()}
 
-  defp map_all_position(:end), do: {:end, %Shared.Empty{}}
+  defp map_all_position(:end), do: {:end, empty()}
 
-  defp map_stream_revision(%ReadResp{} = read_resp) do
+  defp map_stream_revision(read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)
     |> map_stream_revision()
@@ -97,14 +111,14 @@ defmodule Spear.Reading do
   defp map_stream_revision(%Spear.Event{metadata: %{stream_revision: revision}}),
     do: {:revision, revision}
 
-  defp map_stream_revision(:start), do: {:start, %Shared.Empty{}}
+  defp map_stream_revision(:start), do: {:start, empty()}
   defp map_stream_revision(n) when is_integer(n), do: {:revision, n}
-  defp map_stream_revision(:end), do: {:end, %Shared.Empty{}}
+  defp map_stream_revision(:end), do: {:end, empty()}
 
   defp map_filter(%Spear.Filter{} = filter),
     do: {:filter, Spear.Filter._to_filter_options(filter)}
 
-  defp map_filter(nil), do: {:no_filter, %Shared.Empty{}}
+  defp map_filter(nil), do: {:no_filter, empty()}
 
   defp map_direction(:forwards), do: :Forwards
   defp map_direction(:backwards), do: :Backwards

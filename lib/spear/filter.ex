@@ -92,10 +92,13 @@ defmodule Spear.Filter do
   `:checkpoint_after` field in this struct.
   """
 
-  alias Spear.Protos.EventStore.Client.{
-    Streams.ReadReq.Options.FilterOptions,
-    Shared.Empty
-  }
+  import Spear.Records.Streams,
+    only: [
+      read_req_options_filter_options: 1,
+      read_req_options_filter_options_expression: 1
+    ]
+
+  import Spear.Records.Shared, only: [empty: 0]
 
   @checkpoint_multiplier 32
   @default_checkpoint_after 32 * @checkpoint_multiplier
@@ -262,12 +265,12 @@ defmodule Spear.Filter do
 
   @doc false
   def _to_filter_options(%__MODULE__{} = filter) do
-    %FilterOptions{
+    read_req_options_filter_options(
       checkpointIntervalMultiplier: div(filter.checkpoint_after, @checkpoint_multiplier),
       filter: map_inner_filter(filter),
       # YARD exactly how does one use the `:max` option here?
-      window: {:count, %Empty{}}
-    }
+      window: {:count, empty()}
+    )
   end
 
   defp map_inner_filter(%__MODULE__{} = filter) do
@@ -282,11 +285,11 @@ defmodule Spear.Filter do
   end
 
   defp map_filter_expression(regex) when is_binary(regex) do
-    %FilterOptions.Expression{regex: regex, prefix: nil}
+    read_req_options_filter_options_expression(regex: regex)
   end
 
   defp map_filter_expression(prefixes) when is_list(prefixes) do
-    %FilterOptions.Expression{regex: nil, prefix: prefixes}
+    read_req_options_filter_options_expression(prefix: prefixes)
   end
 end
 

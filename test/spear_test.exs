@@ -1,9 +1,9 @@
 defmodule SpearTest do
   use ExUnit.Case, async: true
 
-  alias Spear.Protos.EventStore.Client.Streams.ReadResp
-
   @moduletag :capture_log
+
+  import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
 
   # bytes
   @max_append_bytes 1_048_576
@@ -67,8 +67,8 @@ defmodule SpearTest do
       assert to_event_numbers.(events) == expected_event_numbers
     end
 
-    test "reading the stream raw returns ReadResp structs", c do
-      all_expected_type? = &Enum.all?(&1, fn %type{} -> type == ReadResp end)
+    test "reading the stream raw returns ReadResp records", c do
+      all_expected_type? = &Enum.all?(&1, fn message -> match?(read_resp(), message) end)
 
       assert Spear.stream!(c.conn, c.stream_name, raw?: true) |> all_expected_type?.()
 
@@ -95,11 +95,11 @@ defmodule SpearTest do
       refute_receive %Spear.Event{body: _}
     end
 
-    test "a raw subscription will return ReadResp structs", c do
+    test "a raw subscription will return ReadResp records", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, raw?: true)
 
       for _n <- 0..6//1 do
-        assert_receive %ReadResp{}
+        assert_receive read_resp()
       end
 
       :ok = Spear.cancel_subscription(c.conn, sub)
@@ -276,7 +276,7 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Event{body: 0, type: ^type} = first_event
+      assert_receive %Spear.Event{body: 0, type: ^type} = first_event, 1_000
 
       Spear.cancel_subscription(c.conn, sub)
 
@@ -306,7 +306,7 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, raw?: true)
 
-      assert_receive %ReadResp{content: {:event, _}} = first_event
+      assert_receive read_resp(content: {:event, _}) = first_event, 1_000
       assert %Spear.Event{body: 0, type: ^type} = Spear.Event.from_read_response(first_event)
 
       Spear.cancel_subscription(c.conn, sub)
@@ -342,7 +342,7 @@ defmodule SpearTest do
       filter = Spear.Filter.checkpoint_after(filter, @checkpoint_after)
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, from: checkpoint)
 
-      assert_receive %Spear.Event{body: 1, type: ^type}
+      assert_receive %Spear.Event{body: 1, type: ^type}, 1_000
 
       Spear.cancel_subscription(c.conn, sub)
     end
