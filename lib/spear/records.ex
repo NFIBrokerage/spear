@@ -19,7 +19,7 @@ defmodule Spear.Records do
 
   this is where that comes from!
   """
-  defmacro defrecords(prefix, path) do
+  defmacro def_all_records(prefix, path) do
     quote do
       require Record
 
