@@ -54,9 +54,10 @@ defmodule Spear.Connection do
 
   alias Spear.Connection.Request
 
-  defstruct [:config, :conn, requests: %{}]
-
+  @post "POST"
   @closed %Mint.TransportError{reason: :closed}
+
+  defstruct [:config, :conn, requests: %{}]
 
   @typedoc """
   A connection process
@@ -79,8 +80,6 @@ defmodule Spear.Connection do
   """
   @typedoc since: "0.1.0"
   @type t :: pid() | GenServer.name()
-
-  @post "POST"
 
   @doc false
   def child_spec(init_arg) do
