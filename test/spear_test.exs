@@ -383,7 +383,9 @@ defmodule SpearTest do
     test "we may set the global ACL and then an unauthenticated user access fails", c do
       assert Spear.set_global_acl(c.conn, Spear.Acl.admins_only(), Spear.Acl.admins_only()) == :ok
 
-      assert {:error, reason} = [random_event()] |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
+      assert {:error, reason} =
+               [random_event()]
+               |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
 
       assert reason.message == "Bad HTTP status code: 401, should be 200"
 
@@ -395,7 +397,9 @@ defmodule SpearTest do
       metadata = %Spear.StreamMetadata{acl: Spear.Acl.admins_only()}
       assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
 
-      assert {:error, reason} = [random_event()] |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
+      assert {:error, reason} =
+               [random_event()]
+               |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
 
       assert reason.message == "Bad HTTP status code: 401, should be 200"
 

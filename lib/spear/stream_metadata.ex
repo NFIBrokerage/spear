@@ -12,13 +12,13 @@ defmodule Spear.StreamMetadata do
   """
   @typedoc since: "0.1.3"
   @type t :: %__MODULE__{
-    max_age: pos_integer() | nil,
-    truncate_before: pos_integer() | nil,
-    cache_control: pos_integer() | nil,
-    max_count: pos_integer() | nil,
-    acl: Spear.Acl.t() | nil,
-    custom: %{String.t() => any()} | nil
-  }
+          max_age: pos_integer() | nil,
+          truncate_before: pos_integer() | nil,
+          cache_control: pos_integer() | nil,
+          max_count: pos_integer() | nil,
+          acl: Spear.Acl.t() | nil,
+          custom: %{String.t() => any()} | nil
+        }
 
   defstruct [:max_age, :truncate_before, :cache_control, :max_count, :acl, :custom]
 

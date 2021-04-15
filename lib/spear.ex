@@ -759,7 +759,11 @@ defmodule Spear do
       {:ok, %Spear.StreamMetadata{max_count: 50_000, ..}}
   """
   @doc since: "0.1.3"
-  @spec get_stream_metadata(connection :: Spear.Connection.t(), stream :: String.t(), opts :: Keyword.t()) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
+  @spec get_stream_metadata(
+          connection :: Spear.Connection.t(),
+          stream :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
   def get_stream_metadata(conn, stream, opts \\ []) do
     opts =
       opts
@@ -775,10 +779,13 @@ defmodule Spear do
          [%Spear.Event{} = event] <- Enum.take(event_stream, 1) do
       {:ok, Spear.StreamMetadata.from_spear_event(event)}
     else
-      [] -> {:error, :unset}
+      [] ->
+        {:error, :unset}
+
       # coveralls-ignore-start
-      {:error, reason} -> {:error, reason}
-      # coveralls-ignore-stop
+      {:error, reason} ->
+        {:error, reason}
+        # coveralls-ignore-stop
     end
   end
 
@@ -802,9 +809,16 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.3"
-  @spec set_stream_metadata(connection :: Spear.Connection.t(), stream :: String.t(), metadata :: Spear.StreamMetadata.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec set_stream_metadata(
+          connection :: Spear.Connection.t(),
+          stream :: String.t(),
+          metadata :: Spear.StreamMetadata.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def set_stream_metadata(conn, stream, metadata, opts \\ [])
-  def set_stream_metadata(conn, stream, %Spear.StreamMetadata{} = metadata, opts) when is_binary(stream) do
+
+  def set_stream_metadata(conn, stream, %Spear.StreamMetadata{} = metadata, opts)
+      when is_binary(stream) do
     Spear.Event.new("$metadata", Spear.StreamMetadata.to_map(metadata))
     |> List.wrap()
     |> append(conn, stream, opts)
