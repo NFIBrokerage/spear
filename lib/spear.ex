@@ -765,6 +765,7 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
   def get_stream_metadata(conn, stream, opts \\ []) do
+    stream = meta_stream(stream)
     opts =
       opts
       |> Keyword.merge(
@@ -774,8 +775,7 @@ defmodule Spear do
         raw?: false
       )
 
-    with stream = meta_stream(stream),
-         {:ok, event_stream} <- read_stream(conn, stream, opts),
+    with {:ok, event_stream} <- read_stream(conn, stream, opts),
          [%Spear.Event{} = event] <- Enum.take(event_stream, 1) do
       {:ok, Spear.StreamMetadata.from_spear_event(event)}
     else
