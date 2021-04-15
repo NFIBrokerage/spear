@@ -18,6 +18,7 @@ jobs:
 
     - name: install EventStoreDB
       run: |
+        curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
         sudo apt update
         sudo apt install eventstore-oss
         sudo mkdir -p /etc/eventstore/certs
