@@ -766,6 +766,7 @@ defmodule Spear do
         ) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
   def get_stream_metadata(conn, stream, opts \\ []) do
     stream = meta_stream(stream)
+
     opts =
       opts
       |> Keyword.merge(
