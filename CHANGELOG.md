@@ -18,6 +18,15 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 -->
 
+## 0.1.3 - 2021-04-15
+
+### Added
+
+- Added documentation and functionality for using TLS certificates
+    - see `Spear.Connection` and the [security guide](guides/security.md)
+- Added documentation and functionality for setting the global stream ACL
+    - see `Spear.set_global_acl/4` and the `Spear.Acl` module
+
 ## 0.1.2 - 2021-04-14
 
 ### Added
