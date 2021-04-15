@@ -112,8 +112,12 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` struct. See
+    leaves each event as a `ReadReq` record. See
     `Spear.Event.from_read_response/2` for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Enumeration Characteristics
 
@@ -169,7 +173,8 @@ defmodule Spear do
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts = Keyword.merge(default_stream_opts, opts)
@@ -235,8 +240,12 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` struct. See
+    leaves each event as a `ReadReq` record. See
     `Spear.Event.from_read_response/2` for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Timing and Timeouts
 
@@ -295,7 +304,8 @@ defmodule Spear do
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts = Keyword.merge(default_read_opts, opts)
@@ -356,6 +366,10 @@ defmodule Spear do
     metadata and information from the append response which is not available
     through the simplified return API, such as the stream's revision number
     after writing the events.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -379,7 +393,8 @@ defmodule Spear do
       batch_size: 1,
       expect: :any,
       timeout: 5000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts =
@@ -451,6 +466,10 @@ defmodule Spear do
     to confirm the subscription request.
   * `:raw?` - (default: `false`) controls whether the events are sent as
     raw `ReadResp` records or decoded into `t:Spear.Event.t/0`s
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -493,7 +512,8 @@ defmodule Spear do
       resolve_links?: true,
       timeout: 5_000,
       raw?: false,
-      through: &Spear.Reading.decode_read_response/1
+      through: &Spear.Reading.decode_read_response/1,
+      credentials: nil
     ]
 
     opts =
@@ -589,6 +609,10 @@ defmodule Spear do
   * `:expect` - (default: `:any`) the expected state of the stream when
     performing the deleteion. See `append/4` and `Spear.ExpectationViolation`
     for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -609,7 +633,8 @@ defmodule Spear do
     default_delete_opts = [
       tombstone?: false,
       timeout: 5_000,
-      expect: :any
+      expect: :any,
+      credentials: nil
     ]
 
     opts =
