@@ -42,6 +42,19 @@ https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215
 
 -->
 
+**Does TLS work?**
+
+Yep! As of v0.1.3, custom and public CAs may be used for encrypted connections.
+
+**Does this work with EventStore <20?**
+
+Sadly no. This library only provides a gRPC client which showed up in
+EventStoreDB 20+. If you're looking for a similarly fashioned TCP client,
+NFIBrokerage uses
+[`exponentially/extreme`](https://github.com/exponentially/extreme) extensively
+in production (specifically the v1.0.0 branch). Spear and Extreme have
+compatible dependencies and similar styles of making connections.
+
 **How close is this to being able to be used?**
 
 Check out the roadmap in [#7](https://github.com/NFIBrokerage/spear/issues/7)
