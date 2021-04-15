@@ -822,6 +822,6 @@ defmodule Spear do
       when is_binary(stream) do
     Spear.Event.new("$metadata", Spear.StreamMetadata.to_map(metadata))
     |> List.wrap()
-    |> append(conn, stream, opts)
+    |> append(conn, meta_stream(stream), opts)
   end
 end
