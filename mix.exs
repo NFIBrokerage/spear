@@ -89,7 +89,8 @@ defmodule Spear.MixProject do
         "CHANGELOG.md",
         "guides/writing_events.md",
         "guides/streams.md",
-        "guides/link_resolution.md"
+        "guides/link_resolution.md",
+        "guides/security.md"
       ],
       groups_for_extras: [
         Guides: Path.wildcard("guides/*.md")

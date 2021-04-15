@@ -9,7 +9,8 @@ defmodule Spear.Request do
     :rpc,
     :path,
     :headers,
-    :messages
+    :messages,
+    :credentials
   ]
 
   def expand(%__MODULE__{service: service, service_module: service_module, rpc: rpc} = request) do
@@ -31,8 +32,17 @@ defmodule Spear.Request do
   # - custom_metadata may come after the headers returned by this function
   #     - this makes `++/2` a good choice for appending custom metadata
   #     - note that custom headers may not begin with "grpc-"
-  @spec headers() :: [{String.t(), String.t()}]
-  defp headers do
+  @spec headers({String.t(), String.t()} | any()) :: [{String.t(), String.t()}]
+  defp headers(credentials \\ nil) do
+    maybe_auth_header =
+      case credentials do
+        {username, password} ->
+          [{"authorization", "Basic " <> Base.encode64("#{username}:#{password}")}]
+
+        _ ->
+          []
+      end
+
     [
       {"te", "trailers"},
       # {"grpc-timeout", "10S"},
@@ -41,7 +51,17 @@ defmodule Spear.Request do
       {"grpc-accept-encoding", "identity,deflate,gzip"},
       {"accept-encoding", "identity"},
       {"user-agent", Grpc.user_agent()}
-    ]
+    ] ++ maybe_auth_header
+  end
+
+  def merge_credentials(request, connection_credentials) do
+    credentials =
+      case request.credentials do
+        {_username, _password} -> request.credentials
+        _ -> connection_credentials
+      end
+
+    %__MODULE__{request | credentials: credentials, headers: headers(credentials)}
   end
 
   @spec to_wire_data(tuple(), module(), atom()) :: {iodata(), pos_integer()}
