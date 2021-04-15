@@ -208,6 +208,22 @@ The global ACL can be changed by writing an event of type `update-default-acl`
 with a content type of `application/vnd.eventstore.events+json` with the above
 body to the `$streams` system stream.
 
-Spear provides the `Spear.Acl` struct and `Spear.set_global_acl/TODO` function
+Spear provides the `Spear.Acl` struct and `Spear.set_global_acl/4` function
 to set this without dealing with the nitty-gritty details of the structure
 of that event.
+
+Attempting to access a resource with incorrect or invalid credentials will
+yield a gRPC `:permission_denied` error:
+
+```elixir
+iex> Spear.set_global_acl(conn, Spear.Acl.admins_only(), Spear.Acl.admins_only())
+:ok
+iex> Spear.append([my_event], conn, "some_stream", credentials: {"no one", "no pass"})
+{:error,
+ %Spear.Grpc.Response{
+   data: "",
+   message: "Access Denied",
+   status: :permission_denied,
+   status_code: 7
+ }}
+```

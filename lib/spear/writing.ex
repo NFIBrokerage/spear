@@ -129,4 +129,17 @@ defmodule Spear.Writing do
   defp map_expected_revision({:expected_revision, revision}), do: revision
   # shouldn't this be unreachable?!?
   defp map_expected_revision({:expected_any, empty()}), do: :any
+
+  def build_global_acl_event(%Spear.Acl{} = user_acl, %Spear.Acl{} = system_acl, json_encode!)
+      when is_function(json_encode!, 1) do
+    Spear.Event.new(
+      "update-default-acl",
+      %{
+        "$userStreamAcl" => Spear.Acl.to_map(user_acl),
+        "$systemStreamAcl" => Spear.Acl.to_map(system_acl)
+      }
+      |> json_encode!.(),
+      content_type: "application/vnd.eventstore.events+json"
+    )
+  end
 end

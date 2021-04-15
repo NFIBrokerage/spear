@@ -76,4 +76,33 @@ defmodule Spear.Acl do
   def admins_only do
     struct(__MODULE__, Enum.zip(@fields, Stream.repeatedly(fn -> "$admins" end)))
   end
+
+  @doc """
+  Converts an ACL struct to a map with the keys expected by the EventStoreDB
+
+  This function is used internall by `Spear.set_global_acl/4` to create a
+  global ACL event body, but may be used to create an acl body on its own.
+
+  ## Examples
+
+      iex> Spear.Acl.allow_all() |> Spear.Acl.to_map()
+      %{
+        "$w" => "$all",
+        "$r" => "$all",
+        "$d" => "$all",
+        "$mw" => "$all",
+        "$mr" => "$all"
+      }
+  """
+  @doc since: "0.1.3"
+  @spec to_map(t()) :: %{String.t() => String.t() | [String.t()]}
+  def to_map(%__MODULE__{} = acl) do
+    %{
+      "$w" => acl.write,
+      "$r" => acl.read,
+      "$d" => acl.delete,
+      "$mw" => acl.metadata_write,
+      "$mr" => acl.metadata_read
+    }
+  end
 end

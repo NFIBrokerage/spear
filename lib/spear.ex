@@ -390,7 +390,6 @@ defmodule Spear do
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
     # YARD gRPC timeout?
     default_write_opts = [
-      batch_size: 1,
       expect: :any,
       timeout: 5000,
       raw?: false,
@@ -671,4 +670,48 @@ defmodule Spear do
   @doc since: "0.1.2"
   @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
   def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
+
+  @doc """
+  Sets the global stream ACL
+
+  This function appends an event to the `$streams` EventStoreDB stream
+  detailing how the EventStoreDB should allow access to user and system
+  streams (with the `user_acl` and `system_acl` arguments, respectively).
+
+  See the [security guide](guides/security.md) for more information.
+
+  ## Options
+
+  * `:json_encode!` - (default: `Jason.encode!/1`) a 1-arity JSON encoding
+    function used to serialize the event. This event must be JSON encoded
+    in order for the EventStoreDB to consider it valid.
+
+  Remaining options are passed to `Spear.append/4`. The `:expect` option
+  will be applied to the `$streams` system stream, so one could attempt to
+  set the initial ACL by passing `expect: :empty`.
+
+  ## Examples
+
+  This recreates the default ACL:
+
+      iex> Spear.set_global_acl(conn, Spear.Acl.allow_all(), Spear.Acl.admins_only())
+      :ok
+  """
+  @doc since: "0.1.3"
+  @spec set_global_acl(
+          connection :: Spear.Connection.t(),
+          user_acl :: Spear.Acl.t(),
+          system_acl :: Spear.Acl.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def set_global_acl(conn, user_acl, system_acl, opts \\ [])
+
+  def set_global_acl(conn, %Spear.Acl{} = user_acl, %Spear.Acl{} = system_acl, opts) do
+    {json_encode!, opts} = Keyword.pop(opts, :json_encode!)
+    json_encode! = json_encode! || (&Jason.encode!/1)
+
+    Spear.Writing.build_global_acl_event(user_acl, system_acl, json_encode!)
+    |> List.wrap()
+    |> Spear.append(conn, "$streams", opts)
+  end
 end
