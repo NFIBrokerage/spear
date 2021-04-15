@@ -104,5 +104,18 @@ defmodule Spear.Acl do
       "$mw" => acl.metadata_write,
       "$mr" => acl.metadata_read
     }
+    |> Enum.reject(fn {_k, v} -> v == nil end)
+    |> Enum.into(%{})
+  end
+
+  @doc false
+  def from_map(%{} = acl) do
+    %__MODULE__{
+      read: Map.get(acl, "$r"),
+      write: Map.get(acl, "$w"),
+      delete: Map.get(acl, "$d"),
+      metadata_read: Map.get(acl, "$mr"),
+      metadata_write: Map.get(acl, "$mw")
+    }
   end
 end

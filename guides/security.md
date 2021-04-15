@@ -213,7 +213,7 @@ to set this without dealing with the nitty-gritty details of the structure
 of that event.
 
 Attempting to access a resource with incorrect or invalid credentials will
-yield a gRPC `:permission_denied` error:
+yield an HTTP 401 error.
 
 ```elixir
 iex> Spear.set_global_acl(conn, Spear.Acl.admins_only(), Spear.Acl.admins_only())
@@ -222,8 +222,11 @@ iex> Spear.append([my_event], conn, "some_stream", credentials: {"no one", "no p
 {:error,
  %Spear.Grpc.Response{
    data: "",
-   message: "Access Denied",
-   status: :permission_denied,
-   status_code: 7
+   message: "Bad HTTP status code: 401, should be 200",
+   status: :unknown,
+   status_code: 2
  }}
 ```
+
+Attempting to access a resource with no credentials will yield a gRPC error
+with a status of `:permission_denied`.

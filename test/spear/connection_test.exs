@@ -3,6 +3,8 @@ defmodule Spear.ConnectionTest do
 
   import ExUnit.CaptureLog
 
+  @good_config Application.compile_env!(:spear, :config)
+
   describe "given a connection_string leading nowhere" do
     setup do
       [connection_string: "esdb://localhost:54325"]
@@ -35,7 +37,7 @@ defmodule Spear.ConnectionTest do
   end
 
   test "a connection can be told to disconnect and connect" do
-    conn = start_supervised!({Spear.Connection, connection_string: "esdb://localhost:2113"})
+    conn = start_supervised!({Spear.Connection, @good_config})
 
     assert Connection.call(conn, :close) == {:ok, :closed}
     assert Process.alive?(conn)
@@ -45,7 +47,7 @@ defmodule Spear.ConnectionTest do
   end
 
   test "a connection can noop random info messages" do
-    conn = start_supervised!({Spear.Connection, connection_string: "esdb://localhost:2113"})
+    conn = start_supervised!({Spear.Connection, @good_config})
 
     send(conn, :crypto.strong_rand_bytes(16))
 

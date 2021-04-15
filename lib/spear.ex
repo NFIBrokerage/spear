@@ -714,4 +714,99 @@ defmodule Spear do
     |> List.wrap()
     |> Spear.append(conn, "$streams", opts)
   end
+
+  @doc """
+  Determines the metadata stream for any given stream
+
+  Meta streams are used by the EventStoreDB to store some internal information
+  about a stream, and to configure features such setting time-to-lives for
+  events or streams.
+
+  ## Examples
+
+      iex> Spear.meta_stream("es_supported_clients")
+      "$$es_supported_clients"
+  """
+  @doc since: "0.1.3"
+  @spec meta_stream(stream :: String.t()) :: String.t()
+  def meta_stream(stream) when is_binary(stream), do: "$$" <> stream
+
+  @doc """
+  Queries the metadata for a stream
+
+  Note that the `stream` argument is passed through `meta_stream/1` before
+  being read. It is not necessary to call that function on the stream name
+  before passing it as `stream`.
+
+  If no metadata has been set on a stream `{:error, :unset}` is returned.
+
+  ## Options
+
+  Under the hood, `get_stream_metadata/3` uses `read_stream/3` and all options
+  are passed directly to that function. These options are overridden, however,
+  and cannot be changed:
+
+  * `:direction`
+  * `:from`
+  * `:max_count`
+  * `:raw?`
+
+  ## Examples
+
+      iex> Spear.get_stream_metadata(conn, "my_stream")
+      {:error, :unset}
+      iex> Spear.get_stream_metadata(conn, "some_stream_with_max_count")
+      {:ok, %Spear.StreamMetadata{max_count: 50_000, ..}}
+  """
+  @doc since: "0.1.3"
+  @spec get_stream_metadata(connection :: Spear.Connection.t(), stream :: String.t(), opts :: Keyword.t()) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
+  def get_stream_metadata(conn, stream, opts \\ []) do
+    opts =
+      opts
+      |> Keyword.merge(
+        direction: :backwards,
+        from: :end,
+        max_count: 1,
+        raw?: false
+      )
+
+    with stream = meta_stream(stream),
+         {:ok, event_stream} <- read_stream(conn, stream, opts),
+         [%Spear.Event{} = event] <- Enum.take(event_stream, 1) do
+      {:ok, Spear.StreamMetadata.from_spear_event(event)}
+    else
+      [] -> {:error, :unset}
+      # coveralls-ignore-start
+      {:error, reason} -> {:error, reason}
+      # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Sets a stream's metadata
+
+  Note that the `stream` argument is passed through `meta_stream/1` before
+  being read. It is not necessary to call that function on the stream name
+  before passing it as `stream`.
+
+  ## Options
+
+  This function uses `append/4` under the hood. All options are passed to
+  the `opts` argument of `append/4`.
+
+  ## Examples
+
+      # only allow admins to read, write, and delete the stream (or stream metadata)
+      iex> metadata = %Spear.StreamMetadata{acl: Spear.Acl.admins_only()}
+      iex> Spear.set_stream_metadata(conn, stream, metadata)
+      :ok
+  """
+  @doc since: "0.1.3"
+  @spec set_stream_metadata(connection :: Spear.Connection.t(), stream :: String.t(), metadata :: Spear.StreamMetadata.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  def set_stream_metadata(conn, stream, metadata, opts \\ [])
+  def set_stream_metadata(conn, stream, %Spear.StreamMetadata{} = metadata, opts) when is_binary(stream) do
+    Spear.Event.new("$metadata", Spear.StreamMetadata.to_map(metadata))
+    |> List.wrap()
+    |> append(conn, stream, opts)
+  end
 end
