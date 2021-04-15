@@ -33,7 +33,8 @@ defmodule Spear.Writing do
       service: :"event_store.client.streams.Streams",
       service_module: :spear_proto_streams,
       rpc: :Append,
-      messages: messages
+      messages: messages,
+      credentials: params.credentials
     }
     |> Spear.Request.expand()
   end
@@ -54,7 +55,8 @@ defmodule Spear.Writing do
       service: :"event_store.client.streams.Streams",
       service_module: :spear_proto_streams,
       rpc: :Delete,
-      messages: [build_delete_message(params)]
+      messages: [build_delete_message(params)],
+      credentials: params.credentials
     }
     |> Spear.Request.expand()
   end
@@ -64,7 +66,8 @@ defmodule Spear.Writing do
       service: :"event_store.client.streams.Streams",
       service_module: :spear_proto_streams,
       rpc: :Tombstone,
-      messages: [build_delete_message(params)]
+      messages: [build_delete_message(params)],
+      credentials: params.credentials
     }
     |> Spear.Request.expand()
   end
