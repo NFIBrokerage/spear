@@ -55,6 +55,22 @@ NFIBrokerage uses
 in production (specifically the v1.0.0 branch). Spear and Extreme have
 compatible dependencies and similar styles of making connections.
 
+**How many dependencies are we talking here?**
+
+Spear's reliance on Mint and `:gpb` give it a very small dependency tree with
+no transitive dependencies! The full tree is:
+
+```
+$ mix deps.tree --only prod
+spear
+├── connection ~> 1.0 (Hex package)
+├── gpb ~> 4.0 (Hex package)
+├── jason >= 0.0.0 (Hex package)
+└── mint ~> 1.0 (Hex package)
+```
+
+(And `jason` is optional!)
+
 **How close is this to being able to be used?**
 
 Check out the roadmap in [#7](https://github.com/NFIBrokerage/spear/issues/7)
