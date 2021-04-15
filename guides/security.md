@@ -230,3 +230,9 @@ iex> Spear.append([my_event], conn, "some_stream", credentials: {"no one", "no p
 
 Attempting to access a resource with no credentials will yield a gRPC error
 with a status of `:permission_denied`.
+
+### Stream-level ACLs
+
+EventStoreDB also allows more fine-grained stream-level ACLs to be defined on
+a per-stream basis. See the `Spear.set_stream_metadata/4` function for an
+example of setting a stream-level ACL.
