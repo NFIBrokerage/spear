@@ -1,4 +1,6 @@
 defmodule Spear.Connection do
+  @default_opts [protocols: [:http2], mode: :active]
+
   @moduledoc """
   A GenServer which brokers a connection to an EventStoreDB
 
@@ -37,6 +39,21 @@ defmodule Spear.Connection do
     name and is only addressable through its PID.
   * `:connection_string` - (**required**) the connection string to parse
     containing all connection information
+  * `:opts` - (default: `#{inspect(@default_opts)}`) a `t:Keyword.t/0`
+    of options to pass directly to `Mint.HTTP.connect/4`. See the
+    `Mint.HTTP.connect/4` documentation for a full reference. This can be used
+    to specify a custom CA certificate when using EventStoreDB in secure mode
+    (the default in 20+) with a custom set of certificates. The default options
+    cannot be overridden: explicitly passed `:protocols` or `:mode` will be
+    ignored.
+  * `:credentials` - (default: `nil`) a pair (2-element) tuple providing a
+    username and password to use for authentication with the EventStoreDB.
+    E.g. the default username+password of `{"admin", "changeit"}`.
+
+  ## TLS/SSL configuration and credentials
+
+  See the [Security guide](guides/security.md) for information about
+  certificates, credentials, and access control lists (ACLs).
 
   ## Examples
 
@@ -57,7 +74,7 @@ defmodule Spear.Connection do
   @post "POST"
   @closed %Mint.TransportError{reason: :closed}
 
-  defstruct [:config, :conn, requests: %{}]
+  defstruct [:config, :credentials, :conn, requests: %{}]
 
   @typedoc """
   A connection process
@@ -118,7 +135,10 @@ defmodule Spear.Connection do
   @impl Connection
   def init(config) do
     if valid_config?(config) do
-      {:connect, config, %__MODULE__{config: config}}
+      {credentials, config} = Keyword.pop(config, :credentials)
+      s = %__MODULE__{config: config, credentials: credentials}
+
+      {:connect, :init, s}
     else
       Logger.error("""
       #{inspect(__MODULE__)} did not find enough information to start a connection.
@@ -130,8 +150,8 @@ defmodule Spear.Connection do
   end
 
   @impl Connection
-  def connect(config, s) do
-    case do_connect(config) do
+  def connect(_, s) do
+    case do_connect(s.config) do
       {:ok, conn} -> {:ok, %__MODULE__{s | conn: conn}}
       {:error, _reason} -> {:backoff, 500, s}
     end
@@ -203,6 +223,8 @@ defmodule Spear.Connection do
   end
 
   def handle_call({type, request}, from, s) do
+    request = Spear.Request.merge_credentials(request, s.credentials)
+
     case request_and_stream_body(s, request, from, type) do
       {:ok, s} ->
         {:noreply, s}
@@ -317,11 +339,26 @@ defmodule Spear.Connection do
       config
       |> Keyword.fetch!(:connection_string)
       |> URI.parse()
-      |> set_esdb_scheme()
+      |> set_scheme()
 
-    Mint.HTTP.connect(uri.scheme, uri.host, uri.port, protocols: [:http2], mode: :active)
+    opts =
+      config
+      |> Keyword.get(:opts, [])
+      |> Keyword.merge(@default_opts)
+
+    Mint.HTTP.connect(uri.scheme, uri.host, uri.port, opts)
   end
 
-  defp set_esdb_scheme(%URI{scheme: "esdb"} = uri), do: %URI{uri | scheme: :http}
-  defp set_esdb_scheme(%URI{scheme: "http"} = uri), do: %URI{uri | scheme: :http}
+  defp set_scheme(%URI{} = uri) do
+    scheme =
+      with query when is_binary(query) <- uri.query,
+           params = URI.decode_query(query),
+           {:ok, "true"} <- Map.fetch(params, "tls") do
+        :https
+      else
+        _ -> :http
+      end
+
+    %URI{uri | scheme: scheme}
+  end
 end

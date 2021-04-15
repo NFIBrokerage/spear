@@ -9,8 +9,10 @@ defmodule SpearTest do
   @max_append_bytes 1_048_576
   @checkpoint_after Integer.pow(32, 3)
 
+  @config Application.compile_env!(:spear, :config)
+
   setup do
-    conn = start_supervised!({Spear.Connection, connection_string: "http://localhost:2113"})
+    conn = start_supervised!({Spear.Connection, @config})
 
     [
       conn: conn,
@@ -109,6 +111,9 @@ defmodule SpearTest do
       assert Spear.delete_stream(c.conn, c.stream_name) == :ok
 
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
+
+      assert {:ok, metadata} = Spear.get_stream_metadata(c.conn, c.stream_name)
+      assert metadata.truncate_before |> is_integer()
     end
 
     test "a deletion request will fail if the expectation mismatches", c do
@@ -373,6 +378,34 @@ defmodule SpearTest do
       event = Spear.Event.new("octet-kind", body, content_type: "application/octet-stream")
       :ok = Spear.append([event], c.conn, c.stream_name)
       assert [%Spear.Event{body: ^body}] = Spear.stream!(c.conn, c.stream_name) |> Enum.to_list()
+    end
+
+    test "we may set the global ACL and then an unauthenticated user access fails", c do
+      assert Spear.set_global_acl(c.conn, Spear.Acl.admins_only(), Spear.Acl.admins_only()) == :ok
+
+      assert {:error, reason} =
+               [random_event()]
+               |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
+
+      assert reason.message == "Bad HTTP status code: 401, should be 200"
+
+      # reset ACL
+      assert Spear.set_global_acl(c.conn, Spear.Acl.allow_all(), Spear.Acl.admins_only()) == :ok
+    end
+
+    test "we map set a local ACL and then an unauthenticated user access fails", c do
+      metadata = %Spear.StreamMetadata{acl: Spear.Acl.admins_only()}
+      assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
+
+      assert {:error, reason} =
+               [random_event()]
+               |> Spear.append(c.conn, c.stream_name, credentials: {"no one", "no pass"})
+
+      assert reason.message == "Bad HTTP status code: 401, should be 200"
+
+      # reset ACL
+      metadata = %Spear.StreamMetadata{acl: Spear.Acl.allow_all()}
+      assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
     end
   end
 

@@ -112,8 +112,12 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` struct. See
+    leaves each event as a `ReadReq` record. See
     `Spear.Event.from_read_response/2` for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Enumeration Characteristics
 
@@ -169,7 +173,8 @@ defmodule Spear do
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts = Keyword.merge(default_stream_opts, opts)
@@ -235,8 +240,12 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` struct. See
+    leaves each event as a `ReadReq` record. See
     `Spear.Event.from_read_response/2` for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Timing and Timeouts
 
@@ -295,7 +304,8 @@ defmodule Spear do
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts = Keyword.merge(default_read_opts, opts)
@@ -356,6 +366,10 @@ defmodule Spear do
     metadata and information from the append response which is not available
     through the simplified return API, such as the stream's revision number
     after writing the events.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -376,10 +390,10 @@ defmodule Spear do
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
     # YARD gRPC timeout?
     default_write_opts = [
-      batch_size: 1,
       expect: :any,
       timeout: 5000,
-      raw?: false
+      raw?: false,
+      credentials: nil
     ]
 
     opts =
@@ -451,6 +465,10 @@ defmodule Spear do
     to confirm the subscription request.
   * `:raw?` - (default: `false`) controls whether the events are sent as
     raw `ReadResp` records or decoded into `t:Spear.Event.t/0`s
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -493,7 +511,8 @@ defmodule Spear do
       resolve_links?: true,
       timeout: 5_000,
       raw?: false,
-      through: &Spear.Reading.decode_read_response/1
+      through: &Spear.Reading.decode_read_response/1,
+      credentials: nil
     ]
 
     opts =
@@ -589,6 +608,10 @@ defmodule Spear do
   * `:expect` - (default: `:any`) the expected state of the stream when
     performing the deleteion. See `append/4` and `Spear.ExpectationViolation`
     for more information.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
 
   ## Examples
 
@@ -609,7 +632,8 @@ defmodule Spear do
     default_delete_opts = [
       tombstone?: false,
       timeout: 5_000,
-      expect: :any
+      expect: :any,
+      credentials: nil
     ]
 
     opts =
@@ -646,4 +670,158 @@ defmodule Spear do
   @doc since: "0.1.2"
   @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
   def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
+
+  @doc """
+  Sets the global stream ACL
+
+  This function appends an event to the `$streams` EventStoreDB stream
+  detailing how the EventStoreDB should allow access to user and system
+  streams (with the `user_acl` and `system_acl` arguments, respectively).
+
+  See the [security guide](guides/security.md) for more information.
+
+  ## Options
+
+  * `:json_encode!` - (default: `Jason.encode!/1`) a 1-arity JSON encoding
+    function used to serialize the event. This event must be JSON encoded
+    in order for the EventStoreDB to consider it valid.
+
+  Remaining options are passed to `Spear.append/4`. The `:expect` option
+  will be applied to the `$streams` system stream, so one could attempt to
+  set the initial ACL by passing `expect: :empty`.
+
+  ## Examples
+
+  This recreates the default ACL:
+
+      iex> Spear.set_global_acl(conn, Spear.Acl.allow_all(), Spear.Acl.admins_only())
+      :ok
+  """
+  @doc since: "0.1.3"
+  @spec set_global_acl(
+          connection :: Spear.Connection.t(),
+          user_acl :: Spear.Acl.t(),
+          system_acl :: Spear.Acl.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def set_global_acl(conn, user_acl, system_acl, opts \\ [])
+
+  def set_global_acl(conn, %Spear.Acl{} = user_acl, %Spear.Acl{} = system_acl, opts) do
+    {json_encode!, opts} = Keyword.pop(opts, :json_encode!)
+    json_encode! = json_encode! || (&Jason.encode!/1)
+
+    Spear.Writing.build_global_acl_event(user_acl, system_acl, json_encode!)
+    |> List.wrap()
+    |> Spear.append(conn, "$streams", opts)
+  end
+
+  @doc """
+  Determines the metadata stream for any given stream
+
+  Meta streams are used by the EventStoreDB to store some internal information
+  about a stream, and to configure features such setting time-to-lives for
+  events or streams.
+
+  ## Examples
+
+      iex> Spear.meta_stream("es_supported_clients")
+      "$$es_supported_clients"
+  """
+  @doc since: "0.1.3"
+  @spec meta_stream(stream :: String.t()) :: String.t()
+  def meta_stream(stream) when is_binary(stream), do: "$$" <> stream
+
+  @doc """
+  Queries the metadata for a stream
+
+  Note that the `stream` argument is passed through `meta_stream/1` before
+  being read. It is not necessary to call that function on the stream name
+  before passing it as `stream`.
+
+  If no metadata has been set on a stream `{:error, :unset}` is returned.
+
+  ## Options
+
+  Under the hood, `get_stream_metadata/3` uses `read_stream/3` and all options
+  are passed directly to that function. These options are overridden, however,
+  and cannot be changed:
+
+  * `:direction`
+  * `:from`
+  * `:max_count`
+  * `:raw?`
+
+  ## Examples
+
+      iex> Spear.get_stream_metadata(conn, "my_stream")
+      {:error, :unset}
+      iex> Spear.get_stream_metadata(conn, "some_stream_with_max_count")
+      {:ok, %Spear.StreamMetadata{max_count: 50_000, ..}}
+  """
+  @doc since: "0.1.3"
+  @spec get_stream_metadata(
+          connection :: Spear.Connection.t(),
+          stream :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, Spear.StreamMetadata.t()} | {:error, any()}
+  def get_stream_metadata(conn, stream, opts \\ []) do
+    stream = meta_stream(stream)
+
+    opts =
+      opts
+      |> Keyword.merge(
+        direction: :backwards,
+        from: :end,
+        max_count: 1,
+        raw?: false
+      )
+
+    with {:ok, event_stream} <- read_stream(conn, stream, opts),
+         [%Spear.Event{} = event] <- Enum.take(event_stream, 1) do
+      {:ok, Spear.StreamMetadata.from_spear_event(event)}
+    else
+      [] ->
+        {:error, :unset}
+
+      # coveralls-ignore-start
+      {:error, reason} ->
+        {:error, reason}
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Sets a stream's metadata
+
+  Note that the `stream` argument is passed through `meta_stream/1` before
+  being read. It is not necessary to call that function on the stream name
+  before passing it as `stream`.
+
+  ## Options
+
+  This function uses `append/4` under the hood. All options are passed to
+  the `opts` argument of `append/4`.
+
+  ## Examples
+
+      # only allow admins to read, write, and delete the stream (or stream metadata)
+      iex> metadata = %Spear.StreamMetadata{acl: Spear.Acl.admins_only()}
+      iex> Spear.set_stream_metadata(conn, stream, metadata)
+      :ok
+  """
+  @doc since: "0.1.3"
+  @spec set_stream_metadata(
+          connection :: Spear.Connection.t(),
+          stream :: String.t(),
+          metadata :: Spear.StreamMetadata.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def set_stream_metadata(conn, stream, metadata, opts \\ [])
+
+  def set_stream_metadata(conn, stream, %Spear.StreamMetadata{} = metadata, opts)
+      when is_binary(stream) do
+    Spear.Event.new("$metadata", Spear.StreamMetadata.to_map(metadata))
+    |> List.wrap()
+    |> append(conn, stream, opts)
+  end
 end

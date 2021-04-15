@@ -12,22 +12,22 @@ jobs:
     env:
       MIX_ENV: test
 
-    # YARD run eventstore/erlang versions in a matrix?
-    services:
-      eventstore:
-        # image: eventstore/eventstore:21.2.0-bionic
-        image: docker.pkg.github.com/eventstore/eventstore/eventstore:ci
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          EVENTSTORE_INSECURE: "true"
-        ports:
-          - 2113:2113
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+
+    - name: install EventStoreDB
+      run: |
+        curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
+        sudo apt update
+        sudo apt install eventstore-oss
+        sudo mkdir -p /etc/eventstore/certs
+        sudo cp -r ./certs/ca /etc/eventstore/certs/
+        sudo cp ./certs/node1/* /etc/eventstore/certs/
+        sudo cp ./certs/eventstore.conf /etc/eventstore/
+        sudo chown -R eventstore /etc/eventstore
+        sudo chgrp -R eventstore /etc/eventstore
+        sudo systemctl restart eventstore
 
     - name: Determine the elixir version
       run: echo "ELIXIR_VERSION=$(grep -h elixir .tool-versions | awk '{ print $2 }')" >> $GITHUB_ENV

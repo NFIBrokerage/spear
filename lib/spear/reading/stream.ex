@@ -9,7 +9,8 @@ defmodule Spear.Reading.Stream do
     :direction,
     :resolve_links?,
     :timeout,
-    :buffer
+    :buffer,
+    :credentials
   ]
 
   @type t :: %__MODULE__{}
@@ -76,7 +77,11 @@ defmodule Spear.Reading.Stream do
   defp request(state) do
     request = Reading.build_read_request(state)
 
-    GenServer.call(state.connection, {:request, build_request(request)}, state.timeout)
+    GenServer.call(
+      state.connection,
+      {:request, build_request(request, state.credentials)},
+      state.timeout
+    )
   end
 
   defp request!(state) do
@@ -85,12 +90,13 @@ defmodule Spear.Reading.Stream do
     response
   end
 
-  defp build_request(message) do
+  defp build_request(message, credentials) do
     %Spear.Request{
       service: :"event_store.client.streams.Streams",
       service_module: :spear_proto_streams,
       rpc: :Read,
-      messages: [message]
+      messages: [message],
+      credentials: credentials
     }
     |> Spear.Request.expand()
   end
