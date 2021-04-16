@@ -12,6 +12,7 @@ defmodule Spear.Connection.Configuration do
 
   # ms
   @default_keepalive 10_000
+  @default_mint_opts [protocols: [:http2], mode: :active]
 
   @typedoc """
   Configuration for a `Spear.Connection`.
@@ -45,6 +46,8 @@ defmodule Spear.Connection.Configuration do
 
   @doc """
   Parses configuration from a keyword list
+
+  This function is used internally by `Spear.Connection` when connecting.
   """
   @doc since: "0.2.0"
   @spec new(Keyword.t()) :: t()
@@ -54,6 +57,7 @@ defmodule Spear.Connection.Configuration do
       |> Keyword.get(:connection_string)
       |> from_connection_string()
       |> Keyword.merge(opts)
+      |> override_mint_opts()
 
     struct(__MODULE__, config)
     |> validate()
@@ -120,6 +124,15 @@ defmodule Spear.Connection.Configuration do
     else
       _ -> {nil, nil}
     end
+  end
+
+  defp override_mint_opts(opts) do
+    mint_opts =
+      opts
+      |> Keyword.get(:mint_opts, [])
+      |> Keyword.merge(@default_mint_opts)
+
+    Keyword.merge(opts, mint_opts: mint_opts)
   end
 
   defp validate(%__MODULE__{} = config) do

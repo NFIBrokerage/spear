@@ -102,4 +102,20 @@ defmodule Spear.Connection.ConfigurationTest do
 
     assert config.valid? == true
   end
+
+  test "mint protocols and mode options cannot be overriden" do
+    config =
+      Config.new(
+        scheme: :http,
+        username: "admin",
+        password: "changeit",
+        host: "localhost",
+        port: 2113,
+        mint_opts: [protocols: [:http2, :http], mode: :passive]
+      )
+
+    assert config.valid? == true
+    assert config.mint_opts[:protocols] == [:http2]
+    assert config.mint_opts[:mode] == :active
+  end
 end

@@ -1,6 +1,4 @@
 defmodule Spear.Connection do
-  @default_opts [protocols: [:http2], mode: :active]
-
   @moduledoc """
   A GenServer which brokers a connection to an EventStoreDB
 
