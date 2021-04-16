@@ -1,19 +1,38 @@
 defmodule Spear.Connection.Configuration do
+  @default_mint_opts [protocols: [:http2], mode: :active]
   @moduledoc """
   Configuration for `Spear.Connection`s
 
   ## Options
 
-  TODO redo
-
   * `:name` - the name of the GenServer. See `t:GenServer.name/0` for more
     information. When not provided, the spawned process is not aliased to a
     name and is only addressable through its PID.
-  * `:connection_string` - (**required**) the connection string to parse
-    containing all connection information
-  * `:credentials` - (default: `nil`) a pair (2-element) tuple providing a
-    username and password to use for authentication with the EventStoreDB.
-    E.g. the default username+password of `{"admin", "changeit"}`.
+  * `:connection_string` - the connection string to parse
+    containing all connection information. Other options like `:host` or
+    `:port` will be parsed from the connection string. If options parsed from
+    the connection string are passed, they will be treated as overrides to the
+    value found in the connection string. Consult the EventStoreDB
+    documentation for formulating a valid connection string.
+  * `:mint_opts` - (default: `#{inspect(@default_mint_opts)}`) a keyword
+    list of options to pass to mint. The default values cannot be overridden.
+    This can be useful for configuring TLS. See the
+    [security guide](guides/security.md) for more information.
+  * `:host` - (default: `"localhost"`) the host address of the EventStoreDB
+  * `:port` - (default: `2113`) the external gRPC port of the EventStoreDB
+  * `:tls?` - (default: `false`) whether or not to use TLS to secure the
+    connection to the EventStoreDB
+  * `:username` - (default: `"admin"`) the user to connect as
+  * `:password` - (default: `"changeit"`) the user's password
+  * `:keep_alive_interval` - (default: `10_000`ms - 10s) the period to send
+    keep-alive pings to the EventStoreDB. Set `-1` to disable keep-alive
+    checks. Should be any integer value `>= 10_000`. This option can be used
+    in conjunction with `:keep_alive_timeout` to properly disconnect if the
+    EventStoreDB is not responding to network traffic.
+  * `:keep_alive_timeout` - (default: `10_000`ms - 10s) the time after sending
+    a keep-alive ping when the ping will be considered unacknowledged. Used
+    in conjunction with `:keep_alive_interval`. Set to `-1` to disable
+    keep-alive checks. Should be any integer value `>= 10_000`.
   """
   @moduledoc since: "0.2.0"
 
@@ -21,7 +40,6 @@ defmodule Spear.Connection.Configuration do
 
   # ms
   @default_keepalive 10_000
-  @default_mint_opts [protocols: [:http2], mode: :active]
 
   @typedoc """
   Configuration for a `Spear.Connection`.
