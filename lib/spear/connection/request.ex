@@ -10,7 +10,7 @@ defmodule Spear.Connection.Request do
           from: GenServer.from(),
           response: Spear.Connection.Response.t(),
           status: :streaming | :done,
-          type: :request | {:on_data, (binary -> any())}
+          type: :request | {:subscription, pid(), (binary -> any())}
         }
 
   import Spear.Records.Streams, only: [read_resp: 1]
@@ -220,15 +220,16 @@ defmodule Spear.Connection.Request do
     update_in(request.response.data, fn data -> data <> new_data end)
   end
 
-  def handle_data(%__MODULE__{type: {:on_data, on_data}} = request, new_data) do
+  def handle_data(%__MODULE__{type: {:subscription, subscriber, through}} = request, new_data) do
     case Spear.Grpc.decode_next_message(request.response.data <> new_data, request.response.type) do
       {read_resp(content: {:confirmation, _confirmation}), rest} ->
         GenServer.reply(request.from, {:ok, request.request_ref})
 
+        request = put_in(request.from, nil)
         put_in(request.response.data, rest)
 
       {message, rest} ->
-        on_data.(message)
+        send(subscriber, through.(message))
 
         put_in(request.response.data, rest)
 

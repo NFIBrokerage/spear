@@ -161,6 +161,11 @@ defmodule SpearTest do
       Spear.append([random_event()], c.conn, c.stream_name)
       assert_receive %Spear.Event{}
     end
+
+    test "closing the subscription emits an {:eos, :closed} message", c do
+      assert GenServer.call(c.conn, :close) == {:ok, :closed}
+      assert_receive {:eos, :closed}
+    end
   end
 
   describe "given no prior state" do
@@ -184,6 +189,26 @@ defmodule SpearTest do
       assert {:error, reason} = Spear.append(events, c.conn, c.stream_name)
 
       assert reason == maximum_append_size_error()
+    end
+
+    # this test also shows the nice multiplexing power of this connection genserver
+    test "attempting to append during a connection close gives {:error, :closed}", c do
+      test_proc = self()
+
+      append =
+        Task.async(fn ->
+          Stream.repeatedly(fn ->
+            send(test_proc, :emitting_event)
+            Spear.Event.new("tiny_event", 0)
+          end)
+          |> Spear.append(c.conn, c.stream_name, timeout: :infinity)
+        end)
+
+      assert_receive :emitting_event
+
+      assert GenServer.call(c.conn, :close) == {:ok, :closed}
+
+      assert Task.await(append) == {:error, :closed}
     end
 
     test "if we try to write a gigantic event, we get a gRPC error", c do
