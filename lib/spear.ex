@@ -444,7 +444,7 @@ defmodule Spear do
   This function will block the caller until the subscription has been
   confirmed by the EventStoreDB.
 
-  If/when the subscription is terminated, the subscription process will
+  When the subscription is terminated, the subscription process will
   receive a message in the form of `{:eos, reason}`. `{:eos, :closed}` is
   currently the only implemented end-of-stream reason and it occurs when
   the connection is severed between Spear and the EventStoreDB. If this
