@@ -55,11 +55,12 @@ defmodule Spear.Connection do
   require Logger
 
   alias Spear.Connection.Request
+  alias Spear.Connection.Configuration, as: Config
 
   @post "POST"
   @closed %Mint.TransportError{reason: :closed}
 
-  defstruct [:config, :credentials, :conn, requests: %{}]
+  defstruct [:config, :conn, requests: %{}]
 
   @typedoc """
   A connection process
@@ -104,7 +105,7 @@ defmodule Spear.Connection do
   `lib/my_app/application.ex`:
 
       children = [
-        {Spear.Connection, connection_string: "esdb://localhost:2113"}
+        {Spear.Connection, name: MyConnection, connection_string: "esdb://localhost:2113"}
       ]
       Supervisor.start_link(children, strategy: :one_for_one)
   """
@@ -118,19 +119,24 @@ defmodule Spear.Connection do
   end
 
   @impl Connection
-  def init(config) do
-    if valid_config?(config) do
-      {credentials, config} = Keyword.pop(config, :credentials)
-      s = %__MODULE__{config: config, credentials: credentials}
+  def init(opts) do
+    case Config.new(opts) do
+      %Config{valid?: true} = config ->
+        {:connect, :init, %__MODULE__{config: config}}
 
-      {:connect, :init, s}
-    else
-      Logger.error("""
-      #{inspect(__MODULE__)} did not find enough information to start a connection.
-      Check the #{inspect(__MODULE__)} moduledocs for configuration information.
-      """)
+      %Config{errors: errors} ->
+        error_lines =
+          errors
+          |> Enum.map(fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
+          |> Enum.join("\n")
 
-      :ignore
+        Logger.error("""
+        Invalid configuration passed to #{inspect(__MODULE__)}. Found the following errors:
+
+        #{error_lines}
+        """)
+
+        :ignore
     end
   end
 
@@ -212,7 +218,7 @@ defmodule Spear.Connection do
   end
 
   def handle_call({type, request}, from, s) do
-    request = Spear.Request.merge_credentials(request, s.credentials)
+    request = Spear.Request.merge_credentials(request, Config.credentials(s.config))
 
     case request_and_stream_body(s, request, from, type) do
       {:ok, s} ->
@@ -332,29 +338,8 @@ defmodule Spear.Connection do
     end
   end
 
-  defp valid_config?(config) do
-    case Keyword.fetch(config, :connection_string) do
-      {:ok, connection_string} when is_binary(connection_string) ->
-        true
-
-      _ ->
-        false
-    end
-  end
-
   defp do_connect(config) do
-    uri =
-      config
-      |> Keyword.fetch!(:connection_string)
-      |> URI.parse()
-      |> set_scheme()
-
-    opts =
-      config
-      |> Keyword.get(:opts, [])
-      |> Keyword.merge(@default_opts)
-
-    Mint.HTTP.connect(uri.scheme, uri.host, uri.port, opts)
+    Mint.HTTP.connect(config.scheme, config.host, config.port, config.mint_opts)
   end
 
   defp close_requests(s) do
@@ -367,19 +352,6 @@ defmodule Spear.Connection do
 
   defp close_request(%Request{type: _, from: from}) do
     Connection.reply(from, {:error, :closed})
-  end
-
-  defp set_scheme(%URI{} = uri) do
-    scheme =
-      with query when is_binary(query) <- uri.query,
-           params = URI.decode_query(query),
-           {:ok, "true"} <- Map.fetch(params, "tls") do
-        :https
-      else
-        _ -> :http
-      end
-
-    %URI{uri | scheme: scheme}
   end
 
   @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, %Request{}} | :error

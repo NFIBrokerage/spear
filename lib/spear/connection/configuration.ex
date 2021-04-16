@@ -11,13 +11,6 @@ defmodule Spear.Connection.Configuration do
     name and is only addressable through its PID.
   * `:connection_string` - (**required**) the connection string to parse
     containing all connection information
-  * `:opts` - (default: `#{inspect(@default_opts)}`) a `t:Keyword.t/0`
-    of options to pass directly to `Mint.HTTP.connect/4`. See the
-    `Mint.HTTP.connect/4` documentation for a full reference. This can be used
-    to specify a custom CA certificate when using EventStoreDB in secure mode
-    (the default in 20+) with a custom set of certificates. The default options
-    cannot be overridden: explicitly passed `:protocols` or `:mode` will be
-    ignored.
   * `:credentials` - (default: `nil`) a pair (2-element) tuple providing a
     username and password to use for authentication with the EventStoreDB.
     E.g. the default username+password of `{"admin", "changeit"}`.
@@ -59,6 +52,11 @@ defmodule Spear.Connection.Configuration do
             mint_opts: [],
             valid?: true,
             errors: []
+
+  @doc false
+  def credentials(%__MODULE__{username: username, password: password}) do
+    {username, password}
+  end
 
   @doc """
   Parses configuration from a keyword list

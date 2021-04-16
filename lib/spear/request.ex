@@ -36,7 +36,7 @@ defmodule Spear.Request do
   defp headers(credentials \\ nil) do
     maybe_auth_header =
       case credentials do
-        {username, password} ->
+        {username, password} when is_binary(username) and is_binary(password) ->
           [{"authorization", "Basic " <> Base.encode64("#{username}:#{password}")}]
 
         _ ->

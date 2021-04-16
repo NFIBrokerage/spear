@@ -22,7 +22,7 @@ defmodule Spear.ConnectionTest do
 
   describe "given invalid params" do
     setup do
-      [params: []]
+      [params: [port: -1]]
     end
 
     test "the connection does an :ignore start-up and logs an error", c do
@@ -32,7 +32,8 @@ defmodule Spear.ConnectionTest do
         end)
 
       assert log =~ "Spear.Connection"
-      assert log =~ "did not find enough information"
+      assert log =~ "Invalid configuration passed"
+      assert log =~ "port: -1 is not a valid port number"
     end
   end
 
