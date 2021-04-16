@@ -438,11 +438,19 @@ defmodule Spear do
   Spear.Event.t() | Spear.Filter.Checkpoint.t()
   ```
 
-  or if the `raw?: true` option is provided, `ReadResp` records will be
-  returned.
+  or if the `raw?: true` option is provided,
+  `Spear.Records.Streams.read_resp/0` records will be returned.
 
   This function will block the caller until the subscription has been
   confirmed by the EventStoreDB.
+
+  If/when the subscription is terminated, the subscription process will
+  receive a message in the form of `{:eos, reason}`. `{:eos, :closed}` is
+  currently the only implemented end-of-stream reason and it occurs when
+  the connection is severed between Spear and the EventStoreDB. If this
+  message is received, the subscription is considered to be concluded and the
+  subscription process must re-subscribe from the last received event or
+  checkpoint to resume the subscription.
 
   ## Options
 
@@ -483,7 +491,7 @@ defmodule Spear do
       :ok
 
       iex> {:ok, sub} = Spear.subscribe(conn, self(), :all, filter: Spear.Filter.exclude_system_events())
-      iex> flush()
+      iex> flush
       %Spear.Filter.Checkpoint{}
       %Spear.Filter.Checkpoint{}
       %Spear.Event{}
@@ -492,6 +500,10 @@ defmodule Spear do
       %Spear.Event{}
       %Spear.Filter.Checkpoint{}
       :ok
+      iex> GenServer.call(conn, :close)
+      {:ok, :closed}
+      iex> flush
+      {:eos, :closed}
   """
   @doc since: "0.1.0"
   @spec subscribe(
@@ -527,16 +539,12 @@ defmodule Spear do
         opts[:through]
       end
 
-    on_data = fn message ->
-      subscriber
-      |> GenServer.whereis()
-      |> send(through.(message))
-    end
+    subscriber = GenServer.whereis(subscriber)
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
     # YARD deal with broken subscriptions
-    Connection.call(conn, {{:on_data, on_data}, request}, opts[:timeout])
+    Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
   end
 
   @doc """

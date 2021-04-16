@@ -161,16 +161,20 @@ defmodule Spear.Connection do
   def disconnect(info, %__MODULE__{conn: conn} = s) do
     {:ok, _conn} = Mint.HTTP.close(conn)
 
+    :ok = close_requests(s)
+
+    s = %__MODULE__{s | conn: nil, requests: %{}}
+
     case info do
       {:close, from} ->
         Connection.reply(from, {:ok, :closed})
 
-        {:noconnect, %__MODULE__{s | conn: nil}}
+        {:noconnect, s}
 
       # coveralls-ignore-start
       :closed ->
         :ok
-        {:connect, s.config, %__MODULE__{s | conn: nil}}
+        {:connect, :reconnect, s}
         # coveralls-ignore-stop
     end
   end
@@ -347,6 +351,18 @@ defmodule Spear.Connection do
       |> Keyword.merge(@default_opts)
 
     Mint.HTTP.connect(uri.scheme, uri.host, uri.port, opts)
+  end
+
+  defp close_requests(s) do
+    :ok = s.requests |> Map.values() |> Enum.each(&close_request/1)
+  end
+
+  defp close_request(%Request{type: {:subscription, proc, _through}, from: nil}) do
+    send(proc, {:eos, :closed})
+  end
+
+  defp close_request(%Request{type: _, from: from}) do
+    Connection.reply(from, {:error, :closed})
   end
 
   defp set_scheme(%URI{} = uri) do
