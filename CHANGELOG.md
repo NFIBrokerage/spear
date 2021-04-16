@@ -18,6 +18,13 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 -->
 
+## 0.1.4 - 2021-04-16
+
+### Added
+
+- `{:eos, :closed}` is now emitted when a subscription is broken due to the
+  connection between closed between `Spear.Connection` and EventStoreDB
+
 ## 0.1.3 - 2021-04-15
 
 ### Added
