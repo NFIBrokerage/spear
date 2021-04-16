@@ -539,8 +539,6 @@ defmodule Spear do
         opts[:through]
       end
 
-    subscriber = GenServer.whereis(subscriber)
-
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
     # YARD deal with broken subscriptions
@@ -554,6 +552,8 @@ defmodule Spear do
   `subscription_reference` exists, but is idempotent: if the
   `subscription_reference` is not an active subscription reference, `:ok` will
   be returned.
+
+  Subscriptions are automatically cancelled when a subscribe process exits.
 
   ## Examples
 

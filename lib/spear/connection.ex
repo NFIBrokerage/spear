@@ -244,6 +244,25 @@ defmodule Spear.Connection do
   end
 
   @impl Connection
+  def handle_info({:DOWN, monitor_ref, :process, _object, _reason}, s) do
+    with {:ok, %Request{request_ref: request_ref} = request} <-
+           fetch_subscription(s, monitor_ref),
+         {^request, s} <- pop_in(s.requests[request_ref]),
+         {:ok, conn} <- Mint.HTTP2.cancel_request(s.conn, request_ref) do
+      {:noreply, put_in(s.conn, conn)}
+    else
+      # coveralls-ignore-start
+      {:error, conn, reason} ->
+        s = put_in(s.conn, conn)
+
+        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+
+      _ ->
+        {:noreply, s}
+        # coveralls-ignore-stop
+    end
+  end
+
   def handle_info(message, s) do
     with %Mint.HTTP2{} = conn <- s.conn,
          {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
@@ -376,5 +395,12 @@ defmodule Spear.Connection do
       end
 
     %URI{uri | scheme: scheme}
+  end
+
+  @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, %Request{}} | :error
+  def fetch_subscription(s, monitor_ref) do
+    Enum.find_value(s.requests, :error, fn {_request_ref, request} ->
+      request.monitor_ref == monitor_ref && {:ok, request}
+    end)
   end
 end

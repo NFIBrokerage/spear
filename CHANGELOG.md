@@ -24,6 +24,8 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 - `{:eos, :closed}` is now emitted when a subscription is broken due to the
   connection between closed between `Spear.Connection` and EventStoreDB
+- `Spear.Connection` now monitors subscription processes and cancels
+  EventStoreDB subscriptions upon subscriber process exit
 
 ## 0.1.3 - 2021-04-15
 

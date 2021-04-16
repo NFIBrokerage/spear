@@ -6,6 +6,7 @@ defmodule Spear.Connection.Request do
   @type t :: %{
           continuation: Enumerable.continuation(),
           request_ref: Mint.Types.request_ref(),
+          monitor_ref: reference() | nil,
           buffer: binary(),
           from: GenServer.from(),
           response: Spear.Connection.Response.t(),
@@ -15,7 +16,7 @@ defmodule Spear.Connection.Request do
 
   import Spear.Records.Streams, only: [read_resp: 1]
 
-  defstruct [:continuation, :buffer, :request_ref, :from, :response, :status, :type]
+  defstruct [:continuation, :buffer, :request_ref, :monitor_ref, :from, :response, :status, :type]
 
   def new(
         %Spear.Request{messages: event_stream, rpc: %Spear.Rpc{} = rpc},
@@ -37,6 +38,7 @@ defmodule Spear.Connection.Request do
       continuation: continuation,
       buffer: <<>>,
       request_ref: request_ref,
+      monitor_ref: monitor_subscription(type),
       from: from,
       response: %Spear.Connection.Response{type: {rpc.service_module, rpc.response_type}},
       status: :streaming,
@@ -239,4 +241,10 @@ defmodule Spear.Connection.Request do
         # coveralls-ignore-stop
     end
   end
+
+  defp monitor_subscription({:subscription, subscriber, _through}) do
+    Process.monitor(subscriber)
+  end
+
+  defp monitor_subscription(_), do: nil
 end
