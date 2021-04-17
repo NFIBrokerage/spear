@@ -40,6 +40,38 @@ defmodule Spear.Connection do
   See the [Security guide](guides/security.md) for information about
   certificates, credentials, and access control lists (ACLs).
 
+  ## Keep-alive
+
+  Spear and the EventStoreDB use gRPC keep-alive to ensure that any hung
+  connections are noticed and restarted.
+
+  EventStoreDB has its own configuration for keep-alive and each Spear
+  client's configuration should not necessarily match the server configuration.
+  With a `:keep_alive_interval` too low on the Spear-side and with very many
+  connected clients, the keep-alive pings can effectively become a DDoS
+  even while no clients perform any operations. This does not necessarily
+  apply to the keep-alive settings in EventStoreDB: a client connects to a
+  single EventStoreDB but an EventStoreDB may have hundreds or more clients
+  connected at once.
+
+  `:keep_alive_interval` does not express an interval in the way of
+  `:timer.send_interval/3`. Instead the keep-alive timer is optimized to
+  reset upon any data received from the connection.
+
+  This means that (assuming consistent network, which is generous) either the
+  Spear client or EventStoreDB server will dominate the keep-alive ping
+  communication, the driver of the conversation being which ever has the
+  lowest keep-alive interval configured. For this reason, it is generally
+  advisable to set the client keep-alive just higher than the server
+  keep-alive, adding noise for network latency, since the client's keep-alive
+  routine will only trigger when the server's keep-alive message is behind
+  schedule.
+
+  Note that there may not be much value in attempting to optimize the
+  keep-alive settings unless the network is very unstable: keep-alive only
+  has utility when the client, server, or network is seriously delayed or
+  silently severed.
+
   ## Examples
 
       iex> {:ok, conn} = Spear.Connection.start_link(connection_string: "esdb://localhost:2113")
@@ -47,8 +79,8 @@ defmodule Spear.Connection do
       [%Spear.Event{}, %Spear.Event{}, %Spear.Event{}]
   """
 
-  # see the very similar original implementation of this from the Mint
-  # documentation:
+  # see the very similar original implementation of this process architecture
+  # from the Mint documentation:
   # https://github.com/elixir-mint/mint/blob/796b8db097d69ede7163acba223ab2045c2773a4/pages/Architecture.md
 
   use Connection
