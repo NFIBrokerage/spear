@@ -263,7 +263,7 @@ defmodule Spear.Connection do
     case Mint.HTTP2.ping(s.conn) do
       {:ok, conn, request_ref} ->
         s = put_in(s.conn, conn)
-        s = update_in(s.keep_alive_timer, &KeepAliveTimer.start_after_timer(&1, request_ref))
+        s = update_in(s.keep_alive_timer, &KeepAliveTimer.start_timeout_timer(&1, request_ref))
         # put request ref
         {:noreply, s}
 
@@ -300,6 +300,8 @@ defmodule Spear.Connection do
 
   @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
   defp handle_responses(s, responses) do
+    s = update_in(s.keep_alive_timer, &KeepAliveTimer.reset_interval_timer/1)
+
     responses
     |> Enum.reduce(s, &process_response/2)
     |> Request.continue_requests()
