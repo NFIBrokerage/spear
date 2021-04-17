@@ -54,13 +54,13 @@ defmodule Spear.Connection do
   use Connection
   require Logger
 
-  alias Spear.Connection.Request
+  alias Spear.Connection.{Request, KeepAliveTimer}
   alias Spear.Connection.Configuration, as: Config
 
   @post "POST"
   @closed %Mint.TransportError{reason: :closed}
 
-  defstruct [:config, :conn, requests: %{}]
+  defstruct [:config, :conn, requests: %{}, keep_alive_timer: %KeepAliveTimer{}]
 
   @typedoc """
   A connection process
@@ -143,8 +143,11 @@ defmodule Spear.Connection do
   @impl Connection
   def connect(_, s) do
     case do_connect(s.config) do
-      {:ok, conn} -> {:ok, %__MODULE__{s | conn: conn}}
-      {:error, _reason} -> {:backoff, 500, s}
+      {:ok, conn} ->
+        {:ok, %__MODULE__{s | conn: conn, keep_alive_timer: KeepAliveTimer.start(s.config)}}
+
+      {:error, _reason} ->
+        {:backoff, 500, s}
     end
   end
 
@@ -154,7 +157,12 @@ defmodule Spear.Connection do
 
     :ok = close_requests(s)
 
-    s = %__MODULE__{s | conn: nil, requests: %{}}
+    s = %__MODULE__{
+      s
+      | conn: nil,
+        requests: %{},
+        keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
+    }
 
     case info do
       {:close, from} ->
@@ -162,11 +170,8 @@ defmodule Spear.Connection do
 
         {:noconnect, s}
 
-      # coveralls-ignore-start
-      :closed ->
-        :ok
+      _ ->
         {:connect, :reconnect, s}
-        # coveralls-ignore-stop
     end
   end
 
@@ -254,6 +259,25 @@ defmodule Spear.Connection do
     end
   end
 
+  def handle_info(:keep_alive, s) do
+    case Mint.HTTP2.ping(s.conn) do
+      {:ok, conn, request_ref} ->
+        s = put_in(s.conn, conn)
+        s = update_in(s.keep_alive_timer, &KeepAliveTimer.start_after_timer(&1, request_ref))
+        # put request ref
+        {:noreply, s}
+
+      # coveralls-ignore-start
+      {:error, conn, reason} ->
+        s = put_in(s.conn, conn)
+
+        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+        # coveralls-ignore-stop
+    end
+  end
+
+  def handle_info(:keep_alive_expired, s), do: {:disconnect, :keep_alive_timeout, s}
+
   def handle_info(message, s) do
     with %Mint.HTTP2{} = conn <- s.conn,
          {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
@@ -300,11 +324,17 @@ defmodule Spear.Connection do
   end
 
   defp process_response({:pong, request_ref}, s) do
-    {{:ping, from}, s} = pop_in(s.requests[request_ref])
+    case pop_in(s.requests[request_ref]) do
+      {{:ping, from}, s} ->
+        # ping was initiated by a GenServer.call/3
+        Connection.reply(from, :pong)
 
-    Connection.reply(from, :pong)
+        s
 
-    s
+      {nil, s} ->
+        # ping was initiated by the keepalive timer
+        update_in(s.keep_alive_timer, &KeepAliveTimer.clear_after_timer(&1, request_ref))
+    end
   end
 
   defp process_response({:done, request_ref}, s) do
