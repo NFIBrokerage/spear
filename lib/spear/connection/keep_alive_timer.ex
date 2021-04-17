@@ -15,7 +15,7 @@ defmodule Spear.Connection.KeepAliveTimer do
   defstruct interval_timer: nil, interval: 10_000, timeout: 10_000, timeout_timers: %{}
 
   def start(%Config{keep_alive_interval: interval, keep_alive_timeout: timeout})
-      when interval == -1 or timeout == -1,
+      when interval == false or timeout == false,
       do: %__MODULE__{}
 
   def start(%Config{keep_alive_interval: interval, keep_alive_timeout: timeout}) do
