@@ -1,6 +1,4 @@
 defmodule Spear.Connection do
-  @default_opts [protocols: [:http2], mode: :active]
-
   @moduledoc """
   A GenServer which brokers a connection to an EventStoreDB
 
@@ -34,26 +32,45 @@ defmodule Spear.Connection do
 
   ## Configuration
 
-  * `:name` - the name of the GenServer. See `t:GenServer.name/0` for more
-    information. When not provided, the spawned process is not aliased to a
-    name and is only addressable through its PID.
-  * `:connection_string` - (**required**) the connection string to parse
-    containing all connection information
-  * `:opts` - (default: `#{inspect(@default_opts)}`) a `t:Keyword.t/0`
-    of options to pass directly to `Mint.HTTP.connect/4`. See the
-    `Mint.HTTP.connect/4` documentation for a full reference. This can be used
-    to specify a custom CA certificate when using EventStoreDB in secure mode
-    (the default in 20+) with a custom set of certificates. The default options
-    cannot be overridden: explicitly passed `:protocols` or `:mode` will be
-    ignored.
-  * `:credentials` - (default: `nil`) a pair (2-element) tuple providing a
-    username and password to use for authentication with the EventStoreDB.
-    E.g. the default username+password of `{"admin", "changeit"}`.
+  See the `Spear.Connection.Configuration` module for available configuration
+  of connections.
 
   ## TLS/SSL configuration and credentials
 
   See the [Security guide](guides/security.md) for information about
   certificates, credentials, and access control lists (ACLs).
+
+  ## Keep-alive
+
+  Spear and the EventStoreDB use gRPC keep-alive to ensure that any hung
+  connections are noticed and restarted.
+
+  EventStoreDB has its own configuration for keep-alive and each Spear
+  client's configuration should not necessarily match the server configuration.
+  With a `:keep_alive_interval` too low on the Spear-side and with very many
+  connected clients, the keep-alive pings can effectively become a DDoS
+  even while no clients perform any operations. This does not necessarily
+  apply to the keep-alive settings in EventStoreDB: a client connects to a
+  single EventStoreDB but an EventStoreDB may have hundreds or more clients
+  connected at once.
+
+  `:keep_alive_interval` does not express an interval in the way of
+  `:timer.send_interval/3`. Instead the keep-alive timer is optimized to
+  reset upon any data received from the connection.
+
+  This means that (assuming consistent network, which is generous) either the
+  Spear client or EventStoreDB server will dominate the keep-alive ping
+  communication, the driver of the conversation being which ever has the
+  lowest keep-alive interval configured. For this reason, it is generally
+  advisable to set the client keep-alive just higher than the server
+  keep-alive, adding noise for network latency, since the client's keep-alive
+  routine will only trigger when the server's keep-alive message is behind
+  schedule.
+
+  Note that there may not be much value in attempting to optimize the
+  keep-alive settings unless the network is very unstable: keep-alive only
+  has utility when the client, server, or network is seriously delayed or
+  silently severed.
 
   ## Examples
 
@@ -62,19 +79,20 @@ defmodule Spear.Connection do
       [%Spear.Event{}, %Spear.Event{}, %Spear.Event{}]
   """
 
-  # see the very similar original implementation of this from the Mint
-  # documentation:
+  # see the very similar original implementation of this process architecture
+  # from the Mint documentation:
   # https://github.com/elixir-mint/mint/blob/796b8db097d69ede7163acba223ab2045c2773a4/pages/Architecture.md
 
   use Connection
   require Logger
 
-  alias Spear.Connection.Request
+  alias Spear.Connection.{Request, KeepAliveTimer}
+  alias Spear.Connection.Configuration, as: Config
 
   @post "POST"
   @closed %Mint.TransportError{reason: :closed}
 
-  defstruct [:config, :credentials, :conn, requests: %{}]
+  defstruct [:config, :conn, requests: %{}, keep_alive_timer: %KeepAliveTimer{}]
 
   @typedoc """
   A connection process
@@ -119,7 +137,7 @@ defmodule Spear.Connection do
   `lib/my_app/application.ex`:
 
       children = [
-        {Spear.Connection, connection_string: "esdb://localhost:2113"}
+        {Spear.Connection, name: MyConnection, connection_string: "esdb://localhost:2113"}
       ]
       Supervisor.start_link(children, strategy: :one_for_one)
   """
@@ -133,27 +151,35 @@ defmodule Spear.Connection do
   end
 
   @impl Connection
-  def init(config) do
-    if valid_config?(config) do
-      {credentials, config} = Keyword.pop(config, :credentials)
-      s = %__MODULE__{config: config, credentials: credentials}
+  def init(opts) do
+    case Config.new(opts) do
+      %Config{valid?: true} = config ->
+        {:connect, :init, %__MODULE__{config: config}}
 
-      {:connect, :init, s}
-    else
-      Logger.error("""
-      #{inspect(__MODULE__)} did not find enough information to start a connection.
-      Check the #{inspect(__MODULE__)} moduledocs for configuration information.
-      """)
+      %Config{errors: errors} ->
+        error_lines =
+          errors
+          |> Enum.map(fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
+          |> Enum.join("\n")
 
-      :ignore
+        Logger.error("""
+        Invalid configuration passed to #{inspect(__MODULE__)}. Found the following errors:
+
+        #{error_lines}
+        """)
+
+        :ignore
     end
   end
 
   @impl Connection
   def connect(_, s) do
     case do_connect(s.config) do
-      {:ok, conn} -> {:ok, %__MODULE__{s | conn: conn}}
-      {:error, _reason} -> {:backoff, 500, s}
+      {:ok, conn} ->
+        {:ok, %__MODULE__{s | conn: conn, keep_alive_timer: KeepAliveTimer.start(s.config)}}
+
+      {:error, _reason} ->
+        {:backoff, 500, s}
     end
   end
 
@@ -163,7 +189,12 @@ defmodule Spear.Connection do
 
     :ok = close_requests(s)
 
-    s = %__MODULE__{s | conn: nil, requests: %{}}
+    s = %__MODULE__{
+      s
+      | conn: nil,
+        requests: %{},
+        keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
+    }
 
     case info do
       {:close, from} ->
@@ -171,11 +202,8 @@ defmodule Spear.Connection do
 
         {:noconnect, s}
 
-      # coveralls-ignore-start
-      :closed ->
-        :ok
+      _ ->
         {:connect, :reconnect, s}
-        # coveralls-ignore-stop
     end
   end
 
@@ -227,7 +255,7 @@ defmodule Spear.Connection do
   end
 
   def handle_call({type, request}, from, s) do
-    request = Spear.Request.merge_credentials(request, s.credentials)
+    request = Spear.Request.merge_credentials(request, Config.credentials(s.config))
 
     case request_and_stream_body(s, request, from, type) do
       {:ok, s} ->
@@ -263,6 +291,25 @@ defmodule Spear.Connection do
     end
   end
 
+  def handle_info(:keep_alive, s) do
+    case Mint.HTTP2.ping(s.conn) do
+      {:ok, conn, request_ref} ->
+        s = put_in(s.conn, conn)
+        s = update_in(s.keep_alive_timer, &KeepAliveTimer.start_timeout_timer(&1, request_ref))
+
+        {:noreply, s}
+
+      # coveralls-ignore-start
+      {:error, conn, reason} ->
+        s = put_in(s.conn, conn)
+
+        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+        # coveralls-ignore-stop
+    end
+  end
+
+  def handle_info(:keep_alive_expired, s), do: {:disconnect, :keep_alive_timeout, s}
+
   def handle_info(message, s) do
     with %Mint.HTTP2{} = conn <- s.conn,
          {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
@@ -285,6 +332,8 @@ defmodule Spear.Connection do
 
   @spec handle_responses(%__MODULE__{}, list()) :: %__MODULE__{}
   defp handle_responses(s, responses) do
+    s = update_in(s.keep_alive_timer, &KeepAliveTimer.reset_interval_timer/1)
+
     responses
     |> Enum.reduce(s, &process_response/2)
     |> Request.continue_requests()
@@ -309,11 +358,17 @@ defmodule Spear.Connection do
   end
 
   defp process_response({:pong, request_ref}, s) do
-    {{:ping, from}, s} = pop_in(s.requests[request_ref])
+    case pop_in(s.requests[request_ref]) do
+      {{:ping, from}, s} ->
+        # ping was initiated by a GenServer.call/3
+        Connection.reply(from, :pong)
 
-    Connection.reply(from, :pong)
+        s
 
-    s
+      {nil, s} ->
+        # ping was initiated by the keepalive timer
+        update_in(s.keep_alive_timer, &KeepAliveTimer.clear_after_timer(&1, request_ref))
+    end
   end
 
   defp process_response({:done, request_ref}, s) do
@@ -347,29 +402,8 @@ defmodule Spear.Connection do
     end
   end
 
-  defp valid_config?(config) do
-    case Keyword.fetch(config, :connection_string) do
-      {:ok, connection_string} when is_binary(connection_string) ->
-        true
-
-      _ ->
-        false
-    end
-  end
-
   defp do_connect(config) do
-    uri =
-      config
-      |> Keyword.fetch!(:connection_string)
-      |> URI.parse()
-      |> set_scheme()
-
-    opts =
-      config
-      |> Keyword.get(:opts, [])
-      |> Keyword.merge(@default_opts)
-
-    Mint.HTTP.connect(uri.scheme, uri.host, uri.port, opts)
+    Mint.HTTP.connect(config.scheme, config.host, config.port, config.mint_opts)
   end
 
   defp close_requests(s) do
@@ -382,19 +416,6 @@ defmodule Spear.Connection do
 
   defp close_request(%Request{type: _, from: from}) do
     Connection.reply(from, {:error, :closed})
-  end
-
-  defp set_scheme(%URI{} = uri) do
-    scheme =
-      with query when is_binary(query) <- uri.query,
-           params = URI.decode_query(query),
-           {:ok, "true"} <- Map.fetch(params, "tls") do
-        :https
-      else
-        _ -> :http
-      end
-
-    %URI{uri | scheme: scheme}
   end
 
   @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, %Request{}} | :error

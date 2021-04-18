@@ -166,6 +166,12 @@ defmodule SpearTest do
       assert GenServer.call(c.conn, :close) == {:ok, :closed}
       assert_receive {:eos, :closed}
     end
+
+    test "a keep-alive timeout disconnects the conn and the conn reconnects", c do
+      send(c.conn, :keep_alive_expired)
+      assert_receive {:eos, :closed}
+      assert Spear.ping(c.conn) == :pong
+    end
   end
 
   describe "given no prior state" do
@@ -431,6 +437,12 @@ defmodule SpearTest do
       # reset ACL
       metadata = %Spear.StreamMetadata{acl: Spear.Acl.allow_all()}
       assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
+    end
+
+    test "a server may be told it needs to do a keep-alive ping check", c do
+      # this is mostly for coverage :(
+      send(c.conn, :keep_alive)
+      assert Spear.ping(c.conn) == :pong
     end
   end
 

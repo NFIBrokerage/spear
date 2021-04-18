@@ -1,8 +1,7 @@
 make_server = fn ->
   params = [
-    connection_string: "esdb://localhost:2113?tls=true",
-    credentials: {"admin", "changeit"},
-    opts: [
+    connection_string: "esdb://admin:changeit@localhost:2113?tls=true",
+    mint_opts: [
       transport_opts: [
         cacertfile: Path.join([__DIR__, "certs", "ca", "ca.crt"])
       ]
