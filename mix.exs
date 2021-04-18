@@ -98,7 +98,11 @@ defmodule Spear.MixProject do
       groups_for_modules: [
         "Record interfaces": [
           Spear.Records.Shared,
-          Spear.Records.Streams
+          Spear.Records.Streams,
+          Spear.Records.Operations,
+          Spear.Records.Projections,
+          Spear.Records.Persistent,
+          Spear.Records.Users
         ]
       ],
       skip_undefined_reference_warnings_on: [
