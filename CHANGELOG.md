@@ -11,6 +11,16 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 ### Added
 
 - Added record interface modules for all remaining APIs
+- Added functions for interacting with the Users API
+    - `Spear.change_user_password/5`
+    - `Spear.create_user/6`
+    - `Spear.delete_user/3`
+    - `Spear.disable_user/3`
+    - `Spear.enable_user/3`
+    - `Spear.reset_user_password/4`
+    - `Spear.update_user/6`
+    - `Spear.user_details/3`
+    - associated functions in `Spear.Client`
 
 ## 0.2.1 - 2021-04-17
 
