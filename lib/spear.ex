@@ -832,4 +832,192 @@ defmodule Spear do
     |> List.wrap()
     |> append(conn, meta_stream(stream), opts)
   end
+
+  def create_user(conn, full_name, login_name, password, groups, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      create_req(
+        options:
+          create_req_options(
+            full_name: full_name,
+            login_name: login_name,
+            password: password,
+            groups: groups
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :Create, [message], opts) do
+      {:ok, create_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def update_user(conn, full_name, login_name, password, groups, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      update_req(
+        options:
+          update_req_options(
+            full_name: full_name,
+            login_name: login_name,
+            password: password,
+            groups: groups
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :Update, [message], opts) do
+      {:ok, update_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def delete_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = delete_req(options: delete_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Update, [message], opts) do
+      {:ok, delete_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def enable_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = enable_req(options: enable_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Enable, [message], opts) do
+      {:ok, enable_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def disable_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = disable_req(options: disable_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Disable, [message], opts) do
+      {:ok, disable_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def user_details(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = details_req(options: details_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Details, [message], opts) do
+      {:ok, details_resp() = details_resp} -> {:ok, Spear.User.from_details_resp(details_resp)}
+      error -> error
+    end
+  end
+
+  def change_user_password(conn, login_name, current_password, new_password, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      change_password_req(
+        options:
+          change_password_req_options(
+            login_name: login_name,
+            current_password: current_password,
+            new_password: new_password
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :ChangePassword, [message], opts) do
+      {:ok, change_password_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  def reset_user_password(conn, login_name, new_password, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      reset_password_req(
+        options:
+          reset_password_req_options(
+            login_name: login_name,
+            new_password: new_password
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :ResetPassword, [message], opts) do
+      {:ok, reset_password_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Performs a generic request synchronously
+
+  This is appropriate for many operations across the Users, Streams, and
+  Operations APIs but not suitable for `Spear.subscribe/4` or the
+  Persistent Subscriptions API.
+
+  `message` must be an enumeration of records as created by the Record
+  Interfaces. Lazy stream enumerations are allowed and are not run until each
+  element is serialized over the wire.
+
+  This function is mostly used under-the-hood to implement functions in
+  `Spear` such as `Spear.create_user/5`, but may be used generically.
+
+  ## Options
+
+  * `:timeout` - (default: `5_000`ms - 5s) the GenServer timeout: the maximum
+    time allowed to wait for this request to complete.
+  * `:credentials` - (default: `nil`) the username and password to use to make
+    the request. Overrides the connection-level credentials if provided.
+    Connection-level credentials are used as the default if not provided.
+
+  ## Examples
+
+      iex> alias Spear.Records.Users
+      iex> require Users
+      iex> message = Users.enable_req(options: Users.enable_req_options(login_name: "my_user"))
+      iex> Spear.request(conn, Users, :Enable, [message], credentials: {"admin", "changeit"})
+      {:ok, Users.enable_resp()}
+  """
+  @doc since: "0.3.0"
+  @spec request(Spear.Connection.t(), module(), atom(), Enumerable.t(), Keyword.t()) ::
+          {:ok, tuple() | Enumerable.t()} | {:error, any()}
+  def request(conn, api, rpc, messages, opts) do
+    opts = [timeout: 5_000, credentials: nil] |> Keyword.merge(opts)
+
+    request =
+      %Spear.Request{
+        api: {api, rpc},
+        messages: messages,
+        credentials: opts[:credentials]
+      }
+      |> Spear.Request.expand()
+
+    with {:ok, %Spear.Connection.Response{} = response} <-
+           Connection.call(conn, {:request, request}, opts[:timeout]),
+         %Spear.Grpc.Response{status: :ok, data: data} <-
+           Spear.Grpc.Response.from_connection_response(response) do
+      {:ok, data}
+    else
+      # coveralls-ignore-start
+      {:error, reason} -> {:error, reason}
+      # coveralls-ignore-stop
+      %Spear.Grpc.Response{} = response -> {:error, response}
+    end
+  end
+
+  @doc """
+  Parses an EventStoreDB timestamp into a `DateTime.t()` in UTC time.
+  """
+  @doc since: "0.3.0"
+  def parse_stamp(ticks_since_epoch) when is_integer(ticks_since_epoch) do
+    ticks_since_epoch
+    |> div(10)
+    |> DateTime.from_unix(:microsecond)
+  end
 end
