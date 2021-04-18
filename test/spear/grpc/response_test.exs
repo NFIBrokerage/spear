@@ -13,7 +13,7 @@ defmodule Spear.Grpc.ResponseTest do
   test "a non-200 status code connection response is converted to an error code 2" do
     grpc_response =
       %Connection.Response{status: 404, headers: []}
-      |> Grpc.Response.from_connection_response()
+      |> Grpc.Response.from_connection_response(%Spear.Rpc{}, false)
 
     assert grpc_response.status_code == 2
     assert grpc_response.status == :unknown
@@ -27,7 +27,13 @@ defmodule Spear.Grpc.ResponseTest do
 
     grpc_response =
       %Connection.Response{status: 200, headers: [], type: ReadResp, data: buffer}
-      |> Grpc.Response.from_connection_response()
+      |> Grpc.Response.from_connection_response(
+        %Spear.Rpc{
+          response_type: ReadResp,
+          service_module: :spear_proto_streams
+        },
+        false
+      )
 
     assert grpc_response.status_code == 13
     assert grpc_response.status == :internal

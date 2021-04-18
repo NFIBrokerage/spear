@@ -142,6 +142,73 @@ defmodule SpearTest do
       [one, two] = Spear.stream!(c.conn, c.stream_name) |> Enum.take(2)
       assert [^two] = Spear.stream!(c.conn, c.stream_name, from: one) |> Enum.take(1)
     end
+
+    test "a user can be CRUD-ed", c do
+      login_name = "spear-test-user-" <> Spear.Event.uuid_v4()
+      full_name = "Spear Test User (CRUD)"
+      password = "open sesame"
+      groups = []
+
+      assert Spear.create_user(c.conn, full_name, login_name, password, groups) == :ok
+
+      metadata = %Spear.StreamMetadata{acl: Spear.Acl.allow_all()}
+      assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
+
+      assert {:ok, %Spear.User{full_name: ^full_name, login_name: ^login_name, groups: ^groups}} =
+               Spear.user_details(c.conn, login_name)
+
+      full_name_updated = full_name <> " updated"
+
+      assert Spear.update_user(c.conn, full_name_updated, login_name, password, groups) == :ok
+
+      assert {:ok,
+              %Spear.User{full_name: ^full_name_updated, login_name: ^login_name, groups: ^groups}} =
+               Spear.user_details(c.conn, login_name)
+
+      assert {:ok, _events} =
+               Spear.read_stream(c.conn, c.stream_name, credentials: {login_name, password})
+
+      assert Spear.delete_user(c.conn, login_name) == :ok
+
+      assert {:error, %Spear.Grpc.Response{status: :not_found}} =
+               Spear.user_details(c.conn, login_name)
+    end
+
+    test "a disabled user cannot read from a stream", c do
+      login_name = "spear-test-user-" <> Spear.Event.uuid_v4()
+      full_name = "Spear Test User (CRUD)"
+      password = "open sesame"
+      groups = []
+
+      assert Spear.create_user(c.conn, full_name, login_name, password, groups) == :ok
+
+      assert Spear.disable_user(c.conn, login_name) == :ok
+
+      acl = %Spear.Acl{read: [login_name, "$admins"], write: [login_name, "$admins"]}
+      metadata = %Spear.StreamMetadata{acl: acl}
+      assert Spear.set_stream_metadata(c.conn, c.stream_name, metadata) == :ok
+      assert {:ok, %{acl: ^acl}} = Spear.get_stream_metadata(c.conn, c.stream_name)
+
+      assert {:ok, %Spear.User{login_name: ^login_name, enabled?: false}} =
+               Spear.user_details(c.conn, login_name)
+
+      assert {:error, reason} =
+               Spear.append([random_event()], c.conn, c.stream_name,
+                 credentials: {login_name, password}
+               )
+
+      assert reason.message =~ "401"
+
+      assert {:error, ^reason} =
+               Spear.read_stream(c.conn, c.stream_name, credentials: {login_name, password})
+
+      assert Spear.enable_user(c.conn, login_name) == :ok
+
+      assert {:ok, _events} =
+               Spear.read_stream(c.conn, c.stream_name, credentials: {login_name, password})
+
+      assert Spear.delete_user(c.conn, login_name) == :ok
+    end
   end
 
   describe "given a subscription to a stream" do
@@ -443,6 +510,28 @@ defmodule SpearTest do
       # this is mostly for coverage :(
       send(c.conn, :keep_alive)
       assert Spear.ping(c.conn) == :pong
+    end
+
+    test "you cannot operate on a user that does not exist", c do
+      login_name = "pichael"
+      full_name = "Pichael Thompson"
+      password = "changeit"
+
+      not_found = %Spear.Grpc.Response{
+        data: "",
+        message: "User '#{login_name}' is not found.",
+        status: :not_found,
+        status_code: 5
+      }
+
+      assert {:error, ^not_found} = Spear.update_user(c.conn, full_name, login_name, password, [])
+      assert {:error, ^not_found} = Spear.delete_user(c.conn, login_name)
+      assert {:error, ^not_found} = Spear.disable_user(c.conn, login_name)
+      assert {:error, ^not_found} = Spear.enable_user(c.conn, login_name)
+      assert {:error, ^not_found} = Spear.reset_user_password(c.conn, login_name, password)
+
+      assert {:error, ^not_found} =
+               Spear.change_user_password(c.conn, login_name, password, password)
     end
   end
 

@@ -59,9 +59,7 @@ defmodule Spear.Reading do
       )
 
     %Spear.Request{
-      service: :"event_store.client.streams.Streams",
-      service_module: :spear_proto_streams,
-      rpc: :Read,
+      api: {Spear.Records.Streams, :Read},
       messages: [message],
       credentials: params.credentials
     }

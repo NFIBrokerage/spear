@@ -209,6 +209,152 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.change_user_password/4`
+  """
+  @doc since: "0.3.0"
+  @callback change_user_password(
+              login_name :: String.t(),
+              current_password :: String.t(),
+              new_password :: String.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.change_user_password/5`
+  """
+  @doc since: "0.3.0"
+  @callback change_user_password(
+              login_name :: String.t(),
+              current_password :: String.t(),
+              new_password :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.create_user/5`
+  """
+  @doc since: "0.3.0"
+  @callback create_user(
+              full_name :: String.t(),
+              login_name :: String.t(),
+              password :: String.t(),
+              groups :: [String.t()]
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.create_user/6`
+  """
+  @doc since: "0.3.0"
+  @callback create_user(
+              full_name :: String.t(),
+              login_name :: String.t(),
+              password :: String.t(),
+              groups :: [String.t()],
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.delete_user/2`
+  """
+  @doc since: "0.3.0"
+  @callback delete_user(login_name :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.delete_user/3`
+  """
+  @doc since: "0.3.0"
+  @callback delete_user(
+              login_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.disable_user/2`
+  """
+  @doc since: "0.3.0"
+  @callback disable_user(login_name :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.disable_user/3`
+  """
+  @doc since: "0.3.0"
+  @callback disable_user(
+              login_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.enable_user/2`
+  """
+  @doc since: "0.3.0"
+  @callback enable_user(login_name :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.enable_user/3`
+  """
+  @doc since: "0.3.0"
+  @callback enable_user(
+              login_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.reset_user_password/3`
+  """
+  @doc since: "0.3.0"
+  @callback reset_user_password(
+              login_name :: String.t(),
+              new_password :: String.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.reset_user_password/4`
+  """
+  @doc since: "0.3.0"
+  @callback reset_user_password(
+              login_name :: String.t(),
+              new_password :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.update_user/5`
+  """
+  @doc since: "0.3.0"
+  @callback update_user(
+              full_name :: String.t(),
+              login_name :: String.t(),
+              password :: String.t(),
+              groups :: [String.t()]
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.update_user/6`
+  """
+  @doc since: "0.3.0"
+  @callback update_user(
+              full_name :: String.t(),
+              login_name :: String.t(),
+              password :: String.t(),
+              groups :: [String.t()],
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.user_details/3`
+  """
+  @doc since: "0.3.0"
+  @callback user_details(login_name :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.user_details/3`
+  """
+  @doc since: "0.3.0"
+  @callback user_details(
+              login_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -274,6 +420,46 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def get_stream_metadata(stream, opts \\ []) do
         Spear.get_stream_metadata(__MODULE__, stream, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def change_user_password(login_name, current_password, new_password, opts \\ []) do
+        Spear.change_user_password(__MODULE__, login_name, current_password, new_password, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def create_user(full_name, login_name, password, groups, opts \\ []) do
+        Spear.create_user(__MODULE__, full_name, login_name, password, groups, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def delete_user(login_name, opts \\ []) do
+        Spear.delete_user(__MODULE__, login_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def disable_user(login_name, opts \\ []) do
+        Spear.disable_user(__MODULE__, login_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def enable_user(login_name, opts \\ []) do
+        Spear.enable_user(__MODULE__, login_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def reset_user_password(login_name, new_password, opts \\ []) do
+        Spear.reset_user_password(__MODULE__, login_name, new_password, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def update_user(full_name, login_name, password, groups, opts \\ []) do
+        Spear.update_user(__MODULE__, full_name, login_name, password, groups, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def user_details(login_name, opts \\ []) do
+        Spear.user_details(__MODULE__, login_name, opts)
       end
     end
   end

@@ -1,11 +1,11 @@
 defmodule Spear.Records do
   @moduledoc false
 
+  @callback service_module() :: module()
+  @callback service() :: atom()
+
   @doc """
   a macro that extracts all records from the gpb generated .hrl files in src/
-  for a particular prefix
-
-  e.g. "event_store.client.streams."
 
   it turns them into little macros with Record.defrecord/2
   so they are easier to use/match-with in other files in Spear
@@ -18,21 +18,37 @@ defmodule Spear.Records do
 
   this is where that comes from!
   """
-  defmacro def_all_records(prefix, path) do
+  defmacro __using__(service_module: service_module) do
     quote do
       require Record
 
+      @behaviour unquote(__MODULE__)
+
+      prefix = (unquote(service_module).get_package_name() |> Atom.to_string()) <> "."
+
       records =
-        Record.extract_all(from: unquote(path))
+        Record.extract_all(from: Path.join(["src", "#{unquote(service_module)}.hrl"]))
         |> Enum.map(fn {name, attrs} -> {name, Atom.to_string(name), attrs} end)
         |> Enum.filter(fn {_name, string_name, _attrs} ->
-          String.starts_with?(string_name, unquote(prefix))
+          String.starts_with?(string_name, prefix)
         end)
-        |> Enum.map(&unquote(__MODULE__).with_short_name(&1, unquote(prefix)))
+        |> Enum.map(&unquote(__MODULE__).with_short_name(&1, prefix))
 
       for {name, short_name, attrs} <- records do
         Record.defrecord(short_name, name, attrs)
       end
+
+      @doc """
+      Returns the `:gpb`-generated service module
+      """
+      @impl unquote(__MODULE__)
+      def service_module, do: unquote(service_module)
+
+      @doc """
+      Returns the gRPC service name for the API
+      """
+      @impl unquote(__MODULE__)
+      def service, do: service_module().get_service_names() |> List.first()
     end
   end
 

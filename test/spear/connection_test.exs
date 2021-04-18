@@ -52,6 +52,6 @@ defmodule Spear.ConnectionTest do
 
     send(conn, :crypto.strong_rand_bytes(16))
 
-    refute_receive _
+    refute_receive _, 500
   end
 end

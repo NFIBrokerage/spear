@@ -63,8 +63,6 @@ defmodule Spear do
   contents extracted from the protobuf messages (indirectly via `:gpb`).
   """
 
-  import Spear.Records.Streams, only: [append_resp: 1]
-
   @doc """
   Collects an EventStoreDB stream into an enumerable
 
@@ -159,6 +157,7 @@ defmodule Spear do
       5
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec stream!(
           connection :: Spear.Connection.t(),
           stream_name :: String.t() | :all,
@@ -177,7 +176,11 @@ defmodule Spear do
       credentials: nil
     ]
 
-    opts = Keyword.merge(default_stream_opts, opts)
+    opts =
+      default_stream_opts
+      |> Keyword.merge(opts)
+      |> Keyword.put(:connection, connection)
+      |> Keyword.put(:stream, stream_name)
 
     through =
       if opts[:raw?] do
@@ -186,16 +189,7 @@ defmodule Spear do
         opts[:through]
       end
 
-    Spear.Reading.Stream.new!(
-      connection: connection,
-      stream: stream_name,
-      from: opts[:from],
-      max_count: opts[:chunk_size],
-      direction: opts[:direction],
-      resolve_links?: opts[:resolve_links?],
-      timeout: opts[:timeout]
-    )
-    |> through.()
+    Spear.Reading.Stream.new!(opts) |> through.()
   end
 
   @doc """
@@ -294,6 +288,7 @@ defmodule Spear do
       ]
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
@@ -308,7 +303,11 @@ defmodule Spear do
       credentials: nil
     ]
 
-    opts = Keyword.merge(default_read_opts, opts)
+    opts =
+      default_read_opts
+      |> Keyword.merge(opts)
+      |> Keyword.put(:connection, connection)
+      |> Keyword.put(:stream, stream_name)
 
     through =
       if opts[:raw?] do
@@ -317,19 +316,7 @@ defmodule Spear do
         opts[:through]
       end
 
-    chunk_read_response =
-      Spear.Reading.Stream.read_chunk(
-        connection: connection,
-        stream: stream_name,
-        from: opts[:from],
-        max_count: opts[:max_count],
-        filter: opts[:filter],
-        direction: opts[:direction],
-        resolve_links?: opts[:resolve_links?],
-        timeout: opts[:timeout]
-      )
-
-    case chunk_read_response do
+    case Spear.Reading.Stream.read_chunk(opts) do
       {:ok, stream} ->
         {:ok, through.(stream)}
 
@@ -381,6 +368,7 @@ defmodule Spear do
       {:error, %Spear.ExpectationViolation{current: 1, expected: :empty}}
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec append(
           event_stream :: Enumerable.t(),
           connection :: Spear.Connection.t(),
@@ -388,41 +376,37 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
-    # YARD gRPC timeout?
+    import Spear.Records.Streams, only: [append_resp: 1]
+
     default_write_opts = [
       expect: :any,
-      timeout: 5000,
       raw?: false,
-      credentials: nil
+      stream: stream_name
     ]
 
-    opts =
-      default_write_opts
-      |> Keyword.merge(opts)
-      |> Keyword.merge(event_stream: event_stream, stream: stream_name)
+    opts = default_write_opts |> Keyword.merge(opts)
+    params = Enum.into(opts, %{})
 
-    request = opts |> Enum.into(%{}) |> Spear.Writing.build_write_request()
+    messages =
+      [Spear.Writing.build_append_request(params)]
+      |> Stream.concat(event_stream)
+      |> Stream.map(&Spear.Writing.to_append_request/1)
 
-    with {:ok, %Spear.Connection.Response{} = response} <-
-           Connection.call(conn, {:request, request}, opts[:timeout]),
-         %Spear.Grpc.Response{status: :ok, data: append_resp(result: {:success, _})} <-
-           Spear.Grpc.Response.from_connection_response(response) do
-      :ok
-    else
-      # coveralls-ignore-start
-      {:error, reason} ->
-        {:error, reason}
+    case request(
+           conn,
+           Spear.Records.Streams,
+           :Append,
+           messages,
+           Keyword.take(opts, [:credentials, :timeout])
+         ) do
+      {:ok, append_resp(result: {:success, _})} ->
+        :ok
 
-      # coveralls-ignore-stop
-
-      %Spear.Grpc.Response{
-        status: :ok,
-        data: append_resp(result: {:wrong_expected_version, expectation_violation})
-      } ->
+      {:ok, append_resp(result: {:wrong_expected_version, expectation_violation})} ->
         {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
 
-      %Spear.Grpc.Response{} = response ->
-        {:error, response}
+      error ->
+        error
     end
   end
 
@@ -506,6 +490,7 @@ defmodule Spear do
       {:eos, :closed}
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec subscribe(
           connection :: Spear.Connection.t(),
           subscriber :: pid() | GenServer.name(),
@@ -565,6 +550,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec cancel_subscription(
           connection :: Spear.Connection.t(),
           subscription_reference :: reference(),
@@ -631,6 +617,7 @@ defmodule Spear do
       []
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec delete_stream(
           connection :: Spear.Connection.t(),
           stream_name :: String.t(),
@@ -649,23 +636,24 @@ defmodule Spear do
       |> Keyword.merge(opts)
       |> Keyword.put(:stream, stream_name)
 
-    request = opts |> Enum.into(%{}) |> Spear.Writing.build_delete_request()
+    rpc = if opts[:tombstone?], do: :Tombstone, else: :Delete
 
-    with {:ok, %Spear.Connection.Response{} = response} <-
-           Connection.call(conn, {:request, request}, opts[:timeout]),
-         %Spear.Grpc.Response{status: :ok} <-
-           Spear.Grpc.Response.from_connection_response(response) do
-      :ok
-    else
-      # coveralls-ignore-start
-      {:error, reason} -> {:error, reason}
-      # coveralls-ignore-stop
-      %Spear.Grpc.Response{} = response -> {:error, response}
+    messages = [Spear.Writing.build_delete_request(opts |> Enum.into(%{}))]
+
+    case request(
+           conn,
+           Spear.Records.Streams,
+           rpc,
+           messages,
+           Keyword.take(opts, [:credentials, :timeout])
+         ) do
+      {:ok, _response} -> :ok
+      error -> error
     end
   end
 
   @doc """
-  Pings the connection
+  Pings a connection
 
   This can be used to ensure that the connection process is alive, or to
   roughly measure the latency between the connection process and EventStoreDB.
@@ -676,6 +664,7 @@ defmodule Spear do
       :pong
   """
   @doc since: "0.1.2"
+  @doc api: :utils
   @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
   def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
 
@@ -706,6 +695,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.3"
+  @doc api: :utils
   @spec set_global_acl(
           connection :: Spear.Connection.t(),
           user_acl :: Spear.Acl.t(),
@@ -736,6 +726,7 @@ defmodule Spear do
       "$$es_supported_clients"
   """
   @doc since: "0.1.3"
+  @doc api: :utils
   @spec meta_stream(stream :: String.t()) :: String.t()
   def meta_stream(stream) when is_binary(stream), do: "$$" <> stream
 
@@ -767,6 +758,7 @@ defmodule Spear do
       {:ok, %Spear.StreamMetadata{max_count: 50_000, ..}}
   """
   @doc since: "0.1.3"
+  @doc api: :streams
   @spec get_stream_metadata(
           connection :: Spear.Connection.t(),
           stream :: String.t(),
@@ -818,6 +810,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.3"
+  @doc api: :streams
   @spec set_stream_metadata(
           connection :: Spear.Connection.t(),
           stream :: String.t(),
@@ -831,5 +824,396 @@ defmodule Spear do
     Spear.Event.new("$metadata", Spear.StreamMetadata.to_map(metadata))
     |> List.wrap()
     |> append(conn, meta_stream(stream), opts)
+  end
+
+  @doc """
+  Creates an EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec create_user(
+          Spear.Connection.t(),
+          String.t(),
+          String.t(),
+          String.t(),
+          [String.t()],
+          Keyword.t()
+        ) :: :ok | {:error, any()}
+  def create_user(conn, full_name, login_name, password, groups, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      create_req(
+        options:
+          create_req_options(
+            full_name: full_name,
+            login_name: login_name,
+            password: password,
+            groups: groups
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :Create, [message], opts) do
+      {:ok, create_resp()} ->
+        :ok
+
+      # I could not find a way to get to this failure branch (without the
+      # connection being closed ofc
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Updates an existing EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+      iex> Spear.update_user(conn, "Aladdin", "aladdin", "open sesame", ["$admins"], credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec update_user(
+          Spear.Connection.t(),
+          String.t(),
+          String.t(),
+          String.t(),
+          [String.t()],
+          Keyword.t()
+        ) :: :ok | {:error, any()}
+  def update_user(conn, full_name, login_name, password, groups, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      update_req(
+        options:
+          update_req_options(
+            full_name: full_name,
+            login_name: login_name,
+            password: password,
+            groups: groups
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :Update, [message], opts) do
+      {:ok, update_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Deletes a user from the EventStoreDB
+
+  EventStoreDB users are deleted by the `login_name` parameter as passed
+  to `Spear.create_user/6`.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+      iex> Spear.delete_user(conn, "aladdin", credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec delete_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  def delete_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = delete_req(options: delete_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Delete, [message], opts) do
+      {:ok, delete_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Enables a user to make requests against the EventStoreDB
+
+  Disabling and enabling users are an alternative to repeatedly creating and
+  deleting users and is suitable for when a user needs to be temporarily
+  denied access.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.disable_user(conn, "aladdin")
+      :ok
+      iex> Spear.enable_user(conn, "aladdin")
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec enable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  def enable_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = enable_req(options: enable_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Enable, [message], opts) do
+      {:ok, enable_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Disables a user's ability to make requests against the EventStoreDB
+
+  This can be used in conjunction with `Spear.enable_user/3` to temporarily
+  deny access to a user as an alternative to deleting and creating the user.
+  Enabling and disabling users does not require the password of the user:
+  just that requestor to be in the `$admins` group.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.enable_user(conn, "aladdin")
+      :ok
+      iex> Spear.disable_user(conn, "aladdin")
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec disable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  def disable_user(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = disable_req(options: disable_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Disable, [message], opts) do
+      {:ok, disable_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Fetches details about an EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"])
+      :ok
+      iex> Spear.user_details(conn, "aladdin")
+      {:ok,
+       %Spear.User{
+         enabled?: true,
+         full_name: "Aladdin",
+         groups: ["$ops"],
+         last_updated: ~U[2021-04-18 16:48:38.583313Z],
+         login_name: "aladdin"
+       }}
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec user_details(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  def user_details(conn, login_name, opts \\ []) do
+    import Spear.Records.Users
+
+    message = details_req(options: details_req_options(login_name: login_name))
+
+    case request(conn, Spear.Records.Users, :Details, [message], opts) do
+      {:ok, detail_stream} ->
+        details =
+          detail_stream
+          |> Enum.take(1)
+          |> List.first()
+          |> Spear.User.from_details_resp()
+
+        {:ok, details}
+
+      error ->
+        error
+    end
+  end
+
+  @doc """
+  Changes a user's password by providing the current password
+
+  This can be accomplished regardless of the current credentials since the
+  user's current password is provided.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "changeit", ["$ops"])
+      :ok
+      iex> Spear.change_user_password(conn, "aladdin", "changeit", "open sesame")
+      :ok
+  """
+  @doc api: :users
+  def change_user_password(conn, login_name, current_password, new_password, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      change_password_req(
+        options:
+          change_password_req_options(
+            login_name: login_name,
+            current_password: current_password,
+            new_password: new_password
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :ChangePassword, [message], opts) do
+      {:ok, change_password_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Resets a user's password
+
+  This can be only requested by a user in the `$admins` group. The current
+  password is not passed in this request, so this function is suitable for
+  setting a new password when the current password is lost.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "changeit", ["$ops"])
+      :ok
+      iex> Spear.reset_user_password(conn, "aladdin", "open sesame", credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
+  @doc api: :users
+  @spec reset_user_password(Spear.Connection.t(), String.t(), String.t(), Keyword.t()) ::
+          :ok | {:error, any()}
+  def reset_user_password(conn, login_name, new_password, opts \\ []) do
+    import Spear.Records.Users
+
+    message =
+      reset_password_req(
+        options:
+          reset_password_req_options(
+            login_name: login_name,
+            new_password: new_password
+          )
+      )
+
+    case request(conn, Spear.Records.Users, :ResetPassword, [message], opts) do
+      {:ok, reset_password_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Performs a generic request synchronously
+
+  This is appropriate for many operations across the Users, Streams, and
+  Operations APIs but not suitable for `Spear.subscribe/4` or the
+  Persistent Subscriptions API.
+
+  `message` must be an enumeration of records as created by the Record
+  Interfaces. Lazy stream enumerations are allowed and are not run until each
+  element is serialized over the wire.
+
+  This function is mostly used under-the-hood to implement functions in
+  `Spear` such as `Spear.create_user/5`, but may be used generically.
+
+  ## Options
+
+  * `:timeout` - (default: `5_000`ms - 5s) the GenServer timeout: the maximum
+    time allowed to wait for this request to complete.
+  * `:credentials` - (default: `nil`) the username and password to use to make
+    the request. Overrides the connection-level credentials if provided.
+    Connection-level credentials are used as the default if not provided.
+
+  ## Examples
+
+      iex> alias Spear.Records.Users
+      iex> require Users
+      iex> message = Users.enable_req(options: Users.enable_req_options(login_name: "my_user"))
+      iex> Spear.request(conn, Users, :Enable, [message], credentials: {"admin", "changeit"})
+      {:ok, Users.enable_resp()}
+  """
+  @doc since: "0.3.0"
+  @doc api: :utils
+  @spec request(Spear.Connection.t(), module(), atom(), Enumerable.t(), Keyword.t()) ::
+          {:ok, tuple() | Enumerable.t()} | {:error, any()}
+  def request(conn, api, rpc, messages, opts \\ []) do
+    opts =
+      [
+        timeout: 5_000,
+        credentials: nil,
+        raw?: false
+      ]
+      |> Keyword.merge(opts)
+
+    request =
+      %Spear.Request{
+        api: {api, rpc},
+        messages: messages,
+        credentials: opts[:credentials]
+      }
+      |> Spear.Request.expand()
+
+    with {:ok, %Spear.Connection.Response{} = response} <-
+           Connection.call(conn, {:request, request}, opts[:timeout]),
+         %Spear.Grpc.Response{status: :ok, data: data} <-
+           Spear.Grpc.Response.from_connection_response(response, request.rpc, opts[:raw?]) do
+      {:ok, data}
+    else
+      # coveralls-ignore-start
+      {:error, reason} -> {:error, reason}
+      # coveralls-ignore-stop
+      %Spear.Grpc.Response{} = response -> {:error, response}
+    end
+  end
+
+  @doc """
+  Parses an EventStoreDB timestamp into a `DateTime.t()` in UTC time.
+
+  ## Examples
+
+      iex> Spear.parse_stamp(16187636458580612)
+      {:ok, ~U[2021-04-18 16:34:05.858061Z]}
+  """
+  @doc since: "0.3.0"
+  @doc api: :utils
+  @spec parse_stamp(pos_integer()) :: {:ok, DateTime.t()} | {:error, atom()}
+  def parse_stamp(ticks_since_epoch) when is_integer(ticks_since_epoch) do
+    ticks_since_epoch
+    |> div(10)
+    |> DateTime.from_unix(:microsecond)
   end
 end
