@@ -44,14 +44,14 @@ if present.
 
 ## Using custom TLS certificates with Spear
 
-A `Spear.Connection` takes an `:opts` option which is passed to
+A `Spear.Connection` takes an `:mint_opts` option which is passed to
 `Mint.HTTP.connect/4`. We can inform mint of our custom `./certs/ca/ca.crt`
 CA certificate like so:
 
 ```elixir
 connection_config = [
   connection_string: "esdb://localhost:2113?tls=true",
-  opts: [
+  mint_opts: [
     transport_opts: [
       cacertfile: Path.join([__DIR__ | ~w(certs ca ca.crt)])
     ]
@@ -102,15 +102,13 @@ connection_config = [
 ## Credentials
 
 Now that TLS is enabled, we can safely pass basic-auth credentials over the
-network. `Spear.Connection` accepts a `:credentials` option as a two-tuple
-of `{username, password}`. E.g. with the default login credentials, a
-connection can be configured like so:
+network. `Spear.Connection` accepts credentials through the connection string
+or via the `:username` and `:password` options.
 
 ```elixir
 connection_config = [
-  connection_string: "esdb://localhost:2113?tls=true",
-  credentials: {"admin", "changeit"},
-  opts: [
+  connection_string: "esdb://admin:changeit@localhost:2113?tls=true",
+  mint_opts: [
     transport_opts: [
       cacertfile: Path.join([__DIR__ | ~w(certs ca ca.crt)])
     ]
