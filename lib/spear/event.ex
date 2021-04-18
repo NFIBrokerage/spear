@@ -407,12 +407,9 @@ defmodule Spear.Event do
   defp parse_created_stamp(nil), do: nil
 
   defp parse_created_stamp(stamp) when is_binary(stamp) do
-    significant_size = byte_size(stamp) - 1
-
-    with <<with_last_byte_cut::binary-size(significant_size), _::binary>> <- stamp,
-         {unix_stamp, <<>>} <- Integer.parse(with_last_byte_cut),
-         {:ok, parsed} <- DateTime.from_unix(unix_stamp, :microsecond) do
-      parsed
+    with {ticks_since_epoch, ""} <- Integer.parse(stamp),
+         {:ok, datetime} <- Spear.parse_stamp(ticks_since_epoch) do
+      datetime
     else
       _ -> nil
     end
