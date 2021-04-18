@@ -1,4 +1,4 @@
-alias Spear.{Connection.Response, Grpc}
+alias Spear.{Connection.Response, Grpc, Rpc}
 
 defmodule Grpc.Response do
   @moduledoc false
@@ -31,7 +31,7 @@ defmodule Grpc.Response do
     16 => :unauthenticated
   }
 
-  def from_connection_response(%Response{status: status}) when status != 200 do
+  def from_connection_response(%Response{status: status}, _request, _raw?) when status != 200 do
     %__MODULE__{
       status_code: 2,
       status: :unknown,
@@ -39,9 +39,9 @@ defmodule Grpc.Response do
     }
   end
 
-  def from_connection_response(%Response{type: type, headers: headers, data: data, status: 200}) do
+  def from_connection_response(%Response{headers: headers, data: data, status: 200}, rpc, raw?) do
     with {"grpc-status", "0"} <- List.keyfind(headers, "grpc-status", 0),
-         {parsed_data, <<>>} <- Grpc.decode_next_message(data, type) do
+         {:ok, parsed_data} <- parse_data(data, rpc, raw?) do
       %__MODULE__{
         status_code: 0,
         status: :ok,
@@ -62,12 +62,40 @@ defmodule Grpc.Response do
           data: data
         }
 
-      nil ->
+      _ ->
         %__MODULE__{
           status_code: 13,
           status: :internal,
           message: "Error parsing response proto"
         }
+    end
+  end
+
+  defp parse_data(data, rpc, raw?)
+
+  defp parse_data(data, _rpc, _raw? = true), do: {:ok, data}
+
+  defp parse_data(data, %Rpc{response_stream?: false} = rpc, _raw?) do
+    case Grpc.decode_next_message(data, {rpc.service_module, rpc.response_type}) do
+      {parsed, <<>>} -> {:ok, parsed}
+      _ -> :error
+    end
+  end
+
+  defp parse_data(data, %Rpc{response_stream?: true} = rpc, _raw?) do
+    import Spear.Records.Streams, only: [read_resp: 1, read_resp_stream_not_found: 0]
+
+    parse_chunk = &Spear.Grpc.decode_next_message(&1, {rpc.service_module, rpc.response_type})
+
+    case parse_chunk.(data) do
+      {read_resp(content: {:stream_not_found, read_resp_stream_not_found()}), _rest} ->
+        {:ok, []}
+
+      {_message, _rest} ->
+        {:ok, Stream.unfold(data, parse_chunk)}
+
+      _ ->
+        :error
     end
   end
 

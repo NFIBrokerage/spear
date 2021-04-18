@@ -35,24 +35,6 @@ defmodule Spear.Writing do
   end
 
   def build_delete_request(%{tombstone?: false} = params) do
-    %Spear.Request{
-      api: {Spear.Records.Streams, :Delete},
-      messages: [build_delete_message(params)],
-      credentials: params.credentials
-    }
-    |> Spear.Request.expand()
-  end
-
-  def build_delete_request(%{tombstone?: true} = params) do
-    %Spear.Request{
-      api: {Spear.Records.Streams, :Tombstone},
-      messages: [build_delete_message(params)],
-      credentials: params.credentials
-    }
-    |> Spear.Request.expand()
-  end
-
-  defp build_delete_message(%{tombstone?: false} = params) do
     delete_req(
       options:
         delete_req_options(
@@ -62,7 +44,7 @@ defmodule Spear.Writing do
     )
   end
 
-  defp build_delete_message(%{tombstone?: true} = params) do
+  def build_delete_request(%{tombstone?: true} = params) do
     tombstone_req(
       options:
         tombstone_req_options(

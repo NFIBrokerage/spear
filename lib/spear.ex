@@ -176,7 +176,11 @@ defmodule Spear do
       credentials: nil
     ]
 
-    opts = Keyword.merge(default_stream_opts, opts)
+    opts =
+      default_stream_opts
+      |> Keyword.merge(opts)
+      |> Keyword.put(:connection, connection)
+      |> Keyword.put(:stream, stream_name)
 
     through =
       if opts[:raw?] do
@@ -185,16 +189,7 @@ defmodule Spear do
         opts[:through]
       end
 
-    Spear.Reading.Stream.new!(
-      connection: connection,
-      stream: stream_name,
-      from: opts[:from],
-      max_count: opts[:chunk_size],
-      direction: opts[:direction],
-      resolve_links?: opts[:resolve_links?],
-      timeout: opts[:timeout]
-    )
-    |> through.()
+    Spear.Reading.Stream.new!(opts) |> through.()
   end
 
   @doc """
@@ -308,7 +303,11 @@ defmodule Spear do
       credentials: nil
     ]
 
-    opts = Keyword.merge(default_read_opts, opts)
+    opts =
+      default_read_opts
+      |> Keyword.merge(opts)
+      |> Keyword.put(:connection, connection)
+      |> Keyword.put(:stream, stream_name)
 
     through =
       if opts[:raw?] do
@@ -317,19 +316,7 @@ defmodule Spear do
         opts[:through]
       end
 
-    chunk_read_response =
-      Spear.Reading.Stream.read_chunk(
-        connection: connection,
-        stream: stream_name,
-        from: opts[:from],
-        max_count: opts[:max_count],
-        filter: opts[:filter],
-        direction: opts[:direction],
-        resolve_links?: opts[:resolve_links?],
-        timeout: opts[:timeout]
-      )
-
-    case chunk_read_response do
+    case Spear.Reading.Stream.read_chunk(opts) do
       {:ok, stream} ->
         {:ok, through.(stream)}
 
@@ -649,18 +636,19 @@ defmodule Spear do
       |> Keyword.merge(opts)
       |> Keyword.put(:stream, stream_name)
 
-    request = opts |> Enum.into(%{}) |> Spear.Writing.build_delete_request()
+    rpc = if opts[:tombstone?], do: :Tombstone, else: :Delete
 
-    with {:ok, %Spear.Connection.Response{} = response} <-
-           Connection.call(conn, {:request, request}, opts[:timeout]),
-         %Spear.Grpc.Response{status: :ok} <-
-           Spear.Grpc.Response.from_connection_response(response) do
-      :ok
-    else
-      # coveralls-ignore-start
-      {:error, reason} -> {:error, reason}
-      # coveralls-ignore-stop
-      %Spear.Grpc.Response{} = response -> {:error, response}
+    messages = [Spear.Writing.build_delete_request(opts |> Enum.into(%{}))]
+
+    case request(
+           conn,
+           Spear.Records.Streams,
+           rpc,
+           messages,
+           Keyword.take(opts, [:credentials, :timeout])
+         ) do
+      {:ok, _response} -> :ok
+      error -> error
     end
   end
 
@@ -875,8 +863,15 @@ defmodule Spear do
       )
 
     case request(conn, Spear.Records.Users, :Create, [message], opts) do
-      {:ok, create_resp()} -> :ok
-      error -> error
+      {:ok, create_resp()} ->
+        :ok
+
+      # I could not find a way to get to this failure branch (without the
+      # connection being closed ofc
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -949,7 +944,7 @@ defmodule Spear do
 
     message = delete_req(options: delete_req_options(login_name: login_name))
 
-    case request(conn, Spear.Records.Users, :Update, [message], opts) do
+    case request(conn, Spear.Records.Users, :Delete, [message], opts) do
       {:ok, delete_resp()} -> :ok
       error -> error
     end
@@ -1050,8 +1045,17 @@ defmodule Spear do
     message = details_req(options: details_req_options(login_name: login_name))
 
     case request(conn, Spear.Records.Users, :Details, [message], opts) do
-      {:ok, details_resp() = details_resp} -> {:ok, Spear.User.from_details_resp(details_resp)}
-      error -> error
+      {:ok, detail_stream} ->
+        details =
+          detail_stream
+          |> Enum.take(1)
+          |> List.first()
+          |> Spear.User.from_details_resp()
+
+        {:ok, details}
+
+      error ->
+        error
     end
   end
 
@@ -1166,8 +1170,14 @@ defmodule Spear do
   @doc api: :utils
   @spec request(Spear.Connection.t(), module(), atom(), Enumerable.t(), Keyword.t()) ::
           {:ok, tuple() | Enumerable.t()} | {:error, any()}
-  def request(conn, api, rpc, messages, opts) do
-    opts = [timeout: 5_000, credentials: nil] |> Keyword.merge(opts)
+  def request(conn, api, rpc, messages, opts \\ []) do
+    opts =
+      [
+        timeout: 5_000,
+        credentials: nil,
+        raw?: false
+      ]
+      |> Keyword.merge(opts)
 
     request =
       %Spear.Request{
@@ -1180,7 +1190,7 @@ defmodule Spear do
     with {:ok, %Spear.Connection.Response{} = response} <-
            Connection.call(conn, {:request, request}, opts[:timeout]),
          %Spear.Grpc.Response{status: :ok, data: data} <-
-           Spear.Grpc.Response.from_connection_response(response) do
+           Spear.Grpc.Response.from_connection_response(response, request.rpc, opts[:raw?]) do
       {:ok, data}
     else
       # coveralls-ignore-start
