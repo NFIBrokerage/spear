@@ -92,9 +92,7 @@ defmodule Spear.Reading.Stream do
 
   defp build_request(message, credentials) do
     %Spear.Request{
-      service: :"event_store.client.streams.Streams",
-      service_module: :spear_proto_streams,
-      rpc: :Read,
+      api: {Spear.Records.Streams, :Read},
       messages: [message],
       credentials: credentials
     }

@@ -23,21 +23,7 @@ defmodule Spear.Writing do
 
   alias Spear.ExpectationViolation
 
-  def build_write_request(params) do
-    messages =
-      [build_append_request(params)]
-      |> Stream.concat(params.event_stream)
-      |> Stream.map(&to_append_request/1)
-
-    %Spear.Request{
-      api: {Spear.Records.Streams, :Append},
-      messages: messages,
-      credentials: params.credentials
-    }
-    |> Spear.Request.expand()
-  end
-
-  defp build_append_request(params) do
+  def build_append_request(params) do
     append_req(
       content:
         {:options,
@@ -93,11 +79,11 @@ defmodule Spear.Writing do
   defp map_expectation(:exists), do: {:stream_exists, empty()}
   defp map_expectation(_), do: {:any, empty()}
 
-  defp to_append_request(%Spear.Event{} = event) do
+  def to_append_request(%Spear.Event{} = event) do
     Spear.Event.to_proposed_message(event)
   end
 
-  defp to_append_request(append_req() = request), do: request
+  def to_append_request(append_req() = request), do: request
 
   # N.B. there are fields in here
   # - current_revision_option_20_6_0

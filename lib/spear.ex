@@ -391,41 +391,35 @@ defmodule Spear do
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
     import Spear.Records.Streams, only: [append_resp: 1]
 
-    # YARD gRPC timeout?
     default_write_opts = [
       expect: :any,
-      timeout: 5000,
       raw?: false,
-      credentials: nil
+      stream: stream_name
     ]
 
-    opts =
-      default_write_opts
-      |> Keyword.merge(opts)
-      |> Keyword.merge(event_stream: event_stream, stream: stream_name)
+    opts = default_write_opts |> Keyword.merge(opts)
+    params = Enum.into(opts, %{})
 
-    request = opts |> Enum.into(%{}) |> Spear.Writing.build_write_request()
+    messages =
+      [Spear.Writing.build_append_request(params)]
+      |> Stream.concat(event_stream)
+      |> Stream.map(&Spear.Writing.to_append_request/1)
 
-    with {:ok, %Spear.Connection.Response{} = response} <-
-           Connection.call(conn, {:request, request}, opts[:timeout]),
-         %Spear.Grpc.Response{status: :ok, data: append_resp(result: {:success, _})} <-
-           Spear.Grpc.Response.from_connection_response(response) do
-      :ok
-    else
-      # coveralls-ignore-start
-      {:error, reason} ->
-        {:error, reason}
+    case request(
+           conn,
+           Spear.Records.Streams,
+           :Append,
+           messages,
+           Keyword.take(opts, [:credentials, :timeout])
+         ) do
+      {:ok, append_resp(result: {:success, _})} ->
+        :ok
 
-      # coveralls-ignore-stop
-
-      %Spear.Grpc.Response{
-        status: :ok,
-        data: append_resp(result: {:wrong_expected_version, expectation_violation})
-      } ->
+      {:ok, append_resp(result: {:wrong_expected_version, expectation_violation})} ->
         {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
 
-      %Spear.Grpc.Response{} = response ->
-        {:error, response}
+      error ->
+        error
     end
   end
 
