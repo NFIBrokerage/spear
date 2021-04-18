@@ -296,7 +296,7 @@ defmodule Spear.Connection do
       {:ok, conn, request_ref} ->
         s = put_in(s.conn, conn)
         s = update_in(s.keep_alive_timer, &KeepAliveTimer.start_timeout_timer(&1, request_ref))
-        # put request ref
+
         {:noreply, s}
 
       # coveralls-ignore-start
