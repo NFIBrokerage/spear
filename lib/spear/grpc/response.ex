@@ -73,7 +73,7 @@ defmodule Grpc.Response do
 
   defp parse_data(data, rpc, raw?)
 
-  defp parse_data(data, _rpc, _raw? = true), do: {:ok, data}
+  defp parse_data(data, _rpc, true), do: {:ok, data}
 
   defp parse_data(data, %Rpc{response_stream?: false} = rpc, _raw?) do
     case Grpc.decode_next_message(data, {rpc.service_module, rpc.response_type}) do
