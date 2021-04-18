@@ -33,6 +33,8 @@ defmodule Spear.Connection.Configuration do
     a keep-alive ping when the ping will be considered unacknowledged. Used
     in conjunction with `:keep_alive_interval`. Set to `-1` to disable
     keep-alive checks. Should be any integer value `>= 10_000`.
+
+  See the `Spear.Connection` module docs for more information about keep-alive.
   """
   @moduledoc since: "0.2.0"
 

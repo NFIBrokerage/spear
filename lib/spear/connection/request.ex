@@ -200,7 +200,10 @@ defmodule Spear.Connection.Request do
 
   def continue_requests(state) do
     state.requests
-    |> Enum.filter(fn {_request_ref, request} -> request.status == :streaming end)
+    |> Enum.filter(fn
+      {_request_ref, %__MODULE__{} = request} -> request.status == :streaming
+      _ -> false
+    end)
     |> Enum.reduce(state, fn {request_ref, request}, state ->
       case emit_messages(state, request) do
         {:ok, state} ->
