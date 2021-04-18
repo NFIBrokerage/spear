@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Refactor.CyclomaticComplexity
 defmodule Spear.Client do
   @moduledoc """
   A macro for defining a module which represents a connection to an EventStoreDB
