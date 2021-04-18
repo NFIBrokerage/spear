@@ -155,6 +155,59 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: {:ok, reference()} | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.set_global_acl/3`
+  """
+  @doc since: "0.1.0"
+  @callback set_global_acl(
+              user_acl :: Spear.Acl.t(),
+              system_acl :: Spear.Acl.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.set_global_acl/4`
+  """
+  @doc since: "0.1.0"
+  @callback set_global_acl(
+              user_acl :: Spear.Acl.t(),
+              system_acl :: Spear.Acl.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.set_stream_metadata/3`
+  """
+  @doc since: "0.2.1"
+  @callback set_stream_metadata(
+              stream :: String.t(),
+              metadata :: Spear.StreamMetadata.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.set_stream_metadata/4`
+  """
+  @doc since: "0.2.1"
+  @callback set_stream_metadata(
+              stream :: String.t(),
+              metadata :: Spear.StreamMetadata.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_stream_metadata/2`
+  """
+  @doc since: "0.2.1"
+  @callback get_stream_metadata(stream :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_stream_metadata/3`
+  """
+  @doc since: "0.2.1"
+  @callback get_stream_metadata(
+              stream :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -205,6 +258,21 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def ping(timeout \\ 5_000) do
         Spear.ping(__MODULE__, timeout)
+      end
+
+      @impl unquote(__MODULE__)
+      def set_global_acl(user_acl, system_acl, opts \\ []) do
+        Spear.set_global_acl(__MODULE__, user_acl, system_acl, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def set_stream_metadata(stream, metadata, opts \\ []) do
+        Spear.set_stream_metadata(__MODULE__, stream, metadata, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def get_stream_metadata(stream, opts \\ []) do
+        Spear.get_stream_metadata(__MODULE__, stream, opts)
       end
     end
   end
