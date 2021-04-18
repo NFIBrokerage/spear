@@ -63,8 +63,6 @@ defmodule Spear do
   contents extracted from the protobuf messages (indirectly via `:gpb`).
   """
 
-  import Spear.Records.Streams, only: [append_resp: 1]
-
   @doc """
   Collects an EventStoreDB stream into an enumerable
 
@@ -159,6 +157,7 @@ defmodule Spear do
       5
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec stream!(
           connection :: Spear.Connection.t(),
           stream_name :: String.t() | :all,
@@ -294,6 +293,7 @@ defmodule Spear do
       ]
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
@@ -381,6 +381,7 @@ defmodule Spear do
       {:error, %Spear.ExpectationViolation{current: 1, expected: :empty}}
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec append(
           event_stream :: Enumerable.t(),
           connection :: Spear.Connection.t(),
@@ -388,6 +389,8 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
+    import Spear.Records.Streams, only: [append_resp: 1]
+
     # YARD gRPC timeout?
     default_write_opts = [
       expect: :any,
@@ -506,6 +509,7 @@ defmodule Spear do
       {:eos, :closed}
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec subscribe(
           connection :: Spear.Connection.t(),
           subscriber :: pid() | GenServer.name(),
@@ -565,6 +569,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec cancel_subscription(
           connection :: Spear.Connection.t(),
           subscription_reference :: reference(),
@@ -631,6 +636,7 @@ defmodule Spear do
       []
   """
   @doc since: "0.1.0"
+  @doc api: :streams
   @spec delete_stream(
           connection :: Spear.Connection.t(),
           stream_name :: String.t(),
@@ -676,6 +682,7 @@ defmodule Spear do
       :pong
   """
   @doc since: "0.1.2"
+  @doc api: :utils
   @spec ping(connection :: Spear.Connection.t(), timeout()) :: :pong | {:error, any()}
   def ping(conn, timeout \\ 5_000), do: Connection.call(conn, :ping, timeout)
 
@@ -706,6 +713,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.3"
+  @doc api: :utils
   @spec set_global_acl(
           connection :: Spear.Connection.t(),
           user_acl :: Spear.Acl.t(),
@@ -736,6 +744,7 @@ defmodule Spear do
       "$$es_supported_clients"
   """
   @doc since: "0.1.3"
+  @doc api: :utils
   @spec meta_stream(stream :: String.t()) :: String.t()
   def meta_stream(stream) when is_binary(stream), do: "$$" <> stream
 
@@ -767,6 +776,7 @@ defmodule Spear do
       {:ok, %Spear.StreamMetadata{max_count: 50_000, ..}}
   """
   @doc since: "0.1.3"
+  @doc api: :streams
   @spec get_stream_metadata(
           connection :: Spear.Connection.t(),
           stream :: String.t(),
@@ -818,6 +828,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.3"
+  @doc api: :streams
   @spec set_stream_metadata(
           connection :: Spear.Connection.t(),
           stream :: String.t(),
@@ -833,6 +844,7 @@ defmodule Spear do
     |> append(conn, meta_stream(stream), opts)
   end
 
+  @doc api: :users
   def create_user(conn, full_name, login_name, password, groups, opts \\ []) do
     import Spear.Records.Users
 
@@ -853,6 +865,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def update_user(conn, full_name, login_name, password, groups, opts \\ []) do
     import Spear.Records.Users
 
@@ -873,6 +886,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def delete_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -884,6 +898,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def enable_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -895,6 +910,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def disable_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -906,6 +922,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def user_details(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -917,6 +934,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def change_user_password(conn, login_name, current_password, new_password, opts \\ []) do
     import Spear.Records.Users
 
@@ -936,6 +954,7 @@ defmodule Spear do
     end
   end
 
+  @doc api: :users
   def reset_user_password(conn, login_name, new_password, opts \\ []) do
     import Spear.Records.Users
 
@@ -985,6 +1004,7 @@ defmodule Spear do
       {:ok, Users.enable_resp()}
   """
   @doc since: "0.3.0"
+  @doc api: :utils
   @spec request(Spear.Connection.t(), module(), atom(), Enumerable.t(), Keyword.t()) ::
           {:ok, tuple() | Enumerable.t()} | {:error, any()}
   def request(conn, api, rpc, messages, opts) do
@@ -1015,6 +1035,8 @@ defmodule Spear do
   Parses an EventStoreDB timestamp into a `DateTime.t()` in UTC time.
   """
   @doc since: "0.3.0"
+  @doc api: :utils
+  @spec parse_stamp(pos_integer()) :: {:ok, DateTime.t()} | {:error, atom()}
   def parse_stamp(ticks_since_epoch) when is_integer(ticks_since_epoch) do
     ticks_since_epoch
     |> div(10)

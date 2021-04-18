@@ -96,6 +96,15 @@ defmodule Spear.MixProject do
         Guides: Path.wildcard("guides/*.md")
       ],
       groups_for_modules: [
+        "Structures and Types": [
+          Spear.Acl,
+          Spear.Connection.Configuration,
+          Spear.Event,
+          Spear.ExpectationViolation,
+          Spear.Filter.Checkpoint,
+          Spear.StreamMetadata,
+          Spear.User
+        ],
         "Record interfaces": [
           Spear.Records.Shared,
           Spear.Records.Streams,
@@ -104,6 +113,15 @@ defmodule Spear.MixProject do
           Spear.Records.Persistent,
           Spear.Records.Users
         ]
+      ],
+      groups_for_functions: [
+        "Utility Functions": & &1[:api] == :utils,
+        Streams: & &1[:api] == :streams,
+        Users: & &1[:api] == :users,
+        Operations: & &1[:api] == :operations,
+        Projections: & &1[:api] == :projections,
+        "Persistent Subscriptions": & &1[:api] == :persistent,
+        Gossip: & &1[:api] == :gossip
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"

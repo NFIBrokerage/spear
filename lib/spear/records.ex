@@ -41,8 +41,14 @@ defmodule Spear.Records do
         Record.defrecord(short_name, name, attrs)
       end
 
+      @doc """
+      Returns the `:gpb`-generated service module
+      """
       def service_module, do: unquote(service_module)
 
+      @doc """
+      Returns the gRPC service name for the API
+      """
       def service, do: service_module().get_service_names() |> List.first()
     end
   end
