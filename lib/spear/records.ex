@@ -6,9 +6,6 @@ defmodule Spear.Records do
 
   @doc """
   a macro that extracts all records from the gpb generated .hrl files in src/
-  for a particular prefix
-
-  e.g. "event_store.client.streams."
 
   it turns them into little macros with Record.defrecord/2
   so they are easier to use/match-with in other files in Spear
@@ -21,7 +18,7 @@ defmodule Spear.Records do
 
   this is where that comes from!
   """
-  defmacro from_hrl(service_module) do
+  defmacro __using__(service_module: service_module) do
     quote do
       require Record
 
@@ -44,11 +41,13 @@ defmodule Spear.Records do
       @doc """
       Returns the `:gpb`-generated service module
       """
+      @impl unquote(__MODULE__)
       def service_module, do: unquote(service_module)
 
       @doc """
       Returns the gRPC service name for the API
       """
+      @impl unquote(__MODULE__)
       def service, do: service_module().get_service_names() |> List.first()
     end
   end
