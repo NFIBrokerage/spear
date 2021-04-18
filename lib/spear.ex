@@ -665,7 +665,7 @@ defmodule Spear do
   end
 
   @doc """
-  Pings the connection
+  Pings a connection
 
   This can be used to ensure that the connection process is alive, or to
   roughly measure the latency between the connection process and EventStoreDB.
@@ -838,7 +838,28 @@ defmodule Spear do
     |> append(conn, meta_stream(stream), opts)
   end
 
+  @doc """
+  Creates an EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec create_user(
+          Spear.Connection.t(),
+          String.t(),
+          String.t(),
+          String.t(),
+          [String.t()],
+          Keyword.t()
+        ) :: :ok | {:error, any()}
   def create_user(conn, full_name, login_name, password, groups, opts \\ []) do
     import Spear.Records.Users
 
@@ -859,7 +880,30 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Updates an existing EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+      iex> Spear.update_user(conn, "Aladdin", "aladdin", "open sesame", ["$admins"], credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec update_user(
+          Spear.Connection.t(),
+          String.t(),
+          String.t(),
+          String.t(),
+          [String.t()],
+          Keyword.t()
+        ) :: :ok | {:error, any()}
   def update_user(conn, full_name, login_name, password, groups, opts \\ []) do
     import Spear.Records.Users
 
@@ -880,7 +924,26 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Deletes a user from the EventStoreDB
+
+  EventStoreDB users are deleted by the `login_name` parameter as passed
+  to `Spear.create_user/6`.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"], credentials: {"admin", "changeit"})
+      :ok
+      iex> Spear.delete_user(conn, "aladdin", credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec delete_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
   def delete_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -892,7 +955,27 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Enables a user to make requests against the EventStoreDB
+
+  Disabling and enabling users are an alternative to repeatedly creating and
+  deleting users and is suitable for when a user needs to be temporarily
+  denied access.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.disable_user(conn, "aladdin")
+      :ok
+      iex> Spear.enable_user(conn, "aladdin")
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec enable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
   def enable_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -904,7 +987,28 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Disables a user's ability to make requests against the EventStoreDB
+
+  This can be used in conjunction with `Spear.enable_user/3` to temporarily
+  deny access to a user as an alternative to deleting and creating the user.
+  Enabling and disabling users does not require the password of the user:
+  just that requestor to be in the `$admins` group.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.enable_user(conn, "aladdin")
+      :ok
+      iex> Spear.disable_user(conn, "aladdin")
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec disable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
   def disable_user(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -916,7 +1020,30 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Fetches details about an EventStoreDB user
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "open sesame", ["$ops"])
+      :ok
+      iex> Spear.user_details(conn, "aladdin")
+      {:ok,
+       %Spear.User{
+         enabled?: true,
+         full_name: "Aladdin",
+         groups: ["$ops"],
+         last_updated: ~U[2021-04-18 16:48:38.583313Z],
+         login_name: "aladdin"
+       }}
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec user_details(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
   def user_details(conn, login_name, opts \\ []) do
     import Spear.Records.Users
 
@@ -928,6 +1055,23 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Changes a user's password by providing the current password
+
+  This can be accomplished regardless of the current credentials since the
+  user's current password is provided.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "changeit", ["$ops"])
+      :ok
+      iex> Spear.change_user_password(conn, "aladdin", "changeit", "open sesame")
+      :ok
+  """
   @doc api: :users
   def change_user_password(conn, login_name, current_password, new_password, opts \\ []) do
     import Spear.Records.Users
@@ -948,7 +1092,28 @@ defmodule Spear do
     end
   end
 
+  @doc """
+  Resets a user's password
+
+  This can be only requested by a user in the `$admins` group. The current
+  password is not passed in this request, so this function is suitable for
+  setting a new password when the current password is lost.
+
+  ## Options
+
+  All options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_user(conn, "Aladdin", "aladdin", "changeit", ["$ops"])
+      :ok
+      iex> Spear.reset_user_password(conn, "aladdin", "open sesame", credentials: {"admin", "changeit"})
+      :ok
+  """
+  @doc since: "0.3.0"
   @doc api: :users
+  @spec reset_user_password(Spear.Connection.t(), String.t(), String.t(), Keyword.t()) ::
+          :ok | {:error, any()}
   def reset_user_password(conn, login_name, new_password, opts \\ []) do
     import Spear.Records.Users
 
@@ -1027,6 +1192,11 @@ defmodule Spear do
 
   @doc """
   Parses an EventStoreDB timestamp into a `DateTime.t()` in UTC time.
+
+  ## Examples
+
+      iex> Spear.parse_stamp(16187636458580612)
+      {:ok, ~U[2021-04-18 16:34:05.858061Z]}
   """
   @doc since: "0.3.0"
   @doc api: :utils

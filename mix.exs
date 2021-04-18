@@ -115,13 +115,13 @@ defmodule Spear.MixProject do
         ]
       ],
       groups_for_functions: [
-        "Utility Functions": & &1[:api] == :utils,
-        Streams: & &1[:api] == :streams,
-        Users: & &1[:api] == :users,
-        Operations: & &1[:api] == :operations,
-        Projections: & &1[:api] == :projections,
-        "Persistent Subscriptions": & &1[:api] == :persistent,
-        Gossip: & &1[:api] == :gossip
+        "Utility Functions": &(&1[:api] == :utils),
+        Streams: &(&1[:api] == :streams),
+        Users: &(&1[:api] == :users),
+        Operations: &(&1[:api] == :operations),
+        Projections: &(&1[:api] == :projections),
+        "Persistent Subscriptions": &(&1[:api] == :persistent),
+        Gossip: &(&1[:api] == :gossip)
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"

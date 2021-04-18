@@ -36,12 +36,12 @@ defmodule Spear.User do
   """
   @typedoc since: "0.3.0"
   @type t :: %__MODULE__{
-    login_name: String.t(),
-    full_name: String.t(),
-    groups: [String.t()],
-    last_updated: DateTime.t(),
-    enabled?: boolean()
-  }
+          login_name: String.t(),
+          full_name: String.t(),
+          groups: [String.t()],
+          last_updated: DateTime.t(),
+          enabled?: boolean()
+        }
 
   defstruct ~w[login_name full_name groups last_updated enabled?]a
 
