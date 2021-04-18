@@ -30,9 +30,7 @@ defmodule Spear.Writing do
       |> Stream.map(&to_append_request/1)
 
     %Spear.Request{
-      service: :"event_store.client.streams.Streams",
-      service_module: :spear_proto_streams,
-      rpc: :Append,
+      api: {Spear.Records.Streams, :Append},
       messages: messages,
       credentials: params.credentials
     }
@@ -52,9 +50,7 @@ defmodule Spear.Writing do
 
   def build_delete_request(%{tombstone?: false} = params) do
     %Spear.Request{
-      service: :"event_store.client.streams.Streams",
-      service_module: :spear_proto_streams,
-      rpc: :Delete,
+      api: {Spear.Records.Streams, :Delete},
       messages: [build_delete_message(params)],
       credentials: params.credentials
     }
@@ -63,9 +59,7 @@ defmodule Spear.Writing do
 
   def build_delete_request(%{tombstone?: true} = params) do
     %Spear.Request{
-      service: :"event_store.client.streams.Streams",
-      service_module: :spear_proto_streams,
-      rpc: :Tombstone,
+      api: {Spear.Records.Streams, :Tombstone},
       messages: [build_delete_message(params)],
       credentials: params.credentials
     }

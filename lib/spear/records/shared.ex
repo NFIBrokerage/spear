@@ -5,8 +5,5 @@ defmodule Spear.Records.Shared do
   Shared record definitions for EventStoreDB messages
   """
 
-  Spear.Records.def_all_records(
-    "event_store.client.shared.",
-    "src/spear_proto_shared.hrl"
-  )
+  Spear.Records.from_hrl(:spear_proto_shared)
 end

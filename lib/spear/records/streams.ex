@@ -5,8 +5,5 @@ defmodule Spear.Records.Streams do
   A record macro interface for interacting with the EventStoreDB Streams API
   """
 
-  Spear.Records.def_all_records(
-    "event_store.client.streams.",
-    "src/spear_proto_streams.hrl"
-  )
+  Spear.Records.from_hrl(:spear_proto_streams)
 end

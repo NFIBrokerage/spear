@@ -4,6 +4,7 @@ defmodule Spear.Request do
   alias Spear.Grpc
 
   defstruct [
+    :api,
     :service,
     :service_module,
     :rpc,
@@ -13,10 +14,20 @@ defmodule Spear.Request do
     :credentials
   ]
 
-  def expand(%__MODULE__{service: service, service_module: service_module, rpc: rpc} = request) do
+  def expand(%__MODULE__{api: {api, rpc}, credentials: credentials} = request) do
+    service = api.service()
+    service_module = api.service_module()
+
     rpc = Spear.Rpc.expand(service_module, service, rpc)
 
-    %__MODULE__{request | path: rpc.path, headers: headers(), rpc: rpc}
+    %__MODULE__{
+      request
+      | service: service,
+        service_module: service_module,
+        path: rpc.path,
+        headers: headers(credentials),
+        rpc: rpc
+    }
   end
 
   # N.B. these headers are in a particular order according to the gRPC
@@ -33,7 +44,7 @@ defmodule Spear.Request do
   #     - this makes `++/2` a good choice for appending custom metadata
   #     - note that custom headers may not begin with "grpc-"
   @spec headers({String.t(), String.t()} | any()) :: [{String.t(), String.t()}]
-  defp headers(credentials \\ nil) do
+  defp headers(credentials) do
     maybe_auth_header =
       case credentials do
         {username, password} when is_binary(username) and is_binary(password) ->
