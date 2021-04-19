@@ -1264,7 +1264,9 @@ defmodule Spear do
 
     case request(conn, Spear.Records.Operations, :StartScavenge, [message], Keyword.take(opts, [:timeout, :credentials])) do
       {:ok, scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+      # coveralls-ignore-start
       error -> error
+      # coveralls-ignore-stop
     end
   end
 
@@ -1316,7 +1318,9 @@ defmodule Spear do
       stop_scavenge_req(options: stop_scavenge_req_options(scavenge_id: scavenge_id))
 
     case request(conn, Spear.Records.Operations, :StopScavenge, [message], opts) do
+      # coveralls-ignore-start
       {:ok, scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+      # coveralls-ignore-stop
       error -> error
     end
   end
@@ -1390,7 +1394,9 @@ defmodule Spear do
 
     case request(conn, Spear.Records.Operations, :MergeIndexes, [empty()], opts) do
       {:ok, empty()} -> :ok
+      # coveralls-ignore-start
       error -> error
+      # coveralls-ignore-stop
     end
   end
 
@@ -1422,7 +1428,9 @@ defmodule Spear do
 
     case request(conn, Spear.Records.Operations, :ResignNode, [empty()], opts) do
       {:ok, empty()} -> :ok
+      # coveralls-ignore-start
       error -> error
+      # coveralls-ignore-stop
     end
   end
 
@@ -1459,7 +1467,9 @@ defmodule Spear do
 
     case request(conn, Spear.Records.Operations, :SetNodePriority, [message], opts) do
       {:ok, empty()} -> :ok
+      # coveralls-ignore-start
       error -> error
+      # coveralls-ignore-stop
     end
   end
 
@@ -1487,7 +1497,9 @@ defmodule Spear do
 
     case request(conn, Spear.Records.Operations, :RestartPersistentSubscriptions, [empty()], opts) do
       {:ok, empty()} -> :ok
+      # coveralls-ignore-start
       error -> error
+      # coveralls-ignore-stop
     end
   end
 end
