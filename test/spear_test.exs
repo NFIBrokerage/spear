@@ -4,7 +4,7 @@ defmodule SpearTest do
   @moduletag :capture_log
 
   import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
-  import Spear.Event, only: [uuid_v4: 0]
+  import Spear.Uuid, only: [uuid_v4: 0]
 
   # bytes
   @max_append_bytes 1_048_576
