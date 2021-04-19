@@ -1,5 +1,5 @@
 defmodule SpearTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   @moduletag :capture_log
 
