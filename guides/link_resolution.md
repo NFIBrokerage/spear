@@ -13,7 +13,6 @@ When we read a projected stream (in this example an event-type stream) with
 
 ```elixir
 iex> import Spear.Records.Streams
-iex> alias Spear.Protos.EventStoreDB.Client.Streams.ReadResp
 iex> Spear.stream!(conn, "$et-grpc-client", chunk_size: 1, resolve_links?: false, raw?: true) |> Enum.take(1)
 [
   read_resp(
