@@ -355,6 +355,96 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.merge_indexes/1`
+  """
+  @doc since: "0.4.0"
+  @callback merge_indexes() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.merge_indexes/2`
+  """
+  @doc since: "0.4.0"
+  @callback merge_indexes(opts :: Keyword.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.resign_node/1`
+  """
+  @doc since: "0.4.0"
+  @callback resign_node() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.resign_node/2`
+  """
+  @doc since: "0.4.0"
+  @callback resign_node(opts :: Keyword.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.restart_persistent_subscriptions/1`
+  """
+  @doc since: "0.4.0"
+  @callback restart_persistent_subscriptions() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.restart_persistent_subscriptions/2`
+  """
+  @doc since: "0.4.0"
+  @callback restart_persistent_subscriptions(opts :: Keyword.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.set_node_priority/2`
+  """
+  @doc since: "0.4.0"
+  @callback set_node_priority(priority :: integer()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.set_node_priority/3`
+  """
+  @doc since: "0.4.0"
+  @callback set_node_priority(
+              priority :: integer(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.shutdown/1`
+  """
+  @doc since: "0.4.0"
+  @callback shutdown() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.shutdown/2`
+  """
+  @doc since: "0.4.0"
+  @callback shutdown(opts :: Keyword.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.start_scavenge/1`
+  """
+  @doc since: "0.4.0"
+  @callback start_scavenge() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.start_scavenge/2`
+  """
+  @doc since: "0.4.0"
+  @callback start_scavenge(opts :: Keyword.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.stop_scavenge/2`
+  """
+  @doc since: "0.4.0"
+  @callback stop_scavenge(scavenge_id :: String.t()) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.stop_scavenge/3`
+  """
+  @doc since: "0.4.0"
+  @callback stop_scavenge(
+              scavenge_id :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -460,6 +550,41 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def user_details(login_name, opts \\ []) do
         Spear.user_details(__MODULE__, login_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def merge_indexes(opts \\ []) do
+        Spear.merge_indexes(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def resign_node(opts \\ []) do
+        Spear.resign_node(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def restart_persistent_subscriptions(opts \\ []) do
+        Spear.restart_persistent_subscriptions(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def set_node_priority(priority, opts \\ []) when is_integer(priority) do
+        Spear.set_node_priority(__MODULE__, priority, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def shutdown(opts \\ []) do
+        Spear.shutdown(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def start_scavenge(opts \\ []) do
+        Spear.start_scavenge(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def stop_scavenge(scavenge_id, opts \\ []) do
+        Spear.stop_scavenge(__MODULE__, scavenge_id, opts)
       end
     end
   end
