@@ -1534,4 +1534,49 @@ defmodule Spear do
         # coveralls-ignore-stop
     end
   end
+
+  @doc """
+  Reads the cluster information from the connected EventStoreDB
+
+  Returns a list of members which are clustered to the currently connected
+  EventStoreDB.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.cluster_info(conn)
+      {:ok,                 
+       [
+         %Spear.ClusterMember{
+           address: "127.0.0.1",
+           alive?: true,
+           instance_id: "eba4c27f-e443-4b21-8756-00845bc5cda1",
+           port: 2113,
+           state: :Leader,
+           timestamp: ~U[2021-04-19 17:25:17.875824Z]
+         }
+       ]}
+  """
+  @doc since: "0.5.0"
+  @doc api: :gossip
+  @spec cluster_info(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, [Spear.ClusterMember.t()]} | {:error, any()}
+  def cluster_info(conn, opts \\ []) do
+    import Spear.Records.Shared, only: [empty: 0]
+    alias Spear.Records.Gossip
+    require Gossip
+
+    case request(conn, Gossip, :Read, [empty()], opts) do
+      {:ok, Gossip.cluster_info(members: members)} ->
+        {:ok, Enum.map(members, &Spear.ClusterMember.from_member_info/1)}
+
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
 end

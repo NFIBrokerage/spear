@@ -584,6 +584,11 @@ defmodule SpearTest do
     test "a request to restart persistent subscriptions succeeds", c do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
     end
+
+    test "the cluster info shows one active node on localhost", c do
+      assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
+               Spear.cluster_info(c.conn)
+    end
   end
 
   defp random_stream_name do

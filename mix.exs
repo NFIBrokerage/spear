@@ -103,7 +103,9 @@ defmodule Spear.MixProject do
           Spear.ExpectationViolation,
           Spear.Filter.Checkpoint,
           Spear.StreamMetadata,
-          Spear.User
+          Spear.User,
+          Spear.ClusterMember,
+          Spear.Scavenge
         ],
         "Record interfaces": [
           Spear.Records.Shared,
@@ -111,7 +113,8 @@ defmodule Spear.MixProject do
           Spear.Records.Operations,
           Spear.Records.Projections,
           Spear.Records.Persistent,
-          Spear.Records.Users
+          Spear.Records.Users,
+          Spear.Records.Gossip
         ]
       ],
       groups_for_functions: [
