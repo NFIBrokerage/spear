@@ -29,7 +29,7 @@ defmodule Spear.Uuid do
   Reproduces a UUID from a pair of most and least-significant bits
 
   This function is an adaptation of the OpenJDK 8 source for turning
-  the `java.util.UUID` into a typical string The java source code is as
+  the `java.util.UUID` into a typical string. The java source code is as
   follows:
 
   ```java
