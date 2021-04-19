@@ -1,5 +1,5 @@
 defmodule Spear.ConnectionTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
 
   import ExUnit.CaptureLog
 
