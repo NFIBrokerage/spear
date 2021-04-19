@@ -164,7 +164,7 @@ straight to the `Spear.Connection.start_link/1` function.
 
 Let's use the new `Mix.install/1` function from Elixir 1.12 to try out
 Spear. Say that you have an EventStoreDB instance running locally with the
-`--insecure option`.
+`--insecure` option.
 
 ```elixir
 iex> Mix.install([:spear, :jason])
