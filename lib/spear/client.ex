@@ -445,6 +445,18 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.cluster_info/1`
+  """
+  @doc since: "0.5.0"
+  @callback cluster_info() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.cluster_info/2`
+  """
+  @doc since: "0.5.0"
+  @callback cluster_info(opts :: Keyword.t()) :: :ok | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -585,6 +597,11 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def stop_scavenge(scavenge_id, opts \\ []) do
         Spear.stop_scavenge(__MODULE__, scavenge_id, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def cluster_info(opts \\ []) do
+        Spear.cluster_info(__MODULE__, opts)
       end
     end
   end
