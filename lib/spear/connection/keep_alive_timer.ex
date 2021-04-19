@@ -27,7 +27,7 @@ defmodule Spear.Connection.KeepAliveTimer do
   end
 
   def reset_interval_timer(%__MODULE__{} = keep_alive_timer) do
-    :timer.cancel(keep_alive_timer.interval_timer)
+    cancel_timer(keep_alive_timer.interval_timer)
 
     %__MODULE__{
       keep_alive_timer
@@ -36,31 +36,32 @@ defmodule Spear.Connection.KeepAliveTimer do
   end
 
   def clear(%__MODULE__{interval_timer: interval_timer, timeout_timers: timeout_timers}) do
-    # note that :timer.cancel/1 does not raise when the interval_timer is nil
-    :timer.cancel(interval_timer)
+    cancel_timer(interval_timer)
 
-    :ok = Enum.each(timeout_timers, fn {_request_ref, timer} -> :timer.cancel(timer) end)
+    :ok = Enum.each(timeout_timers, fn {_request_ref, timer} -> cancel_timer(timer) end)
 
     %__MODULE__{}
   end
 
   def start_timeout_timer(%__MODULE__{} = keep_alive_timer, request_ref) do
-    {:ok, timeout_timer} = :timer.send_after(keep_alive_timer.timeout, :keep_alive_expired)
-
-    put_in(keep_alive_timer.timeout_timers[request_ref], timeout_timer)
+    put_in(
+      keep_alive_timer.timeout_timers[request_ref],
+      Process.send_after(self(), :keep_alive_expired, keep_alive_timer.timeout)
+    )
   end
 
   def clear_after_timer(%__MODULE__{} = keep_alive_timer, request_ref) do
     {timeout_timer, keep_alive_timer} = pop_in(keep_alive_timer.timeout_timers[request_ref])
 
-    :timer.cancel(timeout_timer)
+    cancel_timer(timeout_timer)
 
     keep_alive_timer
   end
 
   defp start_interval_timer(interval) do
-    {:ok, interval_timer} = :timer.send_after(interval, :keep_alive)
-
-    interval_timer
+    Process.send_after(self(), :keep_alive, interval)
   end
+
+  defp cancel_timer(nil), do: :ok
+  defp cancel_timer(timer), do: Process.cancel_timer(timer)
 end
