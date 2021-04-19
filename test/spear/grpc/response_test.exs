@@ -1,5 +1,5 @@
 defmodule Spear.Grpc.ResponseTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   # note that these tests are a bit un-ideal: I'd rather have a little http(2)
   # server included in the test suite to bounce these requests off of and get

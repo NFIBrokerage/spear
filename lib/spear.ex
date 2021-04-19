@@ -1406,11 +1406,11 @@ defmodule Spear do
   def merge_indexes(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
+    # coveralls-ignore-start
     case request(conn, Spear.Records.Operations, :MergeIndexes, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
-      # coveralls-ignore-start
       error ->
         error
         # coveralls-ignore-stop
@@ -1444,11 +1444,11 @@ defmodule Spear do
   def resign_node(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
+    # coveralls-ignore-start
     case request(conn, Spear.Records.Operations, :ResignNode, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
-      # coveralls-ignore-start
       error ->
         error
         # coveralls-ignore-stop
@@ -1482,6 +1482,7 @@ defmodule Spear do
           priority :: integer(),
           opts :: Keyword.t()
         ) :: :ok | {:error, any()}
+  # coveralls-ignore-start
   def set_node_priority(conn, priority, opts \\ [])
 
   def set_node_priority(conn, priority, opts) when is_integer(priority) do
@@ -1494,7 +1495,6 @@ defmodule Spear do
       {:ok, empty()} ->
         :ok
 
-      # coveralls-ignore-start
       error ->
         error
         # coveralls-ignore-stop
@@ -1524,11 +1524,11 @@ defmodule Spear do
   def restart_persistent_subscriptions(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
+    # coveralls-ignore-start
     case request(conn, Spear.Records.Operations, :RestartPersistentSubscriptions, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
-      # coveralls-ignore-start
       error ->
         error
         # coveralls-ignore-stop

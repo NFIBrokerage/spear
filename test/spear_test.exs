@@ -1,5 +1,5 @@
 defmodule SpearTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   @moduletag :capture_log
 
@@ -565,18 +565,22 @@ defmodule SpearTest do
       Spear.cancel_subscription(c.conn, sub)
     end
 
+    @tag :operations
     test "a request to merge indices succeeds", c do
       assert Spear.merge_indexes(c.conn) == :ok
     end
 
+    @tag :operations
     test "a request for the node to resign succeeds", c do
       assert Spear.resign_node(c.conn) == :ok
     end
 
+    @tag :operations
     test "a request to set the node priority succeeds", c do
       assert Spear.set_node_priority(c.conn, 1) == :ok
     end
 
+    @tag :operations
     test "a request to restart persistent subscriptions succeeds", c do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
     end
