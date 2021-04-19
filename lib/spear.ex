@@ -1242,7 +1242,8 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec start_scavenge(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: {:ok, Spear.Scavenge.t()} | {:error, any()}
+  @spec start_scavenge(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, Spear.Scavenge.t()} | {:error, any()}
   def start_scavenge(conn, opts \\ []) do
     import Spear.Records.Operations
 
@@ -1262,11 +1263,20 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Spear.Records.Operations, :StartScavenge, [message], Keyword.take(opts, [:timeout, :credentials])) do
-      {:ok, scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+    case request(
+           conn,
+           Spear.Records.Operations,
+           :StartScavenge,
+           [message],
+           Keyword.take(opts, [:timeout, :credentials])
+         ) do
+      {:ok, scavenge_resp() = resp} ->
+        {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+
       # coveralls-ignore-start
-      error -> error
-      # coveralls-ignore-stop
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -1308,14 +1318,17 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec stop_scavenge(connection :: Spear.Connection.t(), scavenge_id :: String.t(), opts :: Keyword.t()) :: {:ok, Spear.Scavenge.t()} | {:error, any()}
+  @spec stop_scavenge(
+          connection :: Spear.Connection.t(),
+          scavenge_id :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, Spear.Scavenge.t()} | {:error, any()}
   def stop_scavenge(conn, scavenge_id, opts \\ [])
 
   def stop_scavenge(conn, scavenge_id, opts) when is_binary(scavenge_id) do
     import Spear.Records.Operations
 
-    message =
-      stop_scavenge_req(options: stop_scavenge_req_options(scavenge_id: scavenge_id))
+    message = stop_scavenge_req(options: stop_scavenge_req_options(scavenge_id: scavenge_id))
 
     case request(conn, Spear.Records.Operations, :StopScavenge, [message], opts) do
       # coveralls-ignore-start
@@ -1388,15 +1401,19 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec merge_indexes(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec merge_indexes(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
   def merge_indexes(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
     case request(conn, Spear.Records.Operations, :MergeIndexes, [empty()], opts) do
-      {:ok, empty()} -> :ok
+      {:ok, empty()} ->
+        :ok
+
       # coveralls-ignore-start
-      error -> error
-      # coveralls-ignore-stop
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -1422,15 +1439,19 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec resign_node(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec resign_node(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
   def resign_node(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
     case request(conn, Spear.Records.Operations, :ResignNode, [empty()], opts) do
-      {:ok, empty()} -> :ok
+      {:ok, empty()} ->
+        :ok
+
       # coveralls-ignore-start
-      error -> error
-      # coveralls-ignore-stop
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -1456,7 +1477,11 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec set_node_priority(connection :: Spear.Connection.t(), priority :: integer(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec set_node_priority(
+          connection :: Spear.Connection.t(),
+          priority :: integer(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def set_node_priority(conn, priority, opts \\ [])
 
   def set_node_priority(conn, priority, opts) when is_integer(priority) do
@@ -1466,10 +1491,13 @@ defmodule Spear do
     message = set_node_priority_req(priority: priority)
 
     case request(conn, Spear.Records.Operations, :SetNodePriority, [message], opts) do
-      {:ok, empty()} -> :ok
+      {:ok, empty()} ->
+        :ok
+
       # coveralls-ignore-start
-      error -> error
-      # coveralls-ignore-stop
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 
@@ -1491,15 +1519,19 @@ defmodule Spear do
   """
   @doc since: "0.4.0"
   @doc api: :operations
-  @spec restart_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec restart_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
   def restart_persistent_subscriptions(conn, opts \\ []) do
     import Spear.Records.Shared, only: [empty: 0]
 
     case request(conn, Spear.Records.Operations, :RestartPersistentSubscriptions, [empty()], opts) do
-      {:ok, empty()} -> :ok
+      {:ok, empty()} ->
+        :ok
+
       # coveralls-ignore-start
-      error -> error
-      # coveralls-ignore-stop
+      error ->
+        error
+        # coveralls-ignore-stop
     end
   end
 end

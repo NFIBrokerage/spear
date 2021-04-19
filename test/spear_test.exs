@@ -538,9 +538,16 @@ defmodule SpearTest do
     end
 
     test "a user not in the `$ops` group cannot shut down the server", c do
-      assert Spear.create_user(c.conn, c.user.full_name, c.user.login_name, c.password, _groups = []) == :ok
+      assert Spear.create_user(
+               c.conn,
+               c.user.full_name,
+               c.user.login_name,
+               c.password,
+               _groups = []
+             ) == :ok
 
-      assert {:error, %Spear.Grpc.Response{status: :permission_denied}} = Spear.shutdown(c.conn, credentials: {c.user.login_name, c.password})
+      assert {:error, %Spear.Grpc.Response{status: :permission_denied}} =
+               Spear.shutdown(c.conn, credentials: {c.user.login_name, c.password})
 
       assert Spear.ping(c.conn) == :pong
 
