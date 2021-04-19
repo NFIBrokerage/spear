@@ -6,11 +6,23 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## 0.4.0 - 2021-04-19
 
 ### Fixed
 
 - Updated security guide to use new configuration style
+
+### Added
+
+- Added the operations API
+    - `Spear.merge_indexes/2`
+    - `Spear.resign_node/2`
+    - `Spear.restart_persistent_subscriptions/2`
+    - `Spear.set_node_priority/3`
+    - `Spear.shutdown/2`
+    - `Spear.start_scavenge/2`
+    - `Spear.stop_scavenge/3`
+    - and associated wrappers in `Spear.Client`
 
 ## 0.3.0 - 2021-04-18
 

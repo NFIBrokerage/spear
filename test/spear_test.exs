@@ -4,6 +4,7 @@ defmodule SpearTest do
   @moduletag :capture_log
 
   import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
+  import Spear.Event, only: [uuid_v4: 0]
 
   # bytes
   @max_append_bytes 1_048_576
@@ -16,7 +17,9 @@ defmodule SpearTest do
 
     [
       conn: conn,
-      stream_name: random_stream_name()
+      stream_name: random_stream_name(),
+      user: random_user(),
+      password: uuid_v4()
     ]
   end
 
@@ -144,9 +147,9 @@ defmodule SpearTest do
     end
 
     test "a user can be CRUD-ed", c do
-      login_name = "spear-test-user-" <> Spear.Event.uuid_v4()
-      full_name = "Spear Test User (CRUD)"
-      password = "open sesame"
+      login_name = c.user.login_name
+      full_name = c.user.full_name
+      password = c.password
       groups = []
 
       assert Spear.create_user(c.conn, full_name, login_name, password, groups) == :ok
@@ -175,9 +178,9 @@ defmodule SpearTest do
     end
 
     test "a disabled user cannot read from a stream", c do
-      login_name = "spear-test-user-" <> Spear.Event.uuid_v4()
-      full_name = "Spear Test User (CRUD)"
-      password = "open sesame"
+      login_name = c.user.login_name
+      full_name = c.user.full_name
+      password = c.password
       groups = []
 
       assert Spear.create_user(c.conn, full_name, login_name, password, groups) == :ok
@@ -513,9 +516,9 @@ defmodule SpearTest do
     end
 
     test "you cannot operate on a user that does not exist", c do
-      login_name = "pichael"
-      full_name = "Pichael Thompson"
-      password = "changeit"
+      login_name = c.user.login_name
+      full_name = c.user.full_name
+      password = c.password
 
       not_found = %Spear.Grpc.Response{
         data: "",
@@ -533,10 +536,58 @@ defmodule SpearTest do
       assert {:error, ^not_found} =
                Spear.change_user_password(c.conn, login_name, password, password)
     end
+
+    test "a user not in the `$ops` group cannot shut down the server", c do
+      assert Spear.create_user(
+               c.conn,
+               c.user.full_name,
+               c.user.login_name,
+               c.password,
+               _groups = []
+             ) == :ok
+
+      assert {:error, %Spear.Grpc.Response{status: :permission_denied}} =
+               Spear.shutdown(c.conn, credentials: {c.user.login_name, c.password})
+
+      assert Spear.ping(c.conn) == :pong
+
+      assert Spear.delete_user(c.conn, c.user.login_name) == :ok
+    end
+
+    test "a scavenge can be started, followed, and deleted", c do
+      assert {:ok, %Spear.Scavenge{result: :Started} = scavenge} = Spear.start_scavenge(c.conn)
+      assert {:ok, sub} = Spear.subscribe(c.conn, self(), Spear.scavenge_stream(scavenge))
+      assert_receive %Spear.Event{type: "$scavengeStarted"}
+      assert_receive %Spear.Event{type: "$scavengeCompleted"}
+      # cannot stop a scavenge after it is complete, get a not-found error
+      assert {:error, reason} = Spear.stop_scavenge(c.conn, scavenge.id)
+      assert reason.status == :not_found
+      Spear.cancel_subscription(c.conn, sub)
+    end
+
+    @tag :operations
+    test "a request to merge indices succeeds", c do
+      assert Spear.merge_indexes(c.conn) == :ok
+    end
+
+    @tag :operations
+    test "a request for the node to resign succeeds", c do
+      assert Spear.resign_node(c.conn) == :ok
+    end
+
+    @tag :operations
+    test "a request to set the node priority succeeds", c do
+      assert Spear.set_node_priority(c.conn, 1) == :ok
+    end
+
+    @tag :operations
+    test "a request to restart persistent subscriptions succeeds", c do
+      assert Spear.restart_persistent_subscriptions(c.conn) == :ok
+    end
   end
 
   defp random_stream_name do
-    "Spear.Test-" <> Spear.Event.uuid_v4()
+    "Spear.Test-" <> uuid_v4()
   end
 
   defp random_event do
@@ -545,6 +596,10 @@ defmodule SpearTest do
 
   defp random_events do
     Stream.iterate(0, &(&1 + 1)) |> Stream.map(&Spear.Event.new("counter-test", &1))
+  end
+
+  defp random_user do
+    %Spear.User{full_name: "Spear Test User", login_name: "spear-test-#{uuid_v4()}", groups: []}
   end
 
   defp maximum_append_size_error do

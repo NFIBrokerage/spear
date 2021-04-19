@@ -1216,4 +1216,322 @@ defmodule Spear do
     |> div(10)
     |> DateTime.from_unix(:microsecond)
   end
+
+  @doc """
+  Requests that a scavenge be started
+
+  Scavenges are disk-space reclaiming operations run on the EventStoreDB
+  server.
+
+  ## Options
+
+  * `:thread_count` - (default: `1`) the number of threads to use for the
+    scavenge process. Scavenging can be resource intensive. Setting this to
+    a low thread count can lower the impact on the server's resources.
+  * `:start_from_chunk` - (default: `0`) the chunk number to start the
+    scavenge from. Generally this is only useful if a prior scavenge has
+    failed on a certain chunk.
+
+  Remaining options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.start_scavenge(conn)
+      {:ok,
+       %Spear.Scavenge{id: "d2897ba8-2f0c-4fc4-bb25-798ba75f3562", result: :Started}}
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec start_scavenge(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, Spear.Scavenge.t()} | {:error, any()}
+  def start_scavenge(conn, opts \\ []) do
+    import Spear.Records.Operations
+
+    opts =
+      [
+        thread_count: 1,
+        start_from_chunk: 0
+      ]
+      |> Keyword.merge(opts)
+
+    message =
+      start_scavenge_req(
+        options:
+          start_scavenge_req_options(
+            thread_count: opts[:thread_count],
+            start_from_chunk: opts[:start_from_chunk]
+          )
+      )
+
+    case request(
+           conn,
+           Spear.Records.Operations,
+           :StartScavenge,
+           [message],
+           Keyword.take(opts, [:timeout, :credentials])
+         ) do
+      {:ok, scavenge_resp() = resp} ->
+        {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Produces the scavenge stream for a scavenge ID
+
+  `start_scavenge/2` begins an asynchronous scavenge operation since scavenges
+  may be time consuming. In order to check the progress of a running scavenge,
+  one may read the scavenge stream with `read_stream/3` or `stream!/3` or
+  subscribe to updates on the scavenge with `subscribe/4`.
+
+  ## Examples
+
+      iex> {:ok, scavenge} = Spear.start_scavenge(conn)
+      {:ok,
+       %Spear.Scavenge{id: "d2897ba8-2f0c-4fc4-bb25-798ba75f3562", result: :Started}}
+      iex> Spear.scavenge_stream(scavenge)
+      "$scavenges-d2897ba8-2f0c-4fc4-bb25-798ba75f3562"
+  """
+  @doc since: "0.4.0"
+  @doc api: :utils
+  @spec scavenge_stream(scavenge :: String.t() | Spear.Scavenge.t()) :: String.t()
+  def scavenge_stream(%Spear.Scavenge{id: scavenge_id}), do: scavenge_stream(scavenge_id)
+  def scavenge_stream(scavenge_id) when is_binary(scavenge_id), do: "$scavenges-" <> scavenge_id
+
+  @doc """
+  Stops a running scavenge
+
+  ## Options
+
+  All options are passed to `request/5`.
+
+  ## Examples
+
+      iex> {:ok, scavenge} = Spear.start_scavenge(conn)
+      iex> Spear.stop_scavenge(conn, scavenge.id)
+      {:ok,
+       %Spear.Scavenge{id: "d2897ba8-2f0c-4fc4-bb25-798ba75f3562", result: :Stopped}}
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec stop_scavenge(
+          connection :: Spear.Connection.t(),
+          scavenge_id :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, Spear.Scavenge.t()} | {:error, any()}
+  def stop_scavenge(conn, scavenge_id, opts \\ [])
+
+  def stop_scavenge(conn, scavenge_id, opts) when is_binary(scavenge_id) do
+    import Spear.Records.Operations
+
+    message = stop_scavenge_req(options: stop_scavenge_req_options(scavenge_id: scavenge_id))
+
+    case request(conn, Spear.Records.Operations, :StopScavenge, [message], opts) do
+      # coveralls-ignore-start
+      {:ok, scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+      # coveralls-ignore-stop
+      error -> error
+    end
+  end
+
+  @doc """
+  Shuts down the connected EventStoreDB
+
+  The user performing the shutdown (either the connection credentials or
+  credentials passed by the `:credentials` option) must at least be in the
+  `$ops` group. `$admins` permissions are a superset of `$ops`.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.shutdown(conn)
+      :ok
+      iex> Spear.ping(conn)
+      {:error, :closed}
+
+      iex> Spear.shutdown(conn, credentials: {"some_non_ops_user", "changeit"})
+      {:error,
+       %Spear.Grpc.Response{
+         data: "",
+         message: "Access Denied",
+         status: :permission_denied,
+         status_code: 7
+       }}
+      iex> Spear.ping(conn)
+      :pong
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec shutdown(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  def shutdown(conn, opts \\ []) do
+    import Spear.Records.Shared, only: [empty: 0]
+
+    case request(conn, Spear.Records.Operations, :Shutdown, [empty()], opts) do
+      {:ok, empty()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Requests that the indices be merged
+
+  <!--
+  YARD I have no idea what this does
+  -->
+
+  See the EventStoreDB documentation for more information.
+
+  A user does not need to be in `$ops` or any group to initiate this request.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.merge_indexes(conn)
+      :ok
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec merge_indexes(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
+  def merge_indexes(conn, opts \\ []) do
+    import Spear.Records.Shared, only: [empty: 0]
+
+    # coveralls-ignore-start
+    case request(conn, Spear.Records.Operations, :MergeIndexes, [empty()], opts) do
+      {:ok, empty()} ->
+        :ok
+
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Requests that the currently connected node resign its leadership role
+
+  <!--
+  YARD I have no idea what this does
+  -->
+
+  See the EventStoreDB documentation for more information.
+
+  A user does not need to be in `$ops` or any group to initiate this request.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.resign_node(conn)
+      :ok
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec resign_node(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
+  def resign_node(conn, opts \\ []) do
+    import Spear.Records.Shared, only: [empty: 0]
+
+    # coveralls-ignore-start
+    case request(conn, Spear.Records.Operations, :ResignNode, [empty()], opts) do
+      {:ok, empty()} ->
+        :ok
+
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Sets the node priority number
+
+  <!--
+  YARD I have no idea what this does
+  -->
+
+  See the EventStoreDB documentation for more information.
+
+  A user does not need to be in `$ops` or any group to initiate this request.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.set_node_priority(conn, 1)
+      :ok
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec set_node_priority(
+          connection :: Spear.Connection.t(),
+          priority :: integer(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  # coveralls-ignore-start
+  def set_node_priority(conn, priority, opts \\ [])
+
+  def set_node_priority(conn, priority, opts) when is_integer(priority) do
+    import Spear.Records.Shared, only: [empty: 0]
+    import Spear.Records.Operations
+
+    message = set_node_priority_req(priority: priority)
+
+    case request(conn, Spear.Records.Operations, :SetNodePriority, [message], opts) do
+      {:ok, empty()} ->
+        :ok
+
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Restarts all persistent subscriptions
+
+  See the EventStoreDB documentation for more information.
+
+  A user does not need to be in `$ops` or any group to initiate this request.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.restart_persistent_subscriptions(conn)
+      :ok
+  """
+  @doc since: "0.4.0"
+  @doc api: :operations
+  @spec restart_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          :ok | {:error, any()}
+  def restart_persistent_subscriptions(conn, opts \\ []) do
+    import Spear.Records.Shared, only: [empty: 0]
+
+    # coveralls-ignore-start
+    case request(conn, Spear.Records.Operations, :RestartPersistentSubscriptions, [empty()], opts) do
+      {:ok, empty()} ->
+        :ok
+
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
 end
