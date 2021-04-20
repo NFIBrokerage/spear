@@ -99,6 +99,10 @@ connection_config = [
 ]
 ```
 
+[Event Store Cloud](https://www.eventstore.com/event-store-cloud) uses
+certificates signed by a public CA, so connections to Managed EventStoreDBs
+(MESDBs) work out-of-the-box with `castore`.
+
 ## Credentials
 
 Now that TLS is enabled, we can safely pass basic-auth credentials over the
