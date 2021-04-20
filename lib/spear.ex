@@ -63,6 +63,24 @@ defmodule Spear do
   contents extracted from the protobuf messages (indirectly via `:gpb`).
   """
 
+  import Spear.Records.Shared, only: [empty: 0]
+
+  alias Spear.Records.{
+    Streams,
+    Users,
+    Operations,
+    Gossip
+    # Persistent,
+    # Shared
+  }
+
+  require Streams
+  require Users
+  require Operations
+  require Gossip
+  # require Persistent
+  # require Shared
+
   @doc """
   Collects an EventStoreDB stream into an enumerable
 
@@ -376,8 +394,6 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
-    import Spear.Records.Streams, only: [append_resp: 1]
-
     default_write_opts = [
       expect: :any,
       raw?: false,
@@ -394,15 +410,15 @@ defmodule Spear do
 
     case request(
            conn,
-           Spear.Records.Streams,
+           Streams,
            :Append,
            messages,
            Keyword.take(opts, [:credentials, :timeout])
          ) do
-      {:ok, append_resp(result: {:success, _})} ->
+      {:ok, Streams.append_resp(result: {:success, _})} ->
         :ok
 
-      {:ok, append_resp(result: {:wrong_expected_version, expectation_violation})} ->
+      {:ok, Streams.append_resp(result: {:wrong_expected_version, expectation_violation})} ->
         {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
 
       error ->
@@ -642,7 +658,7 @@ defmodule Spear do
 
     case request(
            conn,
-           Spear.Records.Streams,
+           Streams,
            rpc,
            messages,
            Keyword.take(opts, [:credentials, :timeout])
@@ -841,20 +857,18 @@ defmodule Spear do
   @doc since: "0.3.0"
   @doc api: :users
   @spec create_user(
-          Spear.Connection.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          [String.t()],
-          Keyword.t()
+          connection :: Spear.Connection.t(),
+          full_name :: String.t(),
+          login_name :: String.t(),
+          password :: String.t(),
+          groups :: [String.t()],
+          opts :: Keyword.t()
         ) :: :ok | {:error, any()}
   def create_user(conn, full_name, login_name, password, groups, opts \\ []) do
-    import Spear.Records.Users
-
     message =
-      create_req(
+      Users.create_req(
         options:
-          create_req_options(
+          Users.create_req_options(
             full_name: full_name,
             login_name: login_name,
             password: password,
@@ -862,8 +876,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Spear.Records.Users, :Create, [message], opts) do
-      {:ok, create_resp()} ->
+    case request(conn, Users, :Create, [message], opts) do
+      {:ok, Users.create_resp()} ->
         :ok
 
       # I could not find a way to get to this failure branch (without the
@@ -892,20 +906,18 @@ defmodule Spear do
   @doc since: "0.3.0"
   @doc api: :users
   @spec update_user(
-          Spear.Connection.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          [String.t()],
-          Keyword.t()
+          connection :: Spear.Connection.t(),
+          full_name :: String.t(),
+          login_name :: String.t(),
+          password :: String.t(),
+          groups :: [String.t()],
+          opts :: Keyword.t()
         ) :: :ok | {:error, any()}
   def update_user(conn, full_name, login_name, password, groups, opts \\ []) do
-    import Spear.Records.Users
-
     message =
-      update_req(
+      Users.update_req(
         options:
-          update_req_options(
+          Users.update_req_options(
             full_name: full_name,
             login_name: login_name,
             password: password,
@@ -913,8 +925,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Spear.Records.Users, :Update, [message], opts) do
-      {:ok, update_resp()} -> :ok
+    case request(conn, Users, :Update, [message], opts) do
+      {:ok, Users.update_resp()} -> :ok
       error -> error
     end
   end
@@ -938,14 +950,16 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :users
-  @spec delete_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  @spec delete_user(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def delete_user(conn, login_name, opts \\ []) do
-    import Spear.Records.Users
+    message = Users.delete_req(options: Users.delete_req_options(login_name: login_name))
 
-    message = delete_req(options: delete_req_options(login_name: login_name))
-
-    case request(conn, Spear.Records.Users, :Delete, [message], opts) do
-      {:ok, delete_resp()} -> :ok
+    case request(conn, Users, :Delete, [message], opts) do
+      {:ok, Users.delete_resp()} -> :ok
       error -> error
     end
   end
@@ -970,14 +984,16 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :users
-  @spec enable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  @spec enable_user(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def enable_user(conn, login_name, opts \\ []) do
-    import Spear.Records.Users
+    message = Users.enable_req(options: Users.enable_req_options(login_name: login_name))
 
-    message = enable_req(options: enable_req_options(login_name: login_name))
-
-    case request(conn, Spear.Records.Users, :Enable, [message], opts) do
-      {:ok, enable_resp()} -> :ok
+    case request(conn, Users, :Enable, [message], opts) do
+      {:ok, Users.enable_resp()} -> :ok
       error -> error
     end
   end
@@ -1003,14 +1019,16 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :users
-  @spec disable_user(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  @spec disable_user(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def disable_user(conn, login_name, opts \\ []) do
-    import Spear.Records.Users
+    message = Users.disable_req(options: Users.disable_req_options(login_name: login_name))
 
-    message = disable_req(options: disable_req_options(login_name: login_name))
-
-    case request(conn, Spear.Records.Users, :Disable, [message], opts) do
-      {:ok, disable_resp()} -> :ok
+    case request(conn, Users, :Disable, [message], opts) do
+      {:ok, Users.disable_resp()} -> :ok
       error -> error
     end
   end
@@ -1038,13 +1056,15 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :users
-  @spec user_details(Spear.Connection.t(), String.t(), Keyword.t()) :: :ok | {:error, any()}
+  @spec user_details(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def user_details(conn, login_name, opts \\ []) do
-    import Spear.Records.Users
+    message = Users.details_req(options: Users.details_req_options(login_name: login_name))
 
-    message = details_req(options: details_req_options(login_name: login_name))
-
-    case request(conn, Spear.Records.Users, :Details, [message], opts) do
+    case request(conn, Users, :Details, [message], opts) do
       {:ok, detail_stream} ->
         details =
           detail_stream
@@ -1077,21 +1097,26 @@ defmodule Spear do
       :ok
   """
   @doc api: :users
+  @spec change_user_password(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          current_password :: String.t(),
+          new_password :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def change_user_password(conn, login_name, current_password, new_password, opts \\ []) do
-    import Spear.Records.Users
-
     message =
-      change_password_req(
+      Users.change_password_req(
         options:
-          change_password_req_options(
+          Users.change_password_req_options(
             login_name: login_name,
             current_password: current_password,
             new_password: new_password
           )
       )
 
-    case request(conn, Spear.Records.Users, :ChangePassword, [message], opts) do
-      {:ok, change_password_resp()} -> :ok
+    case request(conn, Users, :ChangePassword, [message], opts) do
+      {:ok, Users.change_password_resp()} -> :ok
       error -> error
     end
   end
@@ -1116,22 +1141,25 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :users
-  @spec reset_user_password(Spear.Connection.t(), String.t(), String.t(), Keyword.t()) ::
+  @spec reset_user_password(
+          connection :: Spear.Connection.t(),
+          login_name :: String.t(),
+          new_password :: String.t(),
+          opts :: Keyword.t()
+        ) ::
           :ok | {:error, any()}
   def reset_user_password(conn, login_name, new_password, opts \\ []) do
-    import Spear.Records.Users
-
     message =
-      reset_password_req(
+      Users.reset_password_req(
         options:
-          reset_password_req_options(
+          Users.reset_password_req_options(
             login_name: login_name,
             new_password: new_password
           )
       )
 
-    case request(conn, Spear.Records.Users, :ResetPassword, [message], opts) do
-      {:ok, reset_password_resp()} -> :ok
+    case request(conn, Users, :ResetPassword, [message], opts) do
+      {:ok, Users.reset_password_resp()} -> :ok
       error -> error
     end
   end
@@ -1168,7 +1196,13 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :utils
-  @spec request(Spear.Connection.t(), module(), atom(), Enumerable.t(), Keyword.t()) ::
+  @spec request(
+          connection :: Spear.Connection.t(),
+          api :: module(),
+          rpc :: atom(),
+          messages :: Enumerable.t(),
+          opts :: Keyword.t()
+        ) ::
           {:ok, tuple() | Enumerable.t()} | {:error, any()}
   def request(conn, api, rpc, messages, opts \\ []) do
     opts =
@@ -1210,7 +1244,7 @@ defmodule Spear do
   """
   @doc since: "0.3.0"
   @doc api: :utils
-  @spec parse_stamp(pos_integer()) :: {:ok, DateTime.t()} | {:error, atom()}
+  @spec parse_stamp(stamp :: pos_integer()) :: {:ok, DateTime.t()} | {:error, atom()}
   def parse_stamp(ticks_since_epoch) when is_integer(ticks_since_epoch) do
     ticks_since_epoch
     |> div(10)
@@ -1245,8 +1279,6 @@ defmodule Spear do
   @spec start_scavenge(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           {:ok, Spear.Scavenge.t()} | {:error, any()}
   def start_scavenge(conn, opts \\ []) do
-    import Spear.Records.Operations
-
     opts =
       [
         thread_count: 1,
@@ -1255,9 +1287,9 @@ defmodule Spear do
       |> Keyword.merge(opts)
 
     message =
-      start_scavenge_req(
+      Operations.start_scavenge_req(
         options:
-          start_scavenge_req_options(
+          Operations.start_scavenge_req_options(
             thread_count: opts[:thread_count],
             start_from_chunk: opts[:start_from_chunk]
           )
@@ -1265,12 +1297,12 @@ defmodule Spear do
 
     case request(
            conn,
-           Spear.Records.Operations,
+           Operations,
            :StartScavenge,
            [message],
            Keyword.take(opts, [:timeout, :credentials])
          ) do
-      {:ok, scavenge_resp() = resp} ->
+      {:ok, Operations.scavenge_resp() = resp} ->
         {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
 
       # coveralls-ignore-start
@@ -1326,13 +1358,14 @@ defmodule Spear do
   def stop_scavenge(conn, scavenge_id, opts \\ [])
 
   def stop_scavenge(conn, scavenge_id, opts) when is_binary(scavenge_id) do
-    import Spear.Records.Operations
+    message =
+      Operations.stop_scavenge_req(
+        options: Operations.stop_scavenge_req_options(scavenge_id: scavenge_id)
+      )
 
-    message = stop_scavenge_req(options: stop_scavenge_req_options(scavenge_id: scavenge_id))
-
-    case request(conn, Spear.Records.Operations, :StopScavenge, [message], opts) do
+    case request(conn, Operations, :StopScavenge, [message], opts) do
       # coveralls-ignore-start
-      {:ok, scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+      {:ok, Operations.scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
       # coveralls-ignore-stop
       error -> error
     end
@@ -1371,9 +1404,7 @@ defmodule Spear do
   @doc api: :operations
   @spec shutdown(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
   def shutdown(conn, opts \\ []) do
-    import Spear.Records.Shared, only: [empty: 0]
-
-    case request(conn, Spear.Records.Operations, :Shutdown, [empty()], opts) do
+    case request(conn, Operations, :Shutdown, [empty()], opts) do
       {:ok, empty()} -> :ok
       error -> error
     end
@@ -1404,10 +1435,8 @@ defmodule Spear do
   @spec merge_indexes(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
   def merge_indexes(conn, opts \\ []) do
-    import Spear.Records.Shared, only: [empty: 0]
-
     # coveralls-ignore-start
-    case request(conn, Spear.Records.Operations, :MergeIndexes, [empty()], opts) do
+    case request(conn, Operations, :MergeIndexes, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
@@ -1442,10 +1471,8 @@ defmodule Spear do
   @spec resign_node(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
   def resign_node(conn, opts \\ []) do
-    import Spear.Records.Shared, only: [empty: 0]
-
     # coveralls-ignore-start
-    case request(conn, Spear.Records.Operations, :ResignNode, [empty()], opts) do
+    case request(conn, Operations, :ResignNode, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
@@ -1486,12 +1513,9 @@ defmodule Spear do
   def set_node_priority(conn, priority, opts \\ [])
 
   def set_node_priority(conn, priority, opts) when is_integer(priority) do
-    import Spear.Records.Shared, only: [empty: 0]
-    import Spear.Records.Operations
+    message = Operations.set_node_priority_req(priority: priority)
 
-    message = set_node_priority_req(priority: priority)
-
-    case request(conn, Spear.Records.Operations, :SetNodePriority, [message], opts) do
+    case request(conn, Operations, :SetNodePriority, [message], opts) do
       {:ok, empty()} ->
         :ok
 
@@ -1522,10 +1546,8 @@ defmodule Spear do
   @spec restart_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
   def restart_persistent_subscriptions(conn, opts \\ []) do
-    import Spear.Records.Shared, only: [empty: 0]
-
     # coveralls-ignore-start
-    case request(conn, Spear.Records.Operations, :RestartPersistentSubscriptions, [empty()], opts) do
+    case request(conn, Operations, :RestartPersistentSubscriptions, [empty()], opts) do
       {:ok, empty()} ->
         :ok
 
@@ -1565,10 +1587,6 @@ defmodule Spear do
   @spec cluster_info(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           {:ok, [Spear.ClusterMember.t()]} | {:error, any()}
   def cluster_info(conn, opts \\ []) do
-    import Spear.Records.Shared, only: [empty: 0]
-    alias Spear.Records.Gossip
-    require Gossip
-
     case request(conn, Gossip, :Read, [empty()], opts) do
       {:ok, Gossip.cluster_info(members: members)} ->
         {:ok, Enum.map(members, &Spear.ClusterMember.from_member_info/1)}
