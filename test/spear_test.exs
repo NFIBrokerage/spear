@@ -4,7 +4,7 @@ defmodule SpearTest do
   @moduletag :capture_log
 
   import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
-  import Spear.Event, only: [uuid_v4: 0]
+  import Spear.Uuid, only: [uuid_v4: 0]
 
   # bytes
   @max_append_bytes 1_048_576
@@ -583,6 +583,11 @@ defmodule SpearTest do
     @tag :operations
     test "a request to restart persistent subscriptions succeeds", c do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
+    end
+
+    test "the cluster info shows one active node on localhost", c do
+      assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
+               Spear.cluster_info(c.conn)
     end
   end
 
