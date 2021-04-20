@@ -1618,16 +1618,23 @@ defmodule Spear do
   """
   @doc since: "0.6.0"
   @doc api: :persistent
-  @spec delete_persistent_subscription(connection :: Spear.Connection.t(), stream_name :: String.t(), group_name :: String.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  @spec delete_persistent_subscription(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t(),
+          group_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
   def delete_persistent_subscription(conn, stream_name, group_name, opts \\ [])
 
-  def delete_persistent_subscription(conn, stream_name, group_name, opts) when is_binary(stream_name) and is_binary(group_name) do
+  def delete_persistent_subscription(conn, stream_name, group_name, opts)
+      when is_binary(stream_name) and is_binary(group_name) do
     message =
-      Persistent.delete_req(options:
-        Persistent.delete_req_options(
-          stream_identifier: Shared.stream_identifier(streamName: stream_name),
-          group_name: group_name
-        )
+      Persistent.delete_req(
+        options:
+          Persistent.delete_req_options(
+            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            group_name: group_name
+          )
       )
 
     case request(conn, Persistent, :Delete, [message], opts) do
