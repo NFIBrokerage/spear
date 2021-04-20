@@ -1579,4 +1579,42 @@ defmodule Spear do
         # coveralls-ignore-stop
     end
   end
+
+  @doc """
+  Deletes a persistent subscription from the EventStoreDB
+
+  Persistent subscriptions are considered unique by their stream and group
+  names together: you may define separate persistent subscriptions for the same
+  stream with multiple groups or use the same group name for persistent
+  subscriptions to multiple streams. A combination of stream name and group
+  name together is considered unique though.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.delete_persistent_subscription(conn, "my_stream", "MyGroup")
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec delete_persistent_subscription(connection :: Spear.Connection.t(), stream_name :: String.t(), group_name :: String.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
+  def delete_persistent_subscription(conn, stream_name, group_name, opts \\ [])
+
+  def delete_persistent_subscription(conn, stream_name, group_name, opts) when is_binary(stream_name) and is_binary(group_name) do
+    message =
+      Persistent.delete_req(options:
+        Persistent.delete_req_options(
+          stream_identifier: Shared.stream_identifier(streamName: stream_name),
+          group_name: group_name
+        )
+      )
+
+    case request(conn, Persistent, :Delete, [message], opts) do
+      {:ok, Persistent.delete_resp()} -> :ok
+      error -> error
+    end
+  end
 end
