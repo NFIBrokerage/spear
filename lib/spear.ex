@@ -69,17 +69,17 @@ defmodule Spear do
     Streams,
     Users,
     Operations,
-    Gossip
-    # Persistent,
-    # Shared
+    Gossip,
+    Persistent,
+    Shared
   }
 
   require Streams
   require Users
   require Operations
   require Gossip
-  # require Persistent
-  # require Shared
+  require Persistent
+  require Shared
 
   @doc """
   Collects an EventStoreDB stream into an enumerable
