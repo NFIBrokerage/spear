@@ -1,5 +1,5 @@
 make_server = fn ->
-  _sucure_params = [
+  secure_params = [
     connection_string: "esdb://admin:changeit@localhost:2113?tls=true",
     mint_opts: [
       transport_opts: [
@@ -8,11 +8,11 @@ make_server = fn ->
     ]
   ]
 
-  insecure_params = [
+  _insecure_params = [
     connection_string: "esdb://localhost:2113"
   ]
 
-  {:ok, pid} = Spear.Connection.start_link(insecure_params)
+  {:ok, pid} = Spear.Connection.start_link(secure_params)
 
   pid
 end
