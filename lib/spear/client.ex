@@ -457,6 +457,80 @@ defmodule Spear.Client do
   @doc since: "0.5.0"
   @callback cluster_info(opts :: Keyword.t()) :: :ok | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.create_persistent_subscription/4`
+  """
+  @doc since: "0.6.0"
+  @callback create_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              settings :: Spear.PersistentSubscription.Settings.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.create_persistent_subscription/5`
+  """
+  @doc since: "0.6.0"
+  @callback create_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              settings :: Spear.PersistentSubscription.Settings.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.update_persistent_subscription/4`
+  """
+  @doc since: "0.6.0"
+  @callback update_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              settings :: Spear.PersistentSubscription.Settings.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.update_persistent_subscription/5`
+  """
+  @doc since: "0.6.0"
+  @callback update_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              settings :: Spear.PersistentSubscription.Settings.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.delete_persistent_subscription/3`
+  """
+  @doc since: "0.6.0"
+  @callback delete_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.delete_persistent_subscription/4`
+  """
+  @doc since: "0.6.0"
+  @callback delete_persistent_subscription(
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.list_persistent_subscriptions/1`
+  """
+  @doc since: "0.6.0"
+  @callback list_persistent_subscriptions() :: {:ok, Enumerable.t()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.list_persistent_subscriptions/2`
+  """
+  @doc since: "0.6.0"
+  @callback list_persistent_subscriptions(opts :: Keyword.t()) ::
+              {:ok, Enumerable.t()} | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -602,6 +676,26 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def cluster_info(opts \\ []) do
         Spear.cluster_info(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def create_persistent_subscription(stream_name, group_name, settings, opts \\ []) do
+        Spear.create_persistent_subscription(__MODULE__, stream_name, group_name, settings, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def update_persistent_subscription(stream_name, group_name, settings, opts \\ []) do
+        Spear.update_persistent_subscription(__MODULE__, stream_name, group_name, settings, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def delete_persistent_subscription(stream_name, group_name, opts \\ []) do
+        Spear.delete_persistent_subscription(__MODULE__, stream_name, group_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def list_persistent_subscriptions(opts \\ []) do
+        Spear.list_persistent_subscriptions(__MODULE__, opts)
       end
     end
   end

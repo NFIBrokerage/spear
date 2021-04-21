@@ -589,6 +589,62 @@ defmodule SpearTest do
       assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
                Spear.cluster_info(c.conn)
     end
+
+    test "a persistent subscription may be CRUD-ed", c do
+      settings = %Spear.PersistentSubscription.Settings{}
+      stream = c.stream_name
+      group = uuid_v4()
+      assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
+      assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
+
+      assert [%Spear.PersistentSubscription{stream_name: ^stream, group_name: ^group}] =
+               Enum.to_list(subs)
+
+      assert Spear.update_persistent_subscription(c.conn, stream, group, settings) == :ok
+      assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
+
+      assert [%Spear.PersistentSubscription{stream_name: ^stream, group_name: ^group}] =
+               Enum.to_list(subs)
+
+      assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
+      assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
+      assert Enum.to_list(subs) == []
+    end
+
+    test "you cannot create a persistent subscription that already exists", c do
+      settings = %Spear.PersistentSubscription.Settings{}
+      stream = c.stream_name
+      group = uuid_v4()
+
+      assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
+
+      assert {:error, reason} =
+               Spear.create_persistent_subscription(c.conn, stream, group, settings)
+
+      assert reason.status == :already_exists
+
+      Spear.delete_persistent_subscription(c.conn, stream, group)
+    end
+
+    test "you cannot update a persistent subscription that does not exist", c do
+      settings = %Spear.PersistentSubscription.Settings{}
+      stream = c.stream_name
+      group = uuid_v4()
+
+      assert {:error, reason} =
+               Spear.update_persistent_subscription(c.conn, stream, group, settings)
+
+      assert reason.message == "Unexpected UpdatePersistentSubscriptionResult: DoesNotExist"
+      assert reason.status == :unknown
+    end
+
+    test "you cannot delete a persistent subscription that does not exist", c do
+      stream = c.stream_name
+      group = uuid_v4()
+
+      assert {:error, reason} = Spear.delete_persistent_subscription(c.conn, stream, group)
+      assert reason.status == :not_found
+    end
   end
 
   defp random_stream_name do

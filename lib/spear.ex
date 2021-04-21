@@ -69,17 +69,17 @@ defmodule Spear do
     Streams,
     Users,
     Operations,
-    Gossip
-    # Persistent,
-    # Shared
+    Gossip,
+    Persistent,
+    Shared
   }
 
   require Streams
   require Users
   require Operations
   require Gossip
-  # require Persistent
-  # require Shared
+  require Persistent
+  require Shared
 
   @doc """
   Collects an EventStoreDB stream into an enumerable
@@ -1590,6 +1590,227 @@ defmodule Spear do
     case request(conn, Gossip, :Read, [empty()], opts) do
       {:ok, Gossip.cluster_info(members: members)} ->
         {:ok, Enum.map(members, &Spear.ClusterMember.from_member_info/1)}
+
+      # coveralls-ignore-start
+      error ->
+        error
+        # coveralls-ignore-stop
+    end
+  end
+
+  @doc """
+  Deletes a persistent subscription from the EventStoreDB
+
+  Persistent subscriptions are considered unique by their stream and group
+  names together: you may define separate persistent subscriptions for the same
+  stream with multiple groups or use the same group name for persistent
+  subscriptions to multiple streams. A combination of stream name and group
+  name together is considered unique though.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.delete_persistent_subscription(conn, "my_stream", "MyGroup")
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec delete_persistent_subscription(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t(),
+          group_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def delete_persistent_subscription(conn, stream_name, group_name, opts \\ [])
+
+  def delete_persistent_subscription(conn, stream_name, group_name, opts)
+      when is_binary(stream_name) and is_binary(group_name) do
+    message =
+      Persistent.delete_req(
+        options:
+          Persistent.delete_req_options(
+            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            group_name: group_name
+          )
+      )
+
+    case request(conn, Persistent, :Delete, [message], opts) do
+      {:ok, Persistent.delete_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Creates a persistent subscription
+
+  See `t:Spear.PersistentSubscription.Settings.t/0` for more information.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.create_persistent_subscription(conn, "my_stream", "my_group", %Spear.PersistentSubscription.Settings{})
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec create_persistent_subscription(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t(),
+          group_name :: String.t(),
+          settings :: Spear.PersistentSubscription.Settings.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def create_persistent_subscription(conn, stream_name, group_name, settings, opts \\ [])
+
+  def create_persistent_subscription(
+        conn,
+        stream_name,
+        group_name,
+        %Spear.PersistentSubscription.Settings{} = settings,
+        opts
+      )
+      when is_binary(stream_name) and is_binary(group_name) do
+    message =
+      Persistent.create_req(
+        options:
+          Persistent.create_req_options(
+            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            group_name: group_name,
+            settings: Spear.PersistentSubscription.Settings.to_record(settings, :create)
+          )
+      )
+
+    case request(conn, Persistent, :Create, [message], opts) do
+      {:ok, Persistent.create_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Updates an existing persistent subscription
+
+  See `t:Spear.PersistentSubscription.Settings.t/0` for more information.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.update_persistent_subscription(conn, "my_stream", "my_group", %Spear.PersistentSubscription.Settings{})
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec update_persistent_subscription(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t(),
+          group_name :: String.t(),
+          settings :: Spear.PersistentSubscription.Settings.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def update_persistent_subscription(conn, stream_name, group_name, settings, opts \\ [])
+
+  def update_persistent_subscription(
+        conn,
+        stream_name,
+        group_name,
+        %Spear.PersistentSubscription.Settings{} = settings,
+        opts
+      )
+      when is_binary(stream_name) and is_binary(group_name) do
+    message =
+      Persistent.update_req(
+        options:
+          Persistent.update_req_options(
+            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            group_name: group_name,
+            settings: Spear.PersistentSubscription.Settings.to_record(settings, :update)
+          )
+      )
+
+    case request(conn, Persistent, :Update, [message], opts) do
+      {:ok, Persistent.update_resp()} -> :ok
+      error -> error
+    end
+  end
+
+  @doc """
+  Lists the currently existing persistent subscriptions
+
+  Results are returned in an `t:Enumerable.t/0` of
+  `t:Spear.PersistentSubscription.t/0`.
+
+  Note that the `:extra_statistics?` field of settings is not determined by
+  this function: `:extra_statistics?` will always be returned as `nil` in this
+  function.
+
+  This function works by reading the built-in `$persistentSubscriptionConfig`
+  stream. This stream can be read normally to obtain additional information
+  such as at timestamp for the last time the persistent subscription config was
+  updated.
+
+  ## Options
+
+  Options are passed to `read_stream/3`. `:direction`, `:from`, and
+  `:max_count` are fixed and cannot be overridden.
+
+  ## Examples
+
+
+      iex> Spear.create_persistent_subscription(conn, "my_stream", "my_group", %Spear.PersistentSubscription.Settings{})
+      :ok
+      iex> {:ok, subscriptions} = Spear.list_persistent_subscriptions(conn)
+      iex> subscriptions |> Enum.to_list()
+      [
+        %Spear.PersistentSubscription{
+          group_name: "my_group",
+          settings: %Spear.PersistentSubscription.Settings{
+            checkpoint_after: 3000,
+            extra_statistics?: nil,
+            history_buffer_size: 300,
+            live_buffer_size: 100,
+            max_checkpoint_count: 100,
+            max_retry_count: 10,
+            max_subscriber_count: 1,
+            message_timeout: 5000,
+            min_checkpoint_count: 1,
+            named_consumer_strategy: :RoundRobin,
+            read_batch_size: 100,
+            resolve_links?: true,
+            revision: 0
+          },
+          stream_name: "my_stream"
+        }
+      ]
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec list_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, Enumerable.t()} | {:error, any()}
+  def list_persistent_subscriptions(conn, opts \\ []) do
+    read_opts =
+      opts
+      |> Keyword.merge(
+        direction: :backwards,
+        from: :end,
+        max_count: 1
+      )
+
+    case read_stream(conn, "$persistentSubscriptionConfig", read_opts) do
+      {:ok, stream} ->
+        subscriptions =
+          stream
+          |> Stream.flat_map(&get_in(&1, [Access.key(:body), "entries"]))
+          |> Stream.map(&Spear.PersistentSubscription.from_map/1)
+
+        {:ok, subscriptions}
 
       # coveralls-ignore-start
       error ->
