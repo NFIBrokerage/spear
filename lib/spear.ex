@@ -546,7 +546,6 @@ defmodule Spear do
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
-    # YARD deal with broken subscriptions
     Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
   end
 
@@ -1957,7 +1956,6 @@ defmodule Spear do
       }
       |> Spear.Request.expand()
 
-    # YARD deal with broken subscriptions
     Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
   end
 
@@ -2030,7 +2028,6 @@ defmodule Spear do
   def ack(conn, sub, event_ids) when is_list(event_ids) do
     id = ""
     ids = Enum.map(event_ids, fn id -> Shared.uuid(value: {:string, id}) end)
-    # YARD this id field may be incorrect
     message = Persistent.read_req(content: {:ack, Persistent.read_req_ack(id: id, ids: ids)})
 
     Connection.cast(conn, {:push, sub, message})
