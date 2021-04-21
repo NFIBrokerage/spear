@@ -6,16 +6,26 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.6.0 - [Unreleased]
+## 0.6.0 - 2021-04-21
 
 ### Added
 
-- Added the persistent subscriptions API
+- Added the CRUD portions of persistent subscriptions API
     - `Spear.create_persistent_subscription/5`
     - `Spear.update_persistent_subscription/5`
     - `Spear.delete_persistent_subscription/4`
     - `Spear.list_persistent_subscriptions/2`
     - associated callbacks in `Spear.Client`
+- Added subscription functionality for persistent subscriptions
+    - `Spear.connect_to_persistent_subscription/5`
+    - `Spear.ack/3`
+    - `Spear.nack/4`
+    - associated callbacks in `Spear.Client`
+
+### Changed
+
+- Moved `Spear.cancel_subscription/3` under the utils API instead of streams
+    - This function may also be used to cancel persistent subscriptions
 
 ## 0.5.0 - 2021-04-19
 

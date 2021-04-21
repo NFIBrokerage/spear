@@ -53,7 +53,7 @@ defmodule Spear do
 
       iex> import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
       iex> event = Spear.stream!(conn, "my_stream", raw?: true) |> Enum.take(1) |> List.first()
-      {:"event_store.client.streams.ReadResp", {checkpoint, ..}}
+      {:"event_store.client.streams.ReadResp", {:checkpoint, ..}}
       iex> match?(read_resp(), event)
       true
       iex> match?(read_resp(content: {:checkpoint, _}), event)
@@ -452,6 +452,10 @@ defmodule Spear do
   subscription process must re-subscribe from the last received event or
   checkpoint to resume the subscription.
 
+  Subscriptions can be gracefully shut down with `Spear.cancel_subscription/3`.
+  The subscription will be cancelled by the connection process if the
+  subscriber process exits.
+
   ## Options
 
   * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
@@ -542,7 +546,6 @@ defmodule Spear do
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
-    # YARD deal with broken subscriptions
     Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
   end
 
@@ -566,7 +569,7 @@ defmodule Spear do
       :ok
   """
   @doc since: "0.1.0"
-  @doc api: :streams
+  @doc api: :utils
   @spec cancel_subscription(
           connection :: Spear.Connection.t(),
           subscription_reference :: reference(),
@@ -1817,5 +1820,303 @@ defmodule Spear do
         error
         # coveralls-ignore-stop
     end
+  end
+
+  @doc """
+  Subscribes a process to an existing persistent subscription
+
+  Persistent subscriptions can be gracefully closed with
+  `cancel_subscription/3` just like subscriptions started with `subscribe/4`.
+  The subscription will be cancelled by the connection process if the
+  subscriber process exits.
+
+  Persistent subscriptions are an alternative to standard subscriptions
+  (via `subscribe/4`) which use `ack/3` and `nack/4` to exert backpressure
+  and allow out-of-order and batch processing within a single consumer
+  and allow multiple connected consumers at once.
+
+  In standard subscriptions (via `subscribe/4`), if a client wishes to
+  handle events in order without reprocessing, the client must keep track
+  of its own position in a stream, either in memory or using some sort of
+  persistence such as PostgreSQL or mnesia for durability.
+
+  In contrast, persistent subscriptions are stateful on the server-side:
+  the EventStoreDB will keep track of which events have been positively and
+  negatively acknowledged and will only emit events which have not yet
+  been processed to any connected consumers.
+
+  This allows one to connect multiple subscriber processes to a persistent
+  subscription stream-group combination in a strategy called [Competing
+  Consumers](https://docs.microsoft.com/en-us/azure/architecture/patterns/competing-consumers).
+
+  Note that persistent subscription events are not guaranteed to be processed
+  in order like the standard subscriptions because of the ability to `nack/4`
+  and reprocess or park a message. While this requires special considerations
+  when authoring a consumer, it allows one to easily write a consumer which
+  does not head-of-line block in failure cases.
+
+  The subscriber will receive a message `{:eos, reason}` when the
+  subscription is closed by the server. Currently the only `reason` is
+  `:closed`.
+
+  ## Backpressure
+
+  Persistent subscriptions allow the subscriber process to exert backpressure
+  on the EventStoreDB so that the message queue is not flooded. This is
+  implemented with a buffer of events which are considered by the EventStoreDB
+  to be _in-flight_ when they are sent to the client. Events remain in-flight
+  until they are `ack/3`-ed, `nack/4`-ed, or until the `:message_timeout`
+  duration is exceeded. If a client `ack/3`s a message, the EventStoreDB
+  will send a new message if any are available.
+
+  The in-flight buffer size is controllable per subscriber through
+  `:buffer_size`. Note that `:message_timeout` applies to each event: if
+  the `:buffer_size` is 5 and five events arrive simultaneously, the client
+  has the duration `:message_timeout` to acknowledge all five events before
+  they are considered stale and are automatically considered nack-ed by
+  the EventStoreDB.
+
+  The `:buffer_size` should align with the consumer's ability to batch
+  process events.
+
+  ## Options
+
+  * `:timeout` - (default: `5_000`ms - 5s) the time to await a subscription
+    confirmation from the EventStoreDB.
+  * `:raw?` - (default: `false`) controls whether events are translated from
+    low-level `Spear.Records.Persistent.read_resp/0` records to
+    `t:Spear.Event.t/0`s. By default `t:Spear.Event.t/0`s are sent to the
+    subscriber.
+  * `:credentials` - (default: `nil`) the credentials to use to connect to the
+    subscription. When not specified, the connection-level credentials are
+    used. Credentials must be a two-tuple `{username, password}`.
+  * `:buffer_size` - (default: `1`) the number of events allowed to be sent
+    to the client at a time. These events are considered in-flight. See the
+    backpressure section above for more information.
+
+  ## Examples
+
+      iex> Spear.connect_to_persistent_subscription(conn, self(), "my_stream", "my_group")
+      iex> flush
+      %Spear.Event{}
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec connect_to_persistent_subscription(
+          connection :: Spear.Connection.t(),
+          subscriber :: pid() | GenServer.name(),
+          stream_name :: String.t(),
+          group_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, subscription :: reference()} | {:error, any()}
+  def connect_to_persistent_subscription(conn, subscriber, stream_name, group_name, opts \\ [])
+
+  def connect_to_persistent_subscription(conn, subscriber, stream_name, group_name, opts)
+      when is_binary(stream_name) and is_binary(group_name) do
+    default_subscribe_opts = [
+      timeout: 5_000,
+      raw?: false,
+      through: &Spear.Reading.decode_read_response/1,
+      credentials: nil,
+      buffer_size: 1
+    ]
+
+    opts =
+      default_subscribe_opts
+      |> Keyword.merge(opts)
+      |> Keyword.merge(stream: stream_name, subscriber: subscriber)
+
+    message =
+      Persistent.read_req(
+        content:
+          {:options,
+           Persistent.read_req_options(
+             stream_identifier: Shared.stream_identifier(streamName: stream_name),
+             group_name: group_name,
+             buffer_size: opts[:buffer_size],
+             uuid_option: Persistent.read_req_options_uuid_option(content: {:string, empty()})
+           )}
+      )
+
+    through =
+      if opts[:raw?] do
+        # coveralls-ignore-start
+        & &1
+        # coveralls-ignore-stop
+      else
+        opts[:through]
+      end
+
+    request =
+      %Spear.Request{
+        api: {Persistent, :Read},
+        messages: [message],
+        credentials: opts[:credentials]
+      }
+      |> Spear.Request.expand()
+
+    Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
+  end
+
+  @doc """
+  Acknowledges that an event received as part of a persistent subscription was
+  successfully handled
+
+  Although `ack/3` can accept a `t:Spear.Event.t/0` alone, the underlying
+  gRPC call acknowledges a batch of event IDs.
+
+  ```elixir
+  Spear.ack(conn, subscription, events |> Enum.map(& &1.id))
+  ```
+
+  should be preferred over
+
+  ```elixir
+  Enum.each(events, &Spear.ack(conn, subscription, &1.id))
+  ```
+
+  As the acknowledgements will be batched.
+
+  This function (and `nack/4`) are asynchronous casts to the connection
+  process.
+
+  ## Examples
+
+      # some stream with 3 events
+      stream_name = "my_stream"
+      group_name = "spear_iex"
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      get_event_and_ack = fn conn, sub ->
+        receive do
+          %Spear.Event{} = event ->
+            :ok = Spear.ack(conn, sub, event)
+
+            event
+
+        after
+          3_000 -> :no_events
+        end
+      end
+
+      iex> Spear.create_persistent_subscription(conn, stream_name, group_name, settings)
+      :ok
+      iex> {:ok, sub} = Spear.connect_to_persistent_subscription(conn, self(), stream_name, group_name)
+      iex> get_event_and_ack.(conn, sub)
+      %Spear.Event{..}
+      iex> get_event_and_ack.(conn, sub)
+      %Spear.Event{..}
+      iex> get_event_and_ack.(conn, sub)
+      %Spear.Event{..}
+      iex> get_event_and_ack.(conn, sub)
+      :no_events
+      iex> Spear.cancel_subscription(conn, sub)
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec ack(
+          connection :: Spear.Connection.t(),
+          subscription :: reference(),
+          event_or_ids :: Spear.Event.t() | [String.t()]
+        ) :: :ok
+  def ack(conn, subscription, event_or_ids)
+
+  def ack(conn, sub, %Spear.Event{id: id}), do: ack(conn, sub, [id])
+
+  def ack(conn, sub, event_ids) when is_list(event_ids) do
+    id = ""
+    ids = Enum.map(event_ids, fn id -> Shared.uuid(value: {:string, id}) end)
+    message = Persistent.read_req(content: {:ack, Persistent.read_req_ack(id: id, ids: ids)})
+
+    Connection.cast(conn, {:push, sub, message})
+  end
+
+  @doc """
+  Negatively acknowldeges a persistent subscription event
+
+  Nacking is the opposite of `ack/3`ing: it tells the EventStoreDB that the
+  event should not be considered processed.
+
+  ## Options
+
+  * `:action` - (default: `:retry`) controls the action the EventStoreDB
+    should take about the event. See
+    `t:Spear.PersistentSubscription.nack_action/0` for a full description.
+  * `:reason` - (default: `""`) a description of why the event is
+    being nacked
+
+  ## Examples
+
+      # some stream with 3 events
+      stream_name = "my_stream"
+      group_name = "spear_iex"
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      get_event_and_ack = fn conn, sub, action ->
+        receive do
+          %Spear.Event{} = event ->
+            :ok = Spear.nack(conn, sub, event, action: action)
+
+            event
+
+        after
+          3_000 -> :no_events
+        end
+      end
+
+      iex> Spear.create_persistent_subscription(conn, stream_name, group_name, settings)
+      :ok
+      iex> {:ok, sub} = Spear.connect_to_persistent_subscription(conn, self(), stream_name, group_name)
+      iex> get_event_and_nack.(conn, sub, :retry)
+      %Spear.Event{..} # event 0
+      iex> get_event_and_nack.(conn, sub, :retry)
+      %Spear.Event{..} # event 0
+      iex> get_event_and_nack.(conn, sub, :park) # park event 0 and move on
+      %Spear.Event{..} # event 0
+      iex> get_event_and_nack.(conn, sub, :skip) # skip event 1
+      %Spear.Event{..} # event 1
+      iex> get_event_and_nack.(conn, sub, :skip) # skip event 2
+      %Spear.Event{..} # event 2
+      iex> get_event_and_nack.(conn, sub, :skip)
+      :no_events
+      iex> Spear.cancel_subscription(conn, sub)
+      :ok
+  """
+  @doc since: "0.6.0"
+  @doc api: :persistent
+  @spec nack(
+          connection :: Spear.Connection.t(),
+          subscription :: reference(),
+          event_or_ids :: Spear.Event.t() | [String.t()],
+          opts :: Keyword.t()
+        ) :: :ok
+  # coveralls-ignore-start
+  def nack(conn, subscription, event_or_ids, opts \\ [])
+  # coveralls-ignore-stop
+
+  def nack(conn, sub, %Spear.Event{id: id}, opts), do: nack(conn, sub, [id], opts)
+
+  def nack(conn, sub, event_ids, opts) when is_list(event_ids) do
+    reason = Keyword.get(opts, :reason, "")
+    action = Keyword.get(opts, :action, :retry)
+
+    id = ""
+    ids = Enum.map(event_ids, fn id -> Shared.uuid(value: {:string, id}) end)
+
+    message =
+      Persistent.read_req(
+        content:
+          {:nack,
+           Persistent.read_req_nack(
+             id: id,
+             ids: ids,
+             action: Spear.PersistentSubscription.map_nack_action(action),
+             reason: reason
+           )}
+      )
+
+    Connection.cast(conn, {:push, sub, message})
   end
 end

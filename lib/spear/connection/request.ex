@@ -14,9 +14,21 @@ defmodule Spear.Connection.Request do
           type: :request | {:subscription, pid(), (binary -> any())}
         }
 
-  import Spear.Records.Streams, only: [read_resp: 1]
+  alias Spear.Records.{Streams, Persistent}
+  require Streams
+  require Persistent
 
-  defstruct [:continuation, :buffer, :request_ref, :monitor_ref, :from, :response, :status, :type]
+  defstruct [
+    :continuation,
+    :buffer,
+    :request_ref,
+    :monitor_ref,
+    :from,
+    :response,
+    :status,
+    :type,
+    :rpc
+  ]
 
   def new(
         %Spear.Request{messages: event_stream, rpc: %Spear.Rpc{} = rpc},
@@ -42,7 +54,8 @@ defmodule Spear.Connection.Request do
       from: from,
       response: %Spear.Connection.Response{type: {rpc.service_module, rpc.response_type}},
       status: :streaming,
-      type: type
+      type: type,
+      rpc: rpc
     }
   end
 
@@ -108,10 +121,17 @@ defmodule Spear.Connection.Request do
        when finished in [:done, :halted] do
     request = put_in(request.status, :done)
 
+    messages =
+      if request.rpc.request_stream? and request.rpc.response_stream? do
+        message_buffer
+      else
+        [:eof | message_buffer]
+      end
+
     stream_messages(
       put_request(state, request),
       request.request_ref,
-      [:eof | message_buffer]
+      messages
     )
   end
 
@@ -227,7 +247,13 @@ defmodule Spear.Connection.Request do
 
   def handle_data(%__MODULE__{type: {:subscription, subscriber, through}} = request, new_data) do
     case Spear.Grpc.decode_next_message(request.response.data <> new_data, request.response.type) do
-      {read_resp(content: {:confirmation, _confirmation}), rest} ->
+      {Streams.read_resp(content: {:confirmation, _confirmation}), rest} ->
+        GenServer.reply(request.from, {:ok, request.request_ref})
+
+        request = put_in(request.from, nil)
+        put_in(request.response.data, rest)
+
+      {Persistent.read_resp(content: {:subscription_confirmation, _confirmation}), rest} ->
         GenServer.reply(request.from, {:ok, request.request_ref})
 
         request = put_in(request.from, nil)
