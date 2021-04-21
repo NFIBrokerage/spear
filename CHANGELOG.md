@@ -6,6 +6,17 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.0 - [Unreleased]
+
+### Added
+
+- Added the persistent subscriptions API
+    - `Spear.create_persistent_subscription/5`
+    - `Spear.update_persistent_subscription/5`
+    - `Spear.delete_persistent_subscription/4`
+    - `Spear.list_persistent_subscriptions/2`
+    - associated callbacks in `Spear.Client`
+
 ## 0.5.0 - 2021-04-19
 
 ### Added
