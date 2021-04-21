@@ -10,11 +10,16 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 
 ### Added
 
-- Added the persistent subscriptions API
+- Added the CRUD portions of persistent subscriptions API
     - `Spear.create_persistent_subscription/5`
     - `Spear.update_persistent_subscription/5`
     - `Spear.delete_persistent_subscription/4`
     - `Spear.list_persistent_subscriptions/2`
+    - associated callbacks in `Spear.Client`
+- Added subscription functionality for persistent subscriptions
+    - `Spear.connect_to_persistent_subscription/5`
+    - `Spear.ack/3`
+    - `Spear.nack/4`
     - associated callbacks in `Spear.Client`
 
 ## 0.5.0 - 2021-04-19
