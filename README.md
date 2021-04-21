@@ -87,7 +87,10 @@ def deps do
     # encoding and decoding and works out-of-the-box with spear.
     # Any JSON (de)serializer should work though, so you don't *need* to add
     # :jason to your dependencies.
-    {:jason, "~> 1.0"}
+    {:jason, "~> 1.0"},
+    # If you're connecting to an EventStoreDB with a TLS certificate signed
+    # by a public Certificate Authority (CA), include :castore
+    {:castore, ">= 0.0.0"}
   ]
 end
 ```
