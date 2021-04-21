@@ -105,7 +105,9 @@ defmodule Spear.MixProject do
           Spear.StreamMetadata,
           Spear.User,
           Spear.ClusterMember,
-          Spear.Scavenge
+          Spear.Scavenge,
+          Spear.PersistentSubscription,
+          Spear.PersistentSubscription.Settings
         ],
         "Record interfaces": [
           Spear.Records.Shared,
