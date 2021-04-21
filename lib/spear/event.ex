@@ -6,22 +6,10 @@ defmodule Spear.Event do
   AppendReq and ReadResp records
   """
 
-  import Spear.Records.Streams,
-    only: [
-      append_req: 1,
-      append_req_proposed_message: 1,
-      read_resp: 1,
-      read_resp_read_event: 1,
-      read_resp_read_event_recorded_event: 0,
-      read_resp_read_event_recorded_event: 1
-    ]
-
-  import Spear.Records.Shared,
-    only: [
-      uuid: 0,
-      uuid: 1,
-      stream_identifier: 1
-    ]
+  alias Spear.Records.{Streams, Persistent, Shared}
+  require Streams
+  require Persistent
+  require Shared
 
   defstruct [:id, :type, :body, metadata: %{}]
 
@@ -209,13 +197,13 @@ defmodule Spear.Event do
       ) do
     encoder = Map.get(encoder_mapping, event.metadata.content_type, & &1)
 
-    append_req(
+    Streams.append_req(
       content:
         {:proposed_message,
-         append_req_proposed_message(
+         Streams.append_req_proposed_message(
            custom_metadata: event.metadata.custom_metadata,
            data: encoder.(event.body),
-           id: uuid(value: {:string, event.id}),
+           id: Shared.uuid(value: {:string, event.id}),
            metadata: [{"content-type", event.metadata.content_type}, {"type", event.type}]
          )}
     )
@@ -297,6 +285,8 @@ defmodule Spear.Event do
 
     read_response
     |> destructure_read_response(force_follow_link?)
+    |> record_to_keyword_list()
+    |> Enum.into(%{})
     |> from_recorded_event(remaining_opts)
   end
 
@@ -317,16 +307,16 @@ defmodule Spear.Event do
 
   @doc false
   def from_recorded_event(
-        read_resp_read_event_recorded_event(
+        %{
           custom_metadata: custom_metadata,
           commit_position: commit_position,
-          id: uuid() = uuid,
+          id: Shared.uuid() = uuid,
           data: body,
           metadata: metadata,
           prepare_position: prepare_position,
-          stream_identifier: stream_identifier(streamName: stream_name),
+          stream_identifier: Shared.stream_identifier(streamName: stream_name),
           stream_revision: stream_revision
-        ),
+        },
         opts
       ) do
     # metadata comes in as [{k, v}, ..]
@@ -358,12 +348,12 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         read_resp(
+         Streams.read_resp(
            content:
              {:event,
-              read_resp_read_event(
+              Streams.read_resp_read_event(
                 link: :undefined,
-                event: read_resp_read_event_recorded_event() = event
+                event: Streams.read_resp_read_event_recorded_event() = event
               )}
          ),
          _link?
@@ -372,12 +362,12 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         read_resp(
+         Persistent.read_resp(
            content:
              {:event,
-              read_resp_read_event(
-                event: :undefined,
-                link: read_resp_read_event_recorded_event() = event
+              Persistent.read_resp_read_event(
+                link: :undefined,
+                event: Persistent.read_resp_read_event_recorded_event() = event
               )}
          ),
          _link?
@@ -386,9 +376,40 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         read_resp(
+         Streams.read_resp(
            content:
-             {:event, read_resp_read_event(link: read_resp_read_event_recorded_event() = event)}
+             {:event,
+              Streams.read_resp_read_event(
+                event: :undefined,
+                link: Streams.read_resp_read_event_recorded_event() = event
+              )}
+         ),
+         _link?
+       ) do
+    event
+  end
+
+  defp destructure_read_response(
+         Persistent.read_resp(
+           content:
+             {:event,
+              Persistent.read_resp_read_event(
+                event: :undefined,
+                link: Persistent.read_resp_read_event_recorded_event() = event
+              )}
+         ),
+         _link?
+       ) do
+    event
+  end
+
+  defp destructure_read_response(
+         Streams.read_resp(
+           content:
+             {:event,
+              Streams.read_resp_read_event(
+                link: Streams.read_resp_read_event_recorded_event() = event
+              )}
          ),
          true = _link?
        ) do
@@ -396,13 +417,50 @@ defmodule Spear.Event do
   end
 
   defp destructure_read_response(
-         read_resp(
+         Persistent.read_resp(
            content:
-             {:event, read_resp_read_event(event: read_resp_read_event_recorded_event() = event)}
+             {:event,
+              Persistent.read_resp_read_event(
+                link: Persistent.read_resp_read_event_recorded_event() = event
+              )}
+         ),
+         true = _link?
+       ) do
+    event
+  end
+
+  defp destructure_read_response(
+         Streams.read_resp(
+           content:
+             {:event,
+              Streams.read_resp_read_event(
+                event: Streams.read_resp_read_event_recorded_event() = event
+              )}
          ),
          false = _link?
        ) do
     event
+  end
+
+  defp destructure_read_response(
+         Persistent.read_resp(
+           content:
+             {:event,
+              Persistent.read_resp_read_event(
+                event: Persistent.read_resp_read_event_recorded_event() = event
+              )}
+         ),
+         false = _link?
+       ) do
+    event
+  end
+
+  defp record_to_keyword_list(Streams.read_resp_read_event_recorded_event() = event) do
+    Streams.read_resp_read_event_recorded_event(event)
+  end
+
+  defp record_to_keyword_list(Persistent.read_resp_read_event_recorded_event() = event) do
+    Persistent.read_resp_read_event_recorded_event(event)
   end
 
   defp parse_created_stamp(nil), do: nil

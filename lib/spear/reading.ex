@@ -3,17 +3,9 @@ defmodule Spear.Reading do
 
   # Helper functions for reading streams
 
-  import Spear.Records.Streams,
-    only: [
-      read_resp: 0,
-      read_req: 1,
-      read_req_options: 1,
-      read_req_options_uuid_option: 1,
-      read_req_options_subscription_options: 0,
-      read_req_options_all_options: 1,
-      read_req_options_stream_options: 1,
-      read_req_options_position: 1
-    ]
+  alias Spear.Records.{Streams, Persistent}
+  require Streams
+  require Persistent
 
   import Spear.Records.Shared,
     only: [
@@ -21,19 +13,23 @@ defmodule Spear.Reading do
       stream_identifier: 1
     ]
 
-  @uuid read_req_options_uuid_option(content: {:string, empty()})
+  @uuid Streams.read_req_options_uuid_option(content: {:string, empty()})
 
-  def decode_read_response({:"event_store.client.streams.ReadResp", {kind, _body}} = read_resp) do
+  def decode_read_response(Streams.read_resp(content: {kind, _body}) = read_resp) do
     case kind do
       :event -> Spear.Event.from_read_response(read_resp)
       :checkpoint -> Spear.Filter.Checkpoint.from_read_response(read_resp)
     end
   end
 
+  def decode_read_response(Persistent.read_resp() = read_resp) do
+    Spear.Event.from_read_response(read_resp)
+  end
+
   def build_read_request(params) do
-    read_req(
+    Streams.read_req(
       options:
-        read_req_options(
+        Streams.read_req_options(
           stream_option: map_stream(params.stream, params.from),
           read_direction: map_direction(params.direction),
           resolve_links: params.resolve_links?,
@@ -46,13 +42,13 @@ defmodule Spear.Reading do
 
   def build_subscribe_request(params) do
     message =
-      read_req(
+      Streams.read_req(
         options:
-          read_req_options(
+          Streams.read_req_options(
             stream_option: map_stream(params.stream, params.from),
             read_direction: map_direction(params.direction),
             resolve_links: params.resolve_links?,
-            count_option: {:subscription, read_req_options_subscription_options()},
+            count_option: {:subscription, Streams.read_req_options_subscription_options()},
             filter_option: map_filter(params.filter),
             uuid_option: @uuid
           )
@@ -67,18 +63,18 @@ defmodule Spear.Reading do
   end
 
   defp map_stream(:all, from) do
-    {:all, read_req_options_all_options(all_option: map_all_position(from))}
+    {:all, Streams.read_req_options_all_options(all_option: map_all_position(from))}
   end
 
   defp map_stream(stream_name, from) when is_binary(stream_name) do
     {:stream,
-     read_req_options_stream_options(
+     Streams.read_req_options_stream_options(
        stream_identifier: stream_identifier(streamName: stream_name),
        revision_option: map_stream_revision(from)
      )}
   end
 
-  defp map_all_position(read_resp() = read_resp) do
+  defp map_all_position(Streams.read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)
     |> map_all_position()
@@ -87,21 +83,23 @@ defmodule Spear.Reading do
   defp map_all_position(%Spear.Event{
          metadata: %{commit_position: commit, prepare_position: prepare}
        }) do
-    {:position, read_req_options_position(commit_position: commit, prepare_position: prepare)}
+    {:position,
+     Streams.read_req_options_position(commit_position: commit, prepare_position: prepare)}
   end
 
   defp map_all_position(%Spear.Filter.Checkpoint{
          commit_position: commit,
          prepare_position: prepare
        }) do
-    {:position, read_req_options_position(commit_position: commit, prepare_position: prepare)}
+    {:position,
+     Streams.read_req_options_position(commit_position: commit, prepare_position: prepare)}
   end
 
   defp map_all_position(:start), do: {:start, empty()}
 
   defp map_all_position(:end), do: {:end, empty()}
 
-  defp map_stream_revision(read_resp() = read_resp) do
+  defp map_stream_revision(Streams.read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)
     |> map_stream_revision()

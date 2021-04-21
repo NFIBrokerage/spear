@@ -210,6 +210,24 @@ defmodule Spear.Connection do
   @impl Connection
   def handle_cast(:connect, s), do: {:connect, s.config, s}
 
+  def handle_cast({:push, request_ref, message}, s) when is_reference(request_ref) do
+    # TODO backpressure and http2 window sizes
+    with %Request{rpc: rpc} <- s.requests[request_ref],
+         {wire_data, _size} =
+           Spear.Request.to_wire_data(message, rpc.service_module, rpc.request_type),
+         {:ok, conn} <- Mint.HTTP2.stream_request_body(s.conn, request_ref, wire_data) do
+      {:noreply, put_in(s.conn, conn)}
+    else
+      nil ->
+        {:noreply, s}
+
+      {:error, conn, reason} ->
+        s = put_in(s.conn, conn)
+
+        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
+    end
+  end
+
   @impl Connection
   def handle_call(_call, _from, %__MODULE__{conn: nil} = s) do
     {:reply, {:error, :closed}, s}
