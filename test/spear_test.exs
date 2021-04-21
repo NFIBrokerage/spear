@@ -212,6 +212,32 @@ defmodule SpearTest do
 
       assert Spear.delete_user(c.conn, login_name) == :ok
     end
+
+    test "a psub can be ack-ed and nack-ed", c do
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+      assert Spear.create_persistent_subscription(c.conn, c.stream_name, group, settings) == :ok
+
+      assert {:ok, sub} =
+               Spear.connect_to_persistent_subscription(c.conn, self(), c.stream_name, group)
+
+      assert_receive %Spear.Event{metadata: %{stream_revision: 0}} = event
+      # only receive one event at a time with default buffer_size
+      refute_receive _
+
+      assert Spear.ack(c.conn, sub, event) == :ok
+      assert_receive %Spear.Event{metadata: %{stream_revision: 1}} = event
+
+      assert Spear.nack(c.conn, sub, event, action: :retry) == :ok
+      assert_receive %Spear.Event{metadata: %{stream_revision: 1}} = event
+
+      assert Spear.ack(c.conn, sub, event) == :ok
+      assert_receive %Spear.Event{metadata: %{stream_revision: 2}}
+
+      assert Spear.cancel_subscription(c.conn, sub) == :ok
+
+      assert Spear.delete_persistent_subscription(c.conn, c.stream_name, group) == :ok
+    end
   end
 
   describe "given a subscription to a stream" do

@@ -53,7 +53,7 @@ defmodule Spear do
 
       iex> import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
       iex> event = Spear.stream!(conn, "my_stream", raw?: true) |> Enum.take(1) |> List.first()
-      {:"event_store.client.streams.ReadResp", {checkpoint, ..}}
+      {:"event_store.client.streams.ReadResp", {:checkpoint, ..}}
       iex> match?(read_resp(), event)
       true
       iex> match?(read_resp(content: {:checkpoint, _}), event)
@@ -1942,7 +1942,9 @@ defmodule Spear do
 
     through =
       if opts[:raw?] do
+        # coveralls-ignore-start
         & &1
+        # coveralls-ignore-stop
       else
         opts[:through]
       end
@@ -2093,7 +2095,9 @@ defmodule Spear do
           event_or_ids :: Spear.Event.t() | [String.t()],
           opts :: Keyword.t()
         ) :: :ok
+  # coveralls-ignore-start
   def nack(conn, subscription, event_or_ids, opts \\ [])
+  # coveralls-ignore-stop
 
   def nack(conn, sub, %Spear.Event{id: id}, opts), do: nack(conn, sub, [id], opts)
 

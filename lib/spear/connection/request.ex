@@ -121,7 +121,12 @@ defmodule Spear.Connection.Request do
        when finished in [:done, :halted] do
     request = put_in(request.status, :done)
 
-    messages = if request.rpc.request_stream?, do: message_buffer, else: [:eof | message_buffer]
+    messages =
+      if request.rpc.request_stream? and request.rpc.response_stream? do
+        message_buffer
+      else
+        [:eof | message_buffer]
+      end
 
     stream_messages(
       put_request(state, request),

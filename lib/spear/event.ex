@@ -389,6 +389,7 @@ defmodule Spear.Event do
     event
   end
 
+  # coveralls-ignore-start
   defp destructure_read_response(
          Persistent.read_resp(
            content:
@@ -403,6 +404,8 @@ defmodule Spear.Event do
     event
   end
 
+  # coveralls-ignore-stop
+
   defp destructure_read_response(
          Streams.read_resp(
            content:
@@ -416,6 +419,7 @@ defmodule Spear.Event do
     event
   end
 
+  # coveralls-ignore-start
   defp destructure_read_response(
          Persistent.read_resp(
            content:
@@ -428,6 +432,8 @@ defmodule Spear.Event do
        ) do
     event
   end
+
+  # coveralls-ignore-stop
 
   defp destructure_read_response(
          Streams.read_resp(
@@ -442,6 +448,7 @@ defmodule Spear.Event do
     event
   end
 
+  # coveralls-ignore-start
   defp destructure_read_response(
          Persistent.read_resp(
            content:
@@ -454,6 +461,8 @@ defmodule Spear.Event do
        ) do
     event
   end
+
+  # coveralls-ignore-stop
 
   defp record_to_keyword_list(Streams.read_resp_read_event_recorded_event() = event) do
     Streams.read_resp_read_event_recorded_event(event)

@@ -22,6 +22,11 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
     - `Spear.nack/4`
     - associated callbacks in `Spear.Client`
 
+### Changed
+
+- Moved `Spear.cancel_subscription/3` under the utils API instead of streams
+    - This function may also be used to cancel persistent subscriptions
+
 ## 0.5.0 - 2021-04-19
 
 ### Added
