@@ -531,6 +531,55 @@ defmodule Spear.Client do
   @callback list_persistent_subscriptions(opts :: Keyword.t()) ::
               {:ok, Enumerable.t()} | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.connect_to_persistent_subscription/4`
+  """
+  @doc since: "0.6.0"
+  @callback connect_to_persistent_subscription(
+              subscriber :: pid() | GenServer.name(),
+              stream_name :: String.t(),
+              group_name :: String.t()
+            ) :: {:ok, reference()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.connect_to_persistent_subscription/5`
+  """
+  @doc since: "0.6.0"
+  @callback connect_to_persistent_subscription(
+              subscriber :: pid() | GenServer.name(),
+              stream_name :: String.t(),
+              group_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: {:ok, reference()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.ack/3`
+  """
+  @doc since: "0.6.0"
+  @callback ack(
+              subscription :: reference(),
+              event_or_ids :: Spear.Event.t() | [String.t()]
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.nack/3`
+  """
+  @doc since: "0.6.0"
+  @callback nack(
+              subscription :: reference(),
+              event_or_ids :: Spear.Event.t() | [String.t()]
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.nack/4`
+  """
+  @doc since: "0.6.0"
+  @callback nack(
+              subscription :: reference(),
+              event_or_ids :: Spear.Event.t() | [String.t()],
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -696,6 +745,27 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def list_persistent_subscriptions(opts \\ []) do
         Spear.list_persistent_subscriptions(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def connect_to_persistent_subscription(subscriber, stream_name, group_name, opts \\ []) do
+        Spear.connect_to_persistent_subscription(
+          __MODULE__,
+          subscriber,
+          stream_name,
+          group_name,
+          opts
+        )
+      end
+
+      @impl unquote(__MODULE__)
+      def ack(subscription, event_or_ids) do
+        Spear.ack(__MODULE__, subscription, event_or_ids)
+      end
+
+      @impl unquote(__MODULE__)
+      def nack(subscription, event_or_ids, opts \\ []) do
+        Spear.nack(__MODULE__, subscription, event_or_ids, opts)
       end
     end
   end
