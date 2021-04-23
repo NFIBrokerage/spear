@@ -22,6 +22,14 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
   that has not yet been created.
     - the reason is a `Spear.Grpc.Response` struct with a status of `:not_found`
 
+### Added
+
+- Subscriptions may now emit `{:eos, :dropped}` in cases where the EventStoreDB
+  explicitly terminates the subscription
+    - this can happen if a persistent subscription is deleted while it has
+      subscribers actively connected
+    - each subscriber will receive `{:eos, :dropped}` in its mailbox
+
 ## 0.6.0 - 2021-04-21
 
 ### Added
