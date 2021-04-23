@@ -46,9 +46,7 @@ defmodule Spear.Reading.Stream do
       {read_resp(content: {:stream_not_found, read_resp_stream_not_found()}), _rest} ->
         []
 
-      {message, rest} ->
-        buffer = if state.from |> is_atom(), do: buffer, else: rest
-
+      {message, _rest} ->
         Stream.unfold(
           %__MODULE__{state | buffer: buffer, from: message},
           unfold_fn
