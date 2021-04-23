@@ -6,7 +6,6 @@ defmodule SpearTest do
   import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
   import Spear.Uuid, only: [uuid_v4: 0]
 
-  # bytes
   @max_append_bytes 1_048_576
   @checkpoint_after Integer.pow(32, 3)
 
@@ -37,6 +36,20 @@ defmodule SpearTest do
       assert Enum.count(events) == 7
     end
 
+    test "the :from option for reading is inclusive", c do
+      [event] = Spear.stream!(c.conn, c.stream_name, from: :start) |> Enum.take(1)
+      assert [^event] = Spear.stream!(c.conn, c.stream_name, from: event) |> Enum.take(1)
+
+      assert [^event] =
+               Spear.stream!(c.conn, c.stream_name, from: event.metadata.stream_revision)
+               |> Enum.take(1)
+
+      {:ok, events} = Spear.read_stream(c.conn, c.stream_name, from: :start)
+      [event] = Enum.take(events, 1)
+      {:ok, events} = Spear.read_stream(c.conn, c.stream_name, from: event)
+      assert [^event] = Enum.take(events, 1)
+    end
+
     test "an empty expectation will fail on an existing stream", c do
       assert {:error, reason} =
                Spear.append([random_event()], c.conn, c.stream_name, expect: :empty)
@@ -49,12 +62,6 @@ defmodule SpearTest do
       assert {:error, reason} = Spear.append([random_event()], c.conn, c.stream_name, expect: 3)
 
       assert reason == %Spear.ExpectationViolation{current: 6, expected: 3}
-    end
-
-    test "reading a stream from `0` starts at the _second_ event in the stream", c do
-      # `:from` is exclusive, it will start at the event _after_ that revision
-      assert %Spear.Event{body: 1} =
-               Spear.stream!(c.conn, c.stream_name, from: 0) |> Enum.take(1) |> List.first()
     end
 
     test "a stream may be streamed backwards", c do
@@ -139,11 +146,6 @@ defmodule SpearTest do
                   status: :failed_precondition,
                   status_code: 9
                 }}
-    end
-
-    test "we can read events by passing an event to a `:from` option", c do
-      [one, two] = Spear.stream!(c.conn, c.stream_name) |> Enum.take(2)
-      assert [^two] = Spear.stream!(c.conn, c.stream_name, from: one) |> Enum.take(1)
     end
 
     test "a user can be CRUD-ed", c do
