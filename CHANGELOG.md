@@ -17,6 +17,10 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
     - see #26
     - if this behavior is undesirable, a Spear user may `Stream.drop/2` the
       initial element in the enumerable
+- `Spear.connect_to_persistent_subscription/5` now returns an error tuple
+  when attempting to connect to a persistent subscription stream and group
+  that has not yet been created.
+    - the reason is a `Spear.Grpc.Response` struct with a status of `:not_found`
 
 ## 0.6.0 - 2021-04-21
 

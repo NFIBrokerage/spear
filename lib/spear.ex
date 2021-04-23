@@ -1956,7 +1956,24 @@ defmodule Spear do
       }
       |> Spear.Request.expand()
 
-    Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
+    call = {{:subscription, subscriber, through}, request}
+
+    case Connection.call(conn, call, opts[:timeout]) do
+      {:ok, subscription} when is_reference(subscription) ->
+        {:ok, subscription}
+
+      {:ok, %Spear.Connection.Response{} = response} ->
+        grpc_response =
+          Spear.Grpc.Response.from_connection_response(response, request.rpc, opts[:raw?])
+
+        {:error, grpc_response}
+
+      # coveralls-ignore-start
+      error ->
+        error
+
+        # coveralls-ignore-stop
+    end
   end
 
   @doc """

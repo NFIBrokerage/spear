@@ -677,6 +677,16 @@ defmodule SpearTest do
       assert {:error, reason} = Spear.delete_persistent_subscription(c.conn, stream, group)
       assert reason.status == :not_found
     end
+
+    test "you cannot connect to a persistent subscription that does not exist", c do
+      stream = c.stream_name
+      group = uuid_v4()
+
+      assert {:error, reason} =
+               Spear.connect_to_persistent_subscription(c.conn, self(), stream, group)
+
+      assert reason.status == :not_found
+    end
   end
 
   defp random_stream_name do
