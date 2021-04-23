@@ -444,13 +444,13 @@ defmodule Spear do
   This function will block the caller until the subscription has been
   confirmed by the EventStoreDB.
 
-  When the subscription is terminated, the subscription process will
-  receive a message in the form of `{:eos, reason}`. `{:eos, :closed}` is
-  currently the only implemented end-of-stream reason and it occurs when
-  the connection is severed between Spear and the EventStoreDB. If this
-  message is received, the subscription is considered to be concluded and the
-  subscription process must re-subscribe from the last received event or
-  checkpoint to resume the subscription.
+  When the subscription is terminated, the subscription process will receive
+  a message in the form of `{:eos, reason}`. `{:eos, :closed}` is emitted
+  when the connection between EventStoreDB and subscriber is severed and
+  `{:eos, :dropped}` is emitted when the EventStoreDB explicitly drops a
+  subscription. If this message is received, the subscription is considered
+  to be concluded and the subscription process must re-subscribe from the
+  last received event or checkpoint to resume the subscription.
 
   Subscriptions can be gracefully shut down with `Spear.cancel_subscription/3`.
   The subscription will be cancelled by the connection process if the
@@ -1856,8 +1856,25 @@ defmodule Spear do
   does not head-of-line block in failure cases.
 
   The subscriber will receive a message `{:eos, reason}` when the
-  subscription is closed by the server. Currently the only `reason` is
-  `:closed`.
+  subscription is closed by the server. `:closed` denotes that the EventStoreDB
+  connection has been severed and `:dropped` denotes that the EventStoreDB
+  has explicitly told the subscriber that the subscription is terminated.
+  This can occur for persistent subscriptions in the case where the
+  subscription is deleted (e.g. via `Spear.delete_persistent_subscription/4`)
+
+  ```elixir
+  iex> Spear.create_persistent_subscription(conn, "asdf", "asdf", %Spear.PersistentSubscription.Settings{})
+  :ok
+  iex> Spear.connect_to_persistent_subscription(conn, self(), "asdf", "asdf")
+  {:ok, #Reference<0.515780924.2297430020.166204>}
+  iex> flush
+  :ok
+  iex> Spear.delete_persistent_subscription(conn, "asdf", "asdf")
+  :ok
+  iex> flush
+  {:eos, :dropped}
+  :ok
+  ```
 
   ## Backpressure
 
