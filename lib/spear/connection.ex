@@ -392,9 +392,15 @@ defmodule Spear.Connection do
   end
 
   defp process_response({:done, request_ref}, s) do
-    {%{response: response, from: from}, s} = pop_in(s.requests[request_ref])
+    {request, s} = pop_in(s.requests[request_ref])
 
-    Connection.reply(from, {:ok, response})
+    case request do
+      %Request{type: {:subscription, subscriber, _through}, from: nil} ->
+        send(subscriber, {:eos, :dropped})
+
+      %Request{from: from, response: response} ->
+        Connection.reply(from, {:ok, response})
+    end
 
     s
   end
