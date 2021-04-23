@@ -687,6 +687,22 @@ defmodule SpearTest do
 
       assert reason.status == :not_found
     end
+
+    test "a persistent subscription shows {:eos, :dropped} on deletion", c do
+      settings = %Spear.PersistentSubscription.Settings{}
+      stream = c.stream_name
+      group = uuid_v4()
+      assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
+
+      assert {:ok, _sub} = Spear.connect_to_persistent_subscription(c.conn, self(), stream, group)
+
+      # empty stream
+      refute_receive %Spear.Event{}
+
+      assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
+
+      assert_receive {:eos, :dropped}
+    end
   end
 
   defp random_stream_name do
