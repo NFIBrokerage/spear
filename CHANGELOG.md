@@ -6,6 +6,18 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.1 - 2021-04-23
+
+### Fixed
+
+- `Spear.stream!/3` now reads `:from` revisions as inclusive
+    - e.g. passing some `event` in the stream to `:from` will ensure that the
+      first element in the enumerable is `^event`
+    - the same principal applies when passing event revisions
+    - see #26
+    - if this behavior is undesirable, a Spear user may `Stream.drop/2` the
+      initial element in the enumerable
+
 ## 0.6.0 - 2021-04-21
 
 ### Added
