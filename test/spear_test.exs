@@ -620,21 +620,25 @@ defmodule SpearTest do
       settings = %Spear.PersistentSubscription.Settings{}
       stream = c.stream_name
       group = uuid_v4()
+
+      has_this_psub? = fn subs ->
+        Enum.any?(
+          subs,
+          &match?(%Spear.PersistentSubscription{stream_name: ^stream, group_name: ^group}, &1)
+        )
+      end
+
       assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
       assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
-
-      assert [%Spear.PersistentSubscription{stream_name: ^stream, group_name: ^group}] =
-               Enum.to_list(subs)
+      assert has_this_psub?.(subs)
 
       assert Spear.update_persistent_subscription(c.conn, stream, group, settings) == :ok
       assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
-
-      assert [%Spear.PersistentSubscription{stream_name: ^stream, group_name: ^group}] =
-               Enum.to_list(subs)
+      assert has_this_psub?.(subs)
 
       assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
       assert {:ok, subs} = Spear.list_persistent_subscriptions(c.conn)
-      assert Enum.to_list(subs) == []
+      refute has_this_psub?.(subs)
     end
 
     test "you cannot create a persistent subscription that already exists", c do
