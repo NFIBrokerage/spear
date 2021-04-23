@@ -102,11 +102,11 @@ defmodule Spear do
   * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
-    numbers are exclusive (e.g. reading from `0` will first return the
-    event numbered `1` in the stream, if one exists). `:start` and `:end`
+    numbers are inclusive (e.g. reading from `0` will first return the
+    event with revision `0` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
     the stream).  Events (either `Spear.Event` or ReadResp records) can also
-    be supplied and will be treated as exclusive.
+    be supplied and will be treated as inclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStoreDB stream. Valid values include `:forwards` and `:backwards`.
     Reading the EventStoreDB stream forwards will return events in the order
@@ -225,11 +225,11 @@ defmodule Spear do
   * `:from` - (default: `:start`) the EventStoreDB stream revision from which to
     read. Valid values include `:start`, `:end`, any non-negative integer
     representing the event number revision in the stream and events. Event
-    numbers are exclusive (e.g. reading from `0` will first return the
-    event numbered `0` in the stream, if one exists). `:start` and `:end`
+    numbers are inclusive (e.g. reading from `0` will first return the
+    event with revision `0` in the stream, if one exists). `:start` and `:end`
     are treated as inclusive (e.g. `:start` will return the first event in
     the stream).  Events (either `Spear.Event` or ReadResp records) can also
-    be supplied and will be treated as exclusive.
+    be supplied and will be treated as inclusive.
   * `:direction` - (default: `:forwards`) the direction in which to read the
     EventStoreDB stream. Valid values include `:forwards` and `:backwards`.
     Reading the EventStoreDB stream forwards will return events in the order
