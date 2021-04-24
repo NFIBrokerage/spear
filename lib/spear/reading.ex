@@ -3,9 +3,8 @@ defmodule Spear.Reading do
 
   # Helper functions for reading streams
 
-  alias Spear.Records.{Streams, Persistent}
-  require Streams
-  require Persistent
+  require Spear.Records.Streams, as: Streams
+  require Spear.Records.Persistent, as: Persistent
 
   import Spear.Records.Shared,
     only: [

@@ -14,9 +14,8 @@ defmodule Spear.Connection.Request do
           type: :request | {:subscription, pid(), (binary -> any())}
         }
 
-  alias Spear.Records.{Streams, Persistent}
-  require Streams
-  require Persistent
+  require Spear.Records.Streams, as: Streams
+  require Spear.Records.Persistent, as: Persistent
 
   defstruct [
     :continuation,

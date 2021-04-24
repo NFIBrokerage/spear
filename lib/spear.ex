@@ -64,22 +64,12 @@ defmodule Spear do
   """
 
   import Spear.Records.Shared, only: [empty: 0]
-
-  alias Spear.Records.{
-    Streams,
-    Users,
-    Operations,
-    Gossip,
-    Persistent,
-    Shared
-  }
-
-  require Streams
-  require Users
-  require Operations
-  require Gossip
-  require Persistent
-  require Shared
+  require Spear.Records.Streams, as: Streams
+  require Spear.Records.Users, as: Users
+  require Spear.Records.Operations, as: Operations
+  require Spear.Records.Gossip, as: Gossip
+  require Spear.Records.Persistent, as: Persistent
+  require Spear.Records.Shared, as: Shared
 
   @doc """
   Collects an EventStoreDB stream into an enumerable

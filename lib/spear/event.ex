@@ -6,10 +6,9 @@ defmodule Spear.Event do
   AppendReq and ReadResp records
   """
 
-  alias Spear.Records.{Streams, Persistent, Shared}
-  require Streams
-  require Persistent
-  require Shared
+  require Spear.Records.Streams, as: Streams
+  require Spear.Records.Persistent, as: Persistent
+  require Spear.Records.Shared, as: Shared
 
   defstruct [:id, :type, :body, metadata: %{}]
 
