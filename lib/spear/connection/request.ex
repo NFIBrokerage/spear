@@ -260,7 +260,7 @@ defmodule Spear.Connection.Request do
         put_in(request.response.data, rest)
 
       {message, rest} ->
-        send(subscriber, through.(message))
+        send(subscriber, through.(message, request.request_ref))
 
         put_in(request.response.data, rest)
 

@@ -3,6 +3,8 @@ defmodule Spear.Filter.Checkpoint do
   A struct representing a checkpoint in server-side filtering
   """
 
+  require Spear.Records.Streams, as: Streams
+
   @typedoc """
   A struct representing a checkpoint in a server-side filter operation
 
@@ -22,15 +24,25 @@ defmodule Spear.Filter.Checkpoint do
   @typedoc since: "0.1.0"
   @type t :: %__MODULE__{
           commit_position: non_neg_integer(),
-          prepare_position: non_neg_integer()
+          prepare_position: non_neg_integer(),
+          subscription: reference()
         }
 
-  defstruct [:commit_position, :prepare_position]
+  defstruct [:commit_position, :prepare_position, :subscription]
 
   @doc false
   def from_read_response(
-        {:"event_store.client.streams.ReadResp",
-         {:checkpoint, {:"event_store.client.streams.ReadResp.Checkpoint", commit, prepare}}}
-      ),
-      do: %__MODULE__{commit_position: commit, prepare_position: prepare}
+        Streams.read_resp(
+          content:
+            {:checkpoint,
+             Streams.read_resp_checkpoint(commit_position: commit, prepare_position: prepare)}
+        ),
+        subscription
+      ) do
+    %__MODULE__{
+      commit_position: commit,
+      prepare_position: prepare,
+      subscription: subscription
+    }
+  end
 end
