@@ -128,7 +128,7 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `Spear.Records.Streams.read_resp/0` output. Setting `raw?: true` prevents
-    this transformation and leaves each event as a `ReadReq` record. See
+    this transformation and leaves each event as a `ReadResp` record. See
     `Spear.Event.from_read_response/2` for more information.
   * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
     use as credentials for the request. This option overrides any credentials
@@ -251,7 +251,7 @@ defmodule Spear do
     may be exceeded
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
-    `ReadReq` output. Setting `raw?: true` prevents this transformation and
+    `ReadResp` output. Setting `raw?: true` prevents this transformation and
     leaves each event as a `Spear.Records.Streams.read_resp/0` record. See
     `Spear.Event.from_read_response/2` for more information.
   * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
