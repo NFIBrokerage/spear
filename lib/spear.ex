@@ -127,8 +127,8 @@ defmodule Spear do
     (assuming the chunk read consistently takes `<= 5_000` ms).
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
-    `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` record. See
+    `Spear.Records.Streams.read_resp/0` output. Setting `raw?: true` prevents
+    this transformation and leaves each event as a `ReadReq` record. See
     `Spear.Event.from_read_response/2` for more information.
   * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
     use as credentials for the request. This option overrides any credentials
@@ -252,7 +252,7 @@ defmodule Spear do
   * `:raw?:` - (default: `false`) controls whether or not the enumerable
     `event_stream` is decoded to `Spear.Event` structs from their raw
     `ReadReq` output. Setting `raw?: true` prevents this transformation and
-    leaves each event as a `ReadReq` record. See
+    leaves each event as a `Spear.Records.Streams.read_resp/0` record. See
     `Spear.Event.from_read_response/2` for more information.
   * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
     use as credentials for the request. This option overrides any credentials
@@ -439,7 +439,11 @@ defmodule Spear do
   ```
 
   or if the `raw?: true` option is provided,
-  `Spear.Records.Streams.read_resp/0` records will be returned.
+  `Spear.Records.Streams.read_resp/0` records will be returned in the shape of
+
+  ```elixir
+  {subscription :: reference(), Spear.Records.Streams.read_resp()}
+  ```
 
   This function will block the caller until the subscription has been
   confirmed by the EventStoreDB.
