@@ -6,6 +6,27 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.7.0 - 2021-04-24
+
+### Added
+
+- Added the subscription reference returned by `Spear.subscribe/4` and
+  `Spear.connect_to_persistent_subscription/5` to
+    - the metadata map of `t:Spear.Event.t/0` in the path
+      `Spear.Event.metadata.subscription`
+    - `t:Spear.Filter.Checkpoint.t/0` in a new field `:subscription`
+    - the `:eos` tuples in the new shape of
+      `{:eos, reference(), :closed | :dropped}`
+
+Note that this is a breaking change for any consumers matching explicitly
+on `:eos` tuples. Consumers relying on the prior data shape should update
+like so
+
+```diff
+- def handle_info({:eos, reason}, state) do
++ def handle_info({:eos, _subscription, reason}, state) do
+```
+
 ## 0.6.1 - 2021-04-23
 
 ### Fixed
