@@ -444,13 +444,20 @@ defmodule Spear do
   This function will block the caller until the subscription has been
   confirmed by the EventStoreDB.
 
-  When the subscription is terminated, the subscription process will receive
-  a message in the form of `{:eos, reason}`. `{:eos, :closed}` is emitted
-  when the connection between EventStoreDB and subscriber is severed and
-  `{:eos, :dropped}` is emitted when the EventStoreDB explicitly drops a
-  subscription. If this message is received, the subscription is considered
-  to be concluded and the subscription process must re-subscribe from the
-  last received event or checkpoint to resume the subscription.
+  When the subscription is terminated, the subscription process will receive a
+  message in the form of `{:eos, subscription, reason}`. `{:eos, subscription,
+  :closed}` is emitted when the connection between EventStoreDB and subscriber
+  is severed and `{:eos, subscription, :dropped}` is emitted when the
+  EventStoreDB explicitly drops a subscription. If this message is received,
+  the subscription is considered to be concluded and the subscription process
+  must re-subscribe from the last received event or checkpoint to resume
+  the subscription. `subscription` is the reference returned by this function.
+
+  Events can be correlated to their subscription via the `subscription`
+  reference returned by this function. The subscription reference is included
+  in `Spear.Event.metadata.subscription`,
+  `Spear.Filter.Checkpoint.subscription`, and in the
+  `{:eos, subscription, reason}` tuples as noted above.
 
   Subscriptions can be gracefully shut down with `Spear.cancel_subscription/3`.
   The subscription will be cancelled by the connection process if the
@@ -507,7 +514,7 @@ defmodule Spear do
       iex> GenServer.call(conn, :close)
       {:ok, :closed}
       iex> flush
-      {:eos, :closed}
+      {:eos, #Reference<0.1160763861.3015180291.51238>, :closed}
   """
   @doc since: "0.1.0"
   @doc api: :streams
@@ -1855,12 +1862,13 @@ defmodule Spear do
   when authoring a consumer, it allows one to easily write a consumer which
   does not head-of-line block in failure cases.
 
-  The subscriber will receive a message `{:eos, reason}` when the
+  The subscriber will receive a message `{:eos, subscription, reason}` when the
   subscription is closed by the server. `:closed` denotes that the EventStoreDB
   connection has been severed and `:dropped` denotes that the EventStoreDB
   has explicitly told the subscriber that the subscription is terminated.
   This can occur for persistent subscriptions in the case where the
-  subscription is deleted (e.g. via `Spear.delete_persistent_subscription/4`)
+  subscription is deleted (e.g. via `Spear.delete_persistent_subscription/4`).
+  `subscription` is the reference retuned by this function.
 
   ```elixir
   iex> Spear.create_persistent_subscription(conn, "asdf", "asdf", %Spear.PersistentSubscription.Settings{})
@@ -1872,9 +1880,13 @@ defmodule Spear do
   iex> Spear.delete_persistent_subscription(conn, "asdf", "asdf")
   :ok
   iex> flush
-  {:eos, :dropped}
+  {:eos, #Reference<0.515780924.2297430020.166204>, :dropped}
   :ok
   ```
+
+  Like subscriptions from `subscribe/4`, events can be correlated to their
+  subscription by the `:subscription` key in each `Spear.Event.metadata`
+  map.
 
   ## Backpressure
 
