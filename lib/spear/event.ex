@@ -335,15 +335,17 @@ defmodule Spear.Event do
       id: Spear.Uuid.from_proto(uuid),
       type: Map.get(metadata, "type"),
       body: maybe_decoded_body,
-      metadata: %{
-        content_type: content_type,
-        created: Map.get(metadata, "created") |> parse_created_stamp(),
-        prepare_position: prepare_position,
-        commit_position: commit_position,
-        custom_metadata: custom_metadata,
-        stream_name: stream_name,
-        stream_revision: stream_revision
-      }
+      metadata:
+        %{
+          content_type: content_type,
+          created: Map.get(metadata, "created") |> parse_created_stamp(),
+          prepare_position: prepare_position,
+          commit_position: commit_position,
+          custom_metadata: custom_metadata,
+          stream_name: stream_name,
+          stream_revision: stream_revision
+        }
+        |> Map.merge(opts[:metadata] || %{})
     }
   end
 

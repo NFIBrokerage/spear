@@ -396,7 +396,7 @@ defmodule Spear.Connection do
 
     case request do
       %Request{type: {:subscription, subscriber, _through}, from: nil} ->
-        send(subscriber, {:eos, :dropped})
+        send(subscriber, {:eos, request_ref, :dropped})
 
       %Request{from: from, response: response} ->
         Connection.reply(from, {:ok, response})
@@ -436,8 +436,12 @@ defmodule Spear.Connection do
     :ok = s.requests |> Map.values() |> Enum.each(&close_request/1)
   end
 
-  defp close_request(%Request{type: {:subscription, proc, _through}, from: nil}) do
-    send(proc, {:eos, :closed})
+  defp close_request(%Request{
+         type: {:subscription, proc, _through},
+         from: nil,
+         request_ref: request_ref
+       }) do
+    send(proc, {:eos, request_ref, :closed})
   end
 
   defp close_request(%Request{type: _, from: from}) do

@@ -528,7 +528,7 @@ defmodule Spear do
       resolve_links?: true,
       timeout: 5_000,
       raw?: false,
-      through: &Spear.Reading.decode_read_response/1,
+      through: &Spear.Reading.decode_read_response/2,
       credentials: nil
     ]
 
@@ -539,7 +539,7 @@ defmodule Spear do
 
     through =
       if opts[:raw?] do
-        & &1
+        fn resp, subscription -> {subscription, resp} end
       else
         opts[:through]
       end
@@ -1934,7 +1934,7 @@ defmodule Spear do
     default_subscribe_opts = [
       timeout: 5_000,
       raw?: false,
-      through: &Spear.Reading.decode_read_response/1,
+      through: &Spear.Reading.decode_read_response/2,
       credentials: nil,
       buffer_size: 1
     ]
@@ -1959,7 +1959,7 @@ defmodule Spear do
     through =
       if opts[:raw?] do
         # coveralls-ignore-start
-        & &1
+        fn resp, subscription -> {subscription, resp} end
         # coveralls-ignore-stop
       else
         opts[:through]

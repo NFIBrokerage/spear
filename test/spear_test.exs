@@ -93,7 +93,7 @@ defmodule SpearTest do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :start)
 
       for n <- 0..6//1 do
-        assert_receive %Spear.Event{body: ^n}
+        assert_receive %Spear.Event{body: ^n, metadata: %{subscription: ^sub}}
       end
 
       :ok = Spear.cancel_subscription(c.conn, sub)
@@ -111,7 +111,7 @@ defmodule SpearTest do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, raw?: true)
 
       for _n <- 0..6//1 do
-        assert_receive read_resp()
+        assert_receive {^sub, read_resp()}
       end
 
       :ok = Spear.cancel_subscription(c.conn, sub)
@@ -260,14 +260,16 @@ defmodule SpearTest do
       assert_receive %Spear.Event{}
     end
 
-    test "closing the subscription emits an {:eos, :closed} message", c do
+    test "closing the subscription emits an {:eos, sub, :closed} message", c do
       assert GenServer.call(c.conn, :close) == {:ok, :closed}
-      assert_receive {:eos, :closed}
+      assert_receive {:eos, sub, :closed}
+      assert sub == c.sub
     end
 
     test "a keep-alive timeout disconnects the conn and the conn reconnects", c do
       send(c.conn, :keep_alive_expired)
-      assert_receive {:eos, :closed}
+      assert_receive {:eos, sub, :closed}
+      assert sub == c.sub
       assert Spear.ping(c.conn) == :pong
     end
   end
@@ -440,7 +442,7 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter, raw?: true)
 
-      assert_receive read_resp(content: {:event, _}) = first_event, 1_000
+      assert_receive {^sub, read_resp(content: {:event, _}) = first_event}, 1_000
       assert %Spear.Event{body: 0, type: ^type} = Spear.Event.from_read_response(first_event)
 
       Spear.cancel_subscription(c.conn, sub)
@@ -466,7 +468,7 @@ defmodule SpearTest do
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 
-      assert_receive %Spear.Filter.Checkpoint{} = checkpoint
+      assert_receive %Spear.Filter.Checkpoint{subscription: ^sub} = checkpoint
 
       Spear.cancel_subscription(c.conn, sub)
 
@@ -694,14 +696,14 @@ defmodule SpearTest do
       group = uuid_v4()
       assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
 
-      assert {:ok, _sub} = Spear.connect_to_persistent_subscription(c.conn, self(), stream, group)
+      assert {:ok, sub} = Spear.connect_to_persistent_subscription(c.conn, self(), stream, group)
 
       # empty stream
-      refute_receive %Spear.Event{}
+      refute_receive %Spear.Event{metadata: %{subscription: ^sub}}
 
       assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
 
-      assert_receive {:eos, :dropped}
+      assert_receive {:eos, ^sub, :dropped}
     end
   end
 
