@@ -324,15 +324,8 @@ defmodule Spear do
         opts[:through]
       end
 
-    case Spear.Reading.Stream.read_chunk(opts) do
-      {:ok, stream} ->
-        {:ok, through.(stream)}
-
-      # coveralls-ignore-start
-      error ->
-        error
-
-        # coveralls-ignore-stop
+    with {:ok, stream} <- Spear.Reading.Stream.read_chunk(opts) do
+      {:ok, through.(stream)}
     end
   end
 
@@ -660,15 +653,10 @@ defmodule Spear do
 
     messages = [Spear.Writing.build_delete_request(opts |> Enum.into(%{}))]
 
-    case request(
-           conn,
-           Streams,
-           rpc,
-           messages,
-           Keyword.take(opts, [:credentials, :timeout])
-         ) do
-      {:ok, _response} -> :ok
-      error -> error
+    request_opts = Keyword.take(opts, [:credentials, :timeout])
+
+    with {:ok, _response} <- request(conn, Streams, rpc, messages, request_opts) do
+      :ok
     end
   end
 
@@ -880,16 +868,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Users, :Create, [message], opts) do
-      {:ok, Users.create_resp()} ->
-        :ok
-
-      # I could not find a way to get to this failure branch (without the
-      # connection being closed ofc
-      # coveralls-ignore-start
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, Users.create_resp()} <- request(conn, Users, :Create, [message], opts) do
+      :ok
     end
   end
 
@@ -929,9 +909,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Users, :Update, [message], opts) do
-      {:ok, Users.update_resp()} -> :ok
-      error -> error
+    with {:ok, Users.update_resp()} <- request(conn, Users, :Update, [message], opts) do
+      :ok
     end
   end
 
@@ -962,9 +941,8 @@ defmodule Spear do
   def delete_user(conn, login_name, opts \\ []) do
     message = Users.delete_req(options: Users.delete_req_options(login_name: login_name))
 
-    case request(conn, Users, :Delete, [message], opts) do
-      {:ok, Users.delete_resp()} -> :ok
-      error -> error
+    with {:ok, Users.delete_resp()} <- request(conn, Users, :Delete, [message], opts) do
+      :ok
     end
   end
 
@@ -996,9 +974,8 @@ defmodule Spear do
   def enable_user(conn, login_name, opts \\ []) do
     message = Users.enable_req(options: Users.enable_req_options(login_name: login_name))
 
-    case request(conn, Users, :Enable, [message], opts) do
-      {:ok, Users.enable_resp()} -> :ok
-      error -> error
+    with {:ok, Users.enable_resp()} <- request(conn, Users, :Enable, [message], opts) do
+      :ok
     end
   end
 
@@ -1031,9 +1008,8 @@ defmodule Spear do
   def disable_user(conn, login_name, opts \\ []) do
     message = Users.disable_req(options: Users.disable_req_options(login_name: login_name))
 
-    case request(conn, Users, :Disable, [message], opts) do
-      {:ok, Users.disable_resp()} -> :ok
-      error -> error
+    with {:ok, Users.disable_resp()} <- request(conn, Users, :Disable, [message], opts) do
+      :ok
     end
   end
 
@@ -1068,18 +1044,14 @@ defmodule Spear do
   def user_details(conn, login_name, opts \\ []) do
     message = Users.details_req(options: Users.details_req_options(login_name: login_name))
 
-    case request(conn, Users, :Details, [message], opts) do
-      {:ok, detail_stream} ->
-        details =
-          detail_stream
-          |> Enum.take(1)
-          |> List.first()
-          |> Spear.User.from_details_resp()
+    with {:ok, detail_stream} <- request(conn, Users, :Details, [message], opts) do
+      details =
+        detail_stream
+        |> Enum.take(1)
+        |> List.first()
+        |> Spear.User.from_details_resp()
 
-        {:ok, details}
-
-      error ->
-        error
+      {:ok, details}
     end
   end
 
@@ -1119,9 +1091,9 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Users, :ChangePassword, [message], opts) do
-      {:ok, Users.change_password_resp()} -> :ok
-      error -> error
+    with {:ok, Users.change_password_resp()} <-
+           request(conn, Users, :ChangePassword, [message], opts) do
+      :ok
     end
   end
 
@@ -1162,9 +1134,9 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Users, :ResetPassword, [message], opts) do
-      {:ok, Users.reset_password_resp()} -> :ok
-      error -> error
+    with {:ok, Users.reset_password_resp()} <-
+           request(conn, Users, :ResetPassword, [message], opts) do
+      :ok
     end
   end
 
@@ -1299,20 +1271,15 @@ defmodule Spear do
           )
       )
 
-    case request(
-           conn,
-           Operations,
-           :StartScavenge,
-           [message],
-           Keyword.take(opts, [:timeout, :credentials])
-         ) do
-      {:ok, Operations.scavenge_resp() = resp} ->
-        {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
-
-      # coveralls-ignore-start
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, Operations.scavenge_resp() = resp} <-
+           request(
+             conn,
+             Operations,
+             :StartScavenge,
+             [message],
+             Keyword.take(opts, [:timeout, :credentials])
+           ) do
+      {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
     end
   end
 
@@ -1367,11 +1334,11 @@ defmodule Spear do
         options: Operations.stop_scavenge_req_options(scavenge_id: scavenge_id)
       )
 
-    case request(conn, Operations, :StopScavenge, [message], opts) do
+    with {:ok, Operations.scavenge_resp() = resp} <-
+           request(conn, Operations, :StopScavenge, [message], opts) do
       # coveralls-ignore-start
-      {:ok, Operations.scavenge_resp() = resp} -> {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
+      {:ok, Spear.Scavenge.from_scavenge_resp(resp)}
       # coveralls-ignore-stop
-      error -> error
     end
   end
 
@@ -1408,9 +1375,8 @@ defmodule Spear do
   @doc api: :operations
   @spec shutdown(connection :: Spear.Connection.t(), opts :: Keyword.t()) :: :ok | {:error, any()}
   def shutdown(conn, opts \\ []) do
-    case request(conn, Operations, :Shutdown, [empty()], opts) do
-      {:ok, empty()} -> :ok
-      error -> error
+    with {:ok, empty()} <- request(conn, Operations, :Shutdown, [empty()], opts) do
+      :ok
     end
   end
 
@@ -1440,13 +1406,8 @@ defmodule Spear do
           :ok | {:error, any()}
   def merge_indexes(conn, opts \\ []) do
     # coveralls-ignore-start
-    case request(conn, Operations, :MergeIndexes, [empty()], opts) do
-      {:ok, empty()} ->
-        :ok
-
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, empty()} <- request(conn, Operations, :MergeIndexes, [empty()], opts) do
+      :ok
     end
   end
 
@@ -1476,13 +1437,8 @@ defmodule Spear do
           :ok | {:error, any()}
   def resign_node(conn, opts \\ []) do
     # coveralls-ignore-start
-    case request(conn, Operations, :ResignNode, [empty()], opts) do
-      {:ok, empty()} ->
-        :ok
-
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, empty()} <- request(conn, Operations, :ResignNode, [empty()], opts) do
+      :ok
     end
   end
 
@@ -1519,13 +1475,8 @@ defmodule Spear do
   def set_node_priority(conn, priority, opts) when is_integer(priority) do
     message = Operations.set_node_priority_req(priority: priority)
 
-    case request(conn, Operations, :SetNodePriority, [message], opts) do
-      {:ok, empty()} ->
-        :ok
-
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, empty()} <- request(conn, Operations, :SetNodePriority, [message], opts) do
+      :ok
     end
   end
 
@@ -1551,13 +1502,9 @@ defmodule Spear do
           :ok | {:error, any()}
   def restart_persistent_subscriptions(conn, opts \\ []) do
     # coveralls-ignore-start
-    case request(conn, Operations, :RestartPersistentSubscriptions, [empty()], opts) do
-      {:ok, empty()} ->
-        :ok
-
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, empty()} <-
+           request(conn, Operations, :RestartPersistentSubscriptions, [empty()], opts) do
+      :ok
     end
   end
 
@@ -1591,14 +1538,9 @@ defmodule Spear do
   @spec cluster_info(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           {:ok, [Spear.ClusterMember.t()]} | {:error, any()}
   def cluster_info(conn, opts \\ []) do
-    case request(conn, Gossip, :Read, [empty()], opts) do
-      {:ok, Gossip.cluster_info(members: members)} ->
-        {:ok, Enum.map(members, &Spear.ClusterMember.from_member_info/1)}
-
-      # coveralls-ignore-start
-      error ->
-        error
-        # coveralls-ignore-stop
+    with {:ok, Gossip.cluster_info(members: members)} <-
+           request(conn, Gossip, :Read, [empty()], opts) do
+      {:ok, Enum.map(members, &Spear.ClusterMember.from_member_info/1)}
     end
   end
 
@@ -1641,9 +1583,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Persistent, :Delete, [message], opts) do
-      {:ok, Persistent.delete_resp()} -> :ok
-      error -> error
+    with {:ok, Persistent.delete_resp()} <- request(conn, Persistent, :Delete, [message], opts) do
+      :ok
     end
   end
 
@@ -1690,9 +1631,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Persistent, :Create, [message], opts) do
-      {:ok, Persistent.create_resp()} -> :ok
-      error -> error
+    with {:ok, Persistent.create_resp()} <- request(conn, Persistent, :Create, [message], opts) do
+      :ok
     end
   end
 
@@ -1739,9 +1679,8 @@ defmodule Spear do
           )
       )
 
-    case request(conn, Persistent, :Update, [message], opts) do
-      {:ok, Persistent.update_resp()} -> :ok
-      error -> error
+    with {:ok, Persistent.update_resp()} <- request(conn, Persistent, :Update, [message], opts) do
+      :ok
     end
   end
 
@@ -1807,19 +1746,13 @@ defmodule Spear do
         max_count: 1
       )
 
-    case read_stream(conn, "$persistentSubscriptionConfig", read_opts) do
-      {:ok, stream} ->
-        subscriptions =
-          stream
-          |> Stream.flat_map(&get_in(&1, [Access.key(:body), "entries"]))
-          |> Stream.map(&Spear.PersistentSubscription.from_map/1)
+    with {:ok, stream} <- read_stream(conn, "$persistentSubscriptionConfig", read_opts) do
+      subscriptions =
+        stream
+        |> Stream.flat_map(&get_in(&1, [Access.key(:body), "entries"]))
+        |> Stream.map(&Spear.PersistentSubscription.from_map/1)
 
-        {:ok, subscriptions}
-
-      # coveralls-ignore-start
-      error ->
-        error
-        # coveralls-ignore-stop
+      {:ok, subscriptions}
     end
   end
 
