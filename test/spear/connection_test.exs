@@ -54,4 +54,10 @@ defmodule Spear.ConnectionTest do
 
     refute_receive _, 500
   end
+
+  test "a connection cannot write in read-only mode" do
+    config = [{:read_only?, true} | @good_config]
+    conn = start_supervised!({Spear.Connection, config})
+    assert Spear.append([], conn, "some_stream") == {:error, :read_only}
+  end
 end

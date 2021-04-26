@@ -11,7 +11,8 @@ defmodule Spear.Connection.Request do
           from: GenServer.from(),
           response: Spear.Connection.Response.t(),
           status: :streaming | :done,
-          type: :request | {:subscription, pid(), (binary -> any())}
+          type: :request | {:subscription, pid(), (binary -> any())},
+          rpc: Spear.Rpc.t()
         }
 
   require Spear.Records.Streams, as: Streams
