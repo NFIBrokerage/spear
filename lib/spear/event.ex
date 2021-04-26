@@ -284,8 +284,7 @@ defmodule Spear.Event do
 
     read_response
     |> destructure_read_response(force_follow_link?)
-    |> record_to_keyword_list()
-    |> Enum.into(%{})
+    |> record_to_map()
     |> from_recorded_event(remaining_opts)
   end
 
@@ -348,6 +347,13 @@ defmodule Spear.Event do
     }
   end
 
+  def from_recorded_event({event, link}, opts) do
+    spear_event = from_recorded_event(event, opts)
+    link_metadata = Map.take(link, [:commit_position, :prepare_position, :stream_revision])
+
+    put_in(spear_event.metadata[:link], link_metadata)
+  end
+
   defp destructure_read_response(
          Streams.read_resp(
            content:
@@ -441,12 +447,13 @@ defmodule Spear.Event do
            content:
              {:event,
               Streams.read_resp_read_event(
-                event: Streams.read_resp_read_event_recorded_event() = event
+                event: Streams.read_resp_read_event_recorded_event() = event,
+                link: Streams.read_resp_read_event_recorded_event() = link
               )}
          ),
          false = _link?
        ) do
-    event
+    {event, link}
   end
 
   # coveralls-ignore-start
@@ -455,22 +462,27 @@ defmodule Spear.Event do
            content:
              {:event,
               Persistent.read_resp_read_event(
-                event: Persistent.read_resp_read_event_recorded_event() = event
+                event: Persistent.read_resp_read_event_recorded_event() = event,
+                link: Persistent.read_resp_read_event_recorded_event() = link
               )}
          ),
          false = _link?
        ) do
-    event
+    {event, link}
   end
 
   # coveralls-ignore-stop
 
-  defp record_to_keyword_list(Streams.read_resp_read_event_recorded_event() = event) do
-    Streams.read_resp_read_event_recorded_event(event)
+  defp record_to_map({event, link}) do
+    {record_to_map(event), record_to_map(link)}
   end
 
-  defp record_to_keyword_list(Persistent.read_resp_read_event_recorded_event() = event) do
-    Persistent.read_resp_read_event_recorded_event(event)
+  defp record_to_map(Streams.read_resp_read_event_recorded_event() = event) do
+    Streams.read_resp_read_event_recorded_event(event) |> Map.new()
+  end
+
+  defp record_to_map(Persistent.read_resp_read_event_recorded_event() = event) do
+    Persistent.read_resp_read_event_recorded_event(event) |> Map.new()
   end
 
   defp parse_created_stamp(nil), do: nil
