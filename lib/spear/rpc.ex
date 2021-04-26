@@ -4,6 +4,8 @@ defmodule Spear.Rpc do
 
   # simple struct for an RPC definiton, used by Spear.Service
 
+  @type t :: %__MODULE__{}
+
   defstruct [
     :request_type,
     :response_type,

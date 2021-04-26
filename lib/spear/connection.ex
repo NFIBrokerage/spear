@@ -91,6 +91,14 @@ defmodule Spear.Connection do
 
   @post "POST"
   @closed %Mint.TransportError{reason: :closed}
+  @read_apis %{
+    Spear.Records.Streams => [:Read],
+    Spear.Records.Gossip => [:Read],
+    Spear.Records.Persistent => [:Read],
+    Spear.Records.Projections => [:Statistics, :State, :Result],
+    Spear.Records.Users => [:Details],
+    Spear.Records.Operations => []
+  }
 
   defstruct [:config, :conn, requests: %{}, keep_alive_timer: %KeepAliveTimer{}]
 
@@ -277,9 +285,12 @@ defmodule Spear.Connection do
   def handle_call({type, request}, from, s) do
     request = Spear.Request.merge_credentials(request, Config.credentials(s.config))
 
-    case request_and_stream_body(s, request, from, type) do
-      {:ok, s} ->
-        {:noreply, s}
+    with :ok <- read_only_check(request, s),
+         {:ok, s} <- request_and_stream_body(s, request, from, type) do
+      {:noreply, s}
+    else
+      {:error, :read_only} ->
+        {:reply, {:error, :read_only}, s}
 
       # coveralls-ignore-start
       {:error, s, @closed} ->
@@ -448,10 +459,45 @@ defmodule Spear.Connection do
     Connection.reply(from, {:error, :closed})
   end
 
+  @doc false
   @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, %Request{}} | :error
   def fetch_subscription(s, monitor_ref) do
     Enum.find_value(s.requests, :error, fn {_request_ref, request} ->
       request.monitor_ref == monitor_ref && {:ok, request}
     end)
   end
+
+  @doc """
+  Returns the list of read-only APIs
+
+  This list is used to determine which requests are allowed for read-only
+  clients.
+  """
+  @doc since: "0.8.0"
+  @spec read_apis() :: %{(api :: module()) => [rpc :: atom()]}
+  def read_apis, do: @read_apis
+
+  @doc """
+  Declares whether an API+RPC combination is read-only or not
+
+  ## Examples
+
+      iex> Spear.Connection.read_api?(Spear.Records.Streams, :Read)
+      true
+      iex> Spear.Connection.read_api?(Spear.Records.Streams, :Append)
+      false
+  """
+  @doc since: "0.8.0"
+  @spec read_api?(api :: module(), rpc :: atom()) :: boolean()
+  def read_api?(api, rpc) when is_atom(api) and is_atom(rpc) do
+    read_apis() |> Map.get(api, []) |> Enum.member?(rpc)
+  end
+
+  defp read_only_check(%Spear.Request{api: {api, rpc}}, %__MODULE__{
+         config: %Spear.Connection.Configuration{read_only?: true}
+       }) do
+    if read_api?(api, rpc), do: :ok, else: {:error, :read_only}
+  end
+
+  defp read_only_check(_request, _s), do: :ok
 end
