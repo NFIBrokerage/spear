@@ -14,6 +14,14 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
   `Spear.Connection.Configuration`
     - this allows one to limit what the `Spear.Connection` will perform to
       read-only operations such as reading streams
+- Added link metadata to the `Spear.Event.metadata` packet in a new `:link`
+  field
+
+### Fixed
+
+- Fixed the `:from` option in read requests (`Spear.read_stream/3`,
+  `Spear.stream!/3` and `Spear.subscribe/4`) to respect the new link information
+  in metadata
 
 ## 0.7.0 - 2021-04-24
 
