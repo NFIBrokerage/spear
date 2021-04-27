@@ -336,7 +336,8 @@ defmodule Spear do
   collection of `t:Spear.Event.t/0` structs or more low-level
   `Spear.Records.Streams.append_resp/0` records. In cases where the enumerable
   produces `t:Spear.Event.t/0` structs, they will be lazily mapped to
-  `AppendReq` records before being encoded to wire data.
+  `Spear.Records.Streams.append_req/0` records before being encoded to wire
+  data.
 
   See the [Writing Events](guides/writing_events.md) guide for more information
   about writing events.
