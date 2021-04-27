@@ -144,13 +144,15 @@ defmodule Spear.Event do
   end
 
   @doc """
-  Converts a `Spear.Event` into an append-request struct which proposes a new
+  Converts a `Spear.Event` into an append-request record which proposes a new
   message
 
   Note that each event must be individually structured as an `AppendReq`
-  message in order to be written to an EventStoreDB. The RPC definition for
+  record in order to be written to an EventStoreDB. The RPC definition for
   writing events specifies a stream input, though, so all `AppendReq` events
   passed to `Spear.append/4` will be batched into a single write operation.
+  This write operation appears to be transactional: any events in a single
+  call to `Spear.append/4` will only be appended if all events can be appended.
 
   ```protobuf
   rpc Append (stream AppendReq) returns (AppendResp);
@@ -186,7 +188,7 @@ defmodule Spear.Event do
       iex> events
       [%Spear.Event{}, %Spear.Event{}, ..]
       iex> events |> Enum.map(&Spear.Event.to_proposed_message/1)
-      [%EventStore.Client.Streams.AppendReq{}, ..]
+      [{:"event_store.client.streams.AppendReq", ..}, ..]
   """
   @doc since: "0.1.0"
   @spec to_proposed_message(t(), encoder_mapping :: %{}) :: AppendReq.t()
@@ -291,16 +293,16 @@ defmodule Spear.Event do
   @doc """
   Converts an event into a checkpoint
 
-  This is useful when storing stream position in `Spear.subscribe/4`
-  subscriptions.
+  This is useful when storing stream positions in `Spear.subscribe/4`
+  subscriptions to the `:all` stream.
   """
   @doc since: "0.1.0"
   @spec to_checkpoint(t()) :: Spear.Filter.Checkpoint.t()
-  def to_checkpoint(%__MODULE__{metadata: %{commit_position: commit, prepare_position: prepare}}) do
-    %Spear.Filter.Checkpoint{
-      commit_position: commit,
-      prepare_position: prepare
-    }
+  def to_checkpoint(%__MODULE__{metadata: metadata}) do
+    struct(
+      Spear.Filter.Checkpoint,
+      Map.take(metadata, ~w[commit_position prepare_position subscription]a)
+    )
   end
 
   @doc false
