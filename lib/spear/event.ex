@@ -269,7 +269,7 @@ defmodule Spear.Event do
 
   ```elixir
   iex> Spear.stream!(conn, "es_supported_clients", raw?: true)
-  ...> |> Stream.map(&Spear.Event.from_read_response(&1, decoder: &Poison.decode!/2, keys: :atoms))
+  ...> |> Stream.map(&Spear.Event.from_read_response(&1, json_decoder: &Poison.decode!/2, keys: :atoms))
   ```
 
   ## Examples
