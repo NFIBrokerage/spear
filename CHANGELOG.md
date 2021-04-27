@@ -6,16 +6,19 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## UNRELEASED
+## 0.8.1 - 2021-04-27
+
+### Added
+
+- Added the link's stream to the `Spear.Event.metadata.link` field
 
 ### Fixed
 
 - Fixed some stray references to structs which should be typed as records
 - Fixed `Spear.Event.to_checkpoint/1` to carry over the `:subscription` key
   from a `t:Spear.Event.t/0`'s metadata
-- Fixed a bug in the `Spear.Connection.Configuration` setup which would
-  incorrectly choose the `:http` scheme when the `:tls?` option was set to
-  `true`
+- Fixed a bug in `Spear.Connection.Configuration` which would incorrectly
+  choose the `:http` scheme when the `:tls?` option was set to `true`
 
 ## 0.8.0 - 2021-04-26
 

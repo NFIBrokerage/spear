@@ -351,7 +351,9 @@ defmodule Spear.Event do
 
   def from_recorded_event({event, link}, opts) do
     spear_event = from_recorded_event(event, opts)
-    link_metadata = Map.take(link, [:commit_position, :prepare_position, :stream_revision])
+
+    link_metadata =
+      Map.take(link, [:commit_position, :prepare_position, :stream_revision, :stream_name])
 
     put_in(spear_event.metadata[:link], link_metadata)
   end
