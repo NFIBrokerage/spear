@@ -107,6 +107,7 @@ defmodule Spear.Connection.Configuration do
       |> from_connection_string()
       |> Keyword.merge(opts)
       |> override_mint_opts()
+      |> set_scheme()
 
     struct(__MODULE__, config)
     |> validate()
@@ -118,7 +119,6 @@ defmodule Spear.Connection.Configuration do
     {username, password} = parse_credentials(uri)
 
     [
-      scheme: if(tls?, do: :https, else: :http),
       host: uri.host,
       port: uri.port,
       tls?: tls?,
@@ -184,6 +184,10 @@ defmodule Spear.Connection.Configuration do
     Keyword.merge(opts, mint_opts: mint_opts)
   end
 
+  defp set_scheme(opts) do
+    Keyword.put(opts, :scheme, if(opts[:tls?], do: :https, else: :http))
+  end
+
   defp validate(%__MODULE__{} = config) do
     errors =
       config
@@ -206,10 +210,6 @@ defmodule Spear.Connection.Configuration do
   defp validate({:port = key, value}, errors)
        when not is_integer(value) or value not in 1..65_535 do
     [{key, "#{inspect(value)} is not a valid port number"} | errors]
-  end
-
-  defp validate({:scheme = key, value}, errors) when value not in [:http, :https] do
-    [{key, "scheme #{inspect(value)} must be :http or :https"} | errors]
   end
 
   defp validate({_k, _v}, errors), do: errors

@@ -13,6 +13,9 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 - Fixed some stray references to structs which should be typed as records
 - Fixed `Spear.Event.to_checkpoint/1` to carry over the `:subscription` key
   from a `t:Spear.Event.t/0`'s metadata
+- Fixed a bug in the `Spear.Connection.Configuration` setup which would
+  incorrectly choose the `:http` scheme when the `:tls?` option was set to
+  `true`
 
 ## 0.8.0 - 2021-04-26
 

@@ -83,13 +83,6 @@ defmodule Spear.Connection.ConfigurationTest do
     assert error_msg =~ "0 is not a valid port number"
   end
 
-  test "attempting to override scheme with an invalid value fails validation" do
-    config = Config.new(connection_string: "esdb://localhost:2113", scheme: :esdb)
-    assert config.valid? == false
-    assert [{:scheme, error_msg}] = config.errors
-    assert error_msg =~ "scheme :esdb must be :http or :https"
-  end
-
   test "connection params can be entirely crafted without the connection string" do
     config =
       Config.new(
