@@ -97,6 +97,9 @@ end
 
 ## Usage
 
+<details><summary>Making a connection...</summary>
+<br>
+
 Familiar with [`Ecto.Repo`](https://hexdocs.pm/ecto/Ecto.Repo.html)? It lets
 you write a database connection like a module
 
@@ -154,10 +157,9 @@ defmodule MyApp.Application do
 end
 ```
 
-And now you're ready to use spear! Check out the [Spear
-documentation](https://hexdocs.pm/spear/Spear.html).
+</details>
 
-<details><summary>Alternate usages...</summary>
+<details><summary>Or connecting in IEx...</summary>
 <br>
 
 A `Spear.Connection` is just a regular ole' GenServer with a default of pulling
@@ -175,7 +177,20 @@ iex> Mix.install([:spear, :jason])
 :ok
 iex> {:ok, conn} = Spear.Connection.start_link(connection_string: "esdb://localhost:2113")
 {:ok, #PID<0.1518.0>}
-iex> event = Spear.Event.new("IExAndSpear", %{"hello" => "world"})      
+```
+
+And we're up and running reading and writing events!
+
+</details>
+
+<details open><summary>Reading and writing streams...</summary>
+<br>
+
+Now that we have a connection process (we'll call it `conn`), let's read and
+write some events!
+
+```elixir
+iex> event = Spear.Event.new("IExAndSpear", %{"hello" => "world"})
 %Spear.Event{
   body: %{"hello" => "world"},
   id: "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8",
@@ -208,6 +223,28 @@ iex> Spear.stream!(conn, "MySpearDemo") |> Enum.to_list()
 ]
 ```
 
-And we're up and running reading and writing events!
+Spear uses Elixir `Stream`s to provide a flexible and efficient interface
+for EventStoreDB streams.
+
+```elixir
+iex> Stream.repeatedly(fn -> Spear.Event.new("TinyEvent", %{}) end)
+#Function<51.80860365/2 in Stream.repeatedly/1>
+iex> Stream.repeatedly(fn -> Spear.Event.new("TinyEvent", %{}) end) |> Stream.take(10_000) |> Spear.append(conn, "LongStream")
+:ok
+iex> Spear.stream!(conn, "LongStream")
+#Stream<[
+  enum: #Function<62.80860365/2 in Stream.unfold/2>,
+  funs: [#Function<48.80860365/1 in Stream.map/2>]
+]>
+iex> Spear.stream!(conn, "LongStream") |> Enum.count
+10000
+```
 
 </details>
+
+And that's the basics! Check out the [Spear documentation on
+hex](https://hexdocs.pm/spear/Spear.html). Interested in writing
+efficient event-processing pipelines and topologies with EventStoreDB
+via [GenStage](https://github.com/elixir-lang/gen_stage) and
+[Broadway](https://github.com/dashbitco/broadway) producers? Check out
+[Volley](https://github.com/NFIBrokerage/volley).
