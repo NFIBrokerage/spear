@@ -6,6 +6,30 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.9.0 - 2021-04-29
+
+### Added
+
+- Added a `:link` field to the `t:Spear.Event.t/0` struct
+    - this is used to provide accurate stream revisions and IDs in projected
+      streams as with `Spear.subscribe/4` or in `Spear.ack/3` or `Spear.nack/4`
+- Added `Spear.Event.id/1` and `Spear.Event.revision/1` which take a
+  `t:Spear.Event.t/0` and give the ID and revision, respectively
+    - these new functions respect the new `:link` field and return link
+      information instead of event information if the link is present
+
+### Removed
+
+- Removed link metadata from the `Spear.Event.metadata` map's possible `:link`
+  field.
+    - use the new top-level `:link` field as `Spear.Event.link.metadata`
+
+Note that this may be a breaking change for any consumers depending on the
+optional `:link` field in the metadata packet. Consumers should update by
+instead matching on a `t:Spear.Event.t/0` struct in the `:link` field of any
+event, or by using the new `Spear.Event.id/1` or `Spear.Event.revision/1`
+functions.
+
 ## 0.8.1 - 2021-04-27
 
 ### Added

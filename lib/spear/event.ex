@@ -10,7 +10,7 @@ defmodule Spear.Event do
   require Spear.Records.Persistent, as: Persistent
   require Spear.Records.Shared, as: Shared
 
-  defstruct [:id, :type, :body, metadata: %{}]
+  defstruct [:id, :type, :body, :link, metadata: %{}]
 
   @typedoc """
   A struct representing an EventStoreDB event
@@ -24,6 +24,26 @@ defmodule Spear.Event do
   written to- and events which are read from the EventStoreDB. Read events
   contain more metadata which pertains to EventStoreDB specifics like
   the creation timestamp of the event.
+
+  ## Links
+
+  The `:link` field of a `t:Spear.Event.t/0` can contain another
+  `t:Spear.Event.t/0` struct. Link events are pointers to other events and are
+  used by the EventStoreDB to provide the projections feature without having
+  to duplicate events across streams. Links do not usually contain any
+  information useful to consumers, but clients must keep track of links in
+  order to keep an accurate position in a projected stream, or in order to
+  `Spear.ack/3`/`Spear.nack/4` the projected events in a persistent
+  subscription.
+
+  The `:from` option in functions like `Spear.read_stream/3`, `Spear.stream!/3`
+  or `Spear.subscribe/4` will use the link event's `.metadata.stream_revision`
+  when reading projected streams. `Spear.ack/3` and `Spear.nack/4` take
+  the link's `:id` field when passed a `t:Spear.Event.t/0`. When not passing
+  `t:Spear.Event.t/0`s (for example, if curating the stream revisions or IDs
+  in a database), the `revision/1` and `id/1` functions may be used to return
+  the proper metadata for standard subscriptions and persistent subscriptions,
+  respectively.
 
   ## Examples
 
@@ -41,7 +61,8 @@ defmodule Spear.Event do
             stream_name: "es_supported_clients",
             stream_revision: 0
           },
-          type: "grpc-client"
+          type: "grpc-client",
+          link: nil
         }
       ]
       iex> Spear.Event.new("grpc-client", %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
@@ -49,7 +70,8 @@ defmodule Spear.Event do
         body: %{"languages" => ["typescript", "javascript"], "runtime" => "NodeJS"},
         id: "b952575a-1014-404d-ba20-f0904df7954e",
         metadata: %{content_type: "application/json", custom_metadata: ""},
-        type: "grpc-client"
+        type: "grpc-client",
+        link: nil
       }
   """
   @typedoc since: "0.1.0"
@@ -57,6 +79,7 @@ defmodule Spear.Event do
           id: String.t(),
           type: String.t(),
           body: term(),
+          link: t() | nil,
           metadata: map()
         }
 
@@ -350,12 +373,10 @@ defmodule Spear.Event do
   end
 
   def from_recorded_event({event, link}, opts) do
-    spear_event = from_recorded_event(event, opts)
+    resolved_event = from_recorded_event(event, opts)
+    link_event = from_recorded_event(link, opts)
 
-    link_metadata =
-      Map.take(link, [:commit_position, :prepare_position, :stream_revision, :stream_name])
-
-    put_in(spear_event.metadata[:link], link_metadata)
+    put_in(resolved_event.link, link_event)
   end
 
   defp destructure_read_response(
@@ -558,4 +579,46 @@ defmodule Spear.Event do
   """
   @doc since: "0.1.0"
   defdelegate uuid_v4(term), to: Spear.Uuid
+
+  @doc """
+  Returns the revision of the event, following the event's link if provided
+
+  ## Examples
+
+      iex> Spear.Event.revision(%Spear.Event{link: nil, metadata: %{stream_revision: 1, ..}, ..})
+      1
+      iex> Spear.Event.revision(
+      ...>   %Spear.Event{
+      ...>     link: %Spear.Event{metadata: %{stream_revision: 1, ..}, ..},
+      ...>     metadata: %{stream_revision: 0, ..},
+      ...>     ..
+      ...>   }
+      ...> )
+      1
+  """
+  @doc since: "0.9.0"
+  @spec revision(t()) :: non_neg_integer()
+  def revision(%__MODULE__{link: %__MODULE__{} = link}), do: revision(link)
+  def revision(%__MODULE__{metadata: %{stream_revision: revision}}), do: revision
+
+  @doc """
+  Returns the ID of the event, following the event's link if provided
+
+  ## Examples
+
+      iex> Spear.Event.id(%Spear.Event{link: nil, id: "817cf20b-6791-4979-afdd-da4b03e02007", ..)
+      "817cf20b-6791-4979-afdd-da4b03e02007"
+      iex> Spear.Event.id(
+      ...>   %Spear.Event{
+      ...>     link: %Spear.Event{id: "976601b0-3775-442e-b98c-5f56af809402", ..},
+      ...>     id: "817cf20b-6791-4979-afdd-da4b03e02007",
+      ...>     ..
+      ...>   }
+      ...> )
+      "976601b0-3775-442e-b98c-5f56af809402"
+  """
+  @doc since: "0.9.0"
+  @spec id(t()) :: String.t()
+  def id(%__MODULE__{link: %__MODULE__{} = link}), do: id(link)
+  def id(%__MODULE__{id: id}), do: id
 end
