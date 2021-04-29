@@ -1941,13 +1941,13 @@ defmodule Spear do
   gRPC call acknowledges a batch of event IDs.
 
   ```elixir
-  Spear.ack(conn, subscription, events |> Enum.map(& &1.id))
+  Spear.ack(conn, subscription, events |> Enum.map(&Spear.Event.id/1))
   ```
 
   should be preferred over
 
   ```elixir
-  Enum.each(events, &Spear.ack(conn, subscription, &1.id))
+  Enum.each(events, &Spear.ack(conn, subscription, Spear.Event.id(&1)))
   ```
 
   As the acknowledgements will be batched.
@@ -1997,7 +1997,7 @@ defmodule Spear do
         ) :: :ok
   def ack(conn, subscription, event_or_ids)
 
-  def ack(conn, sub, %Spear.Event{id: id}), do: ack(conn, sub, [id])
+  def ack(conn, sub, %Spear.Event{} = event), do: ack(conn, sub, [Spear.Event.id(event)])
 
   def ack(conn, sub, event_ids) when is_list(event_ids) do
     id = ""
@@ -2070,7 +2070,8 @@ defmodule Spear do
   def nack(conn, subscription, event_or_ids, opts \\ [])
   # coveralls-ignore-stop
 
-  def nack(conn, sub, %Spear.Event{id: id}, opts), do: nack(conn, sub, [id], opts)
+  def nack(conn, sub, %Spear.Event{} = event, opts),
+    do: nack(conn, sub, [Spear.Event.id(event)], opts)
 
   def nack(conn, sub, event_ids, opts) when is_list(event_ids) do
     reason = Keyword.get(opts, :reason, "")
