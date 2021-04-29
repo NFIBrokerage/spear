@@ -16,6 +16,16 @@ defmodule Spear.EventTest do
       assert %Spear.Event{id: "5fc66e27-" <> _} =
                Spear.Event.from_read_response(c.event, link?: true)
     end
+
+    test "id/1 returns the link's ID", c do
+      event = c.event |> Spear.Event.from_read_response()
+      assert Spear.Event.id(event) == event.link.id
+    end
+
+    test "revision/1 returns the link's revision", c do
+      event = c.event |> Spear.Event.from_read_response()
+      assert Spear.Event.revision(event) == event.link.metadata.stream_revision
+    end
   end
 
   describe "given a deleted event" do

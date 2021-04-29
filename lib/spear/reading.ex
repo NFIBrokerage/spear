@@ -80,11 +80,8 @@ defmodule Spear.Reading do
   end
 
   # coveralls-ignore-start
-  defp map_all_position(%Spear.Event{
-         metadata: %{link: %{commit_position: commit, prepare_position: prepare}}
-       }) do
-    {:position,
-     Streams.read_req_options_position(commit_position: commit, prepare_position: prepare)}
+  defp map_all_position(%Spear.Event{link: %Spear.Event{} = link}) do
+    map_all_position(link)
   end
 
   # coveralls-ignore-stop
@@ -114,14 +111,9 @@ defmodule Spear.Reading do
     |> map_stream_revision()
   end
 
-  # coveralls-ignore-start
-  defp map_stream_revision(%Spear.Event{metadata: %{link: %{stream_revision: revision}}}),
-    do: {:revision, revision}
-
-  # coveralls-ignore-stop
-
-  defp map_stream_revision(%Spear.Event{metadata: %{stream_revision: revision}}),
-    do: {:revision, revision}
+  defp map_stream_revision(%Spear.Event{} = event) do
+    {:revision, Spear.Event.revision(event)}
+  end
 
   defp map_stream_revision(:start), do: {:start, empty()}
   defp map_stream_revision(n) when is_integer(n), do: {:revision, n}
