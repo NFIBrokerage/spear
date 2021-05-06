@@ -23,7 +23,7 @@ jobs:
         sudo apt install eventstore-oss
         sudo mkdir -p /etc/eventstore/certs
         sudo cp -r ./certs/ca /etc/eventstore/certs/
-        sudo cp ./certs/node1/* /etc/eventstore/certs/
+        sudo cp ./.github/workflows/node.* /etc/eventstore/certs/
         sudo cp ./certs/eventstore.conf /etc/eventstore/
         sudo chown -R eventstore /etc/eventstore
         sudo chgrp -R eventstore /etc/eventstore
