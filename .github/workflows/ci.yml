@@ -13,7 +13,7 @@ jobs:
       MIX_ENV: test
       EVENTSTORE_START_STANDARD_PROJECTIONS: "True"
       EVENTSTORE_RUN_PROJECTIONS: All
-      EVENTSTORE_HOST: eventstore
+      EVENTSTORE_HOST: localhost
 
     steps:
     - name: Checkout
