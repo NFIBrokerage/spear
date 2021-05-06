@@ -24,7 +24,7 @@ jobs:
         sudo mkdir -p /etc/eventstore/certs
         sudo cp -r ./eventstoredb/certs/ca /etc/eventstore/certs/
         sudo cp ./.github/workflows/node.* /etc/eventstore/certs/
-        sudo cp ./eventstoredb/certs/eventstore.conf /etc/eventstore/
+        sudo cp ./eventstoredb/eventstore.conf /etc/eventstore/
         sudo chown -R eventstore /etc/eventstore
         sudo chgrp -R eventstore /etc/eventstore
         sudo systemctl restart eventstore
