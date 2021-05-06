@@ -705,6 +705,65 @@ defmodule SpearTest do
 
       assert_receive {:eos, ^sub, :dropped}
     end
+
+    test "reading and subscribing to (projected) category streams works", c do
+      id = uuid_v4() |> String.replace("-", "")
+      prefix = "Spear.#{id}.CategoryTest"
+      category = "$ce-" <> prefix
+      # round 1: add events from one stream
+      {:ok, sub} = Spear.subscribe(c.conn, self(), category)
+
+      stream_name = prefix <> "-" <> uuid_v4()
+      :ok = random_events() |> Stream.take(3) |> Spear.append(c.conn, stream_name, expect: :empty)
+
+      assert_receive %Spear.Event{
+        body: 0,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      assert_receive %Spear.Event{
+        body: 1,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      assert_receive %Spear.Event{
+        body: 2,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      :ok = Spear.cancel_subscription(c.conn, sub)
+
+      events = Spear.stream!(c.conn, stream_name) |> Enum.to_list()
+      assert Enum.count(events) == 3
+      last_event = List.last(events)
+
+      # round 2: add events from another stream in the category
+      {:ok, sub} = Spear.subscribe(c.conn, self(), category, from: last_event)
+
+      stream_name = prefix <> "-" <> uuid_v4()
+      :ok = random_events() |> Stream.take(3) |> Spear.append(c.conn, stream_name, expect: :empty)
+
+      assert_receive %Spear.Event{
+        body: 0,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      assert_receive %Spear.Event{
+        body: 1,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      assert_receive %Spear.Event{
+        body: 2,
+        metadata: %{subscription: ^sub, stream_name: ^stream_name}
+      }
+
+      :ok = Spear.cancel_subscription(c.conn, sub)
+
+      assert Spear.stream!(c.conn, category, from: last_event) |> Enum.count() == 4
+
+      assert Spear.stream!(c.conn, category, from: :start, chunk_size: 2) |> Enum.count() == 6
+    end
   end
 
   test "park_stream/2 composes a proper parking stream" do
