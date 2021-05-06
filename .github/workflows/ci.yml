@@ -22,14 +22,13 @@ jobs:
       run: |
         curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
         sudo apt update
-        sudo apt install eventstore-oss
         sudo mkdir -p /etc/eventstore/certs
         sudo cp -r ./eventstoredb/certs/ca /etc/eventstore/certs/
         sudo cp ./.github/workflows/node.* /etc/eventstore/certs/
         sudo cp ./eventstoredb/eventstore.conf /etc/eventstore/
         sudo chown -R eventstore /etc/eventstore
         sudo chgrp -R eventstore /etc/eventstore
-        sudo systemctl restart eventstore
+        sudo apt install eventstore-oss
 
     - name: Determine the elixir version
       run: echo "ELIXIR_VERSION=$(grep -h elixir .tool-versions | awk '{ print $2 }')" >> $GITHUB_ENV
