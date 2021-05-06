@@ -8,20 +8,41 @@ env:
 jobs:
   bless:
     name: Bless
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
+    env:
+      MIX_ENV: test
+      EVENTSTORE_START_STANDARD_PROJECTIONS: "True"
+      EVENTSTORE_RUN_PROJECTIONS: All
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Start Docker-Compose
-      run: docker-compose up -d
+    - name: install EventStoreDB
+      run: |
+        curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
+        sudo apt update
+        sudo mkdir -p /etc/eventstore/certs
+        sudo cp -r ./eventstoredb/certs/ca /etc/eventstore/certs/
+        sudo cp ./.github/workflows/node.* /etc/eventstore/certs/
+        sudo cp ./eventstoredb/eventstore.conf /etc/eventstore/
+        sudo useradd eventstore
+        sudo chown -R eventstore /etc/eventstore
+        sudo chgrp -R eventstore /etc/eventstore
+        sudo apt install eventstore-oss
+        sudo systemctl restart eventstore
 
     - name: Determine the elixir version
       run: echo "ELIXIR_VERSION=$(grep -h elixir .tool-versions | awk '{ print $2 }')" >> $GITHUB_ENV
 
     - name: Determine the otp version
       run: echo "OTP_VERSION=$(grep -h erlang .tool-versions | awk '{ print $2 }')" >> $GITHUB_ENV
+
+    - name: Setup Elixir and Erlang versions
+      uses: erlef/setup-beam@v1.7.0
+      with:
+        otp-version: ${{ env.OTP_VERSION }}
+        elixir-version: ${{ env.ELIXIR_VERSION }}
 
     - name: Restore the deps cache
       uses: actions/cache@v1
@@ -41,33 +62,30 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-${{ env.MIX_ENV }}-build-
 
-    - name: Fetch and compile mix dependencies
+    - name: Fetch mix dependencies
       if: steps.deps-cache.outputs.cache-hit != 'true'
-      run: >
-        docker-compose run app bash
-        -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix deps.compile"
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+
+    - name: Compile dependencies
+      if: steps.deps-cache.outputs.cache-hit != 'true'
+      run: mix deps.compile
 
     - name: Compile
-      run: >
-        docker-compose run app bash
-        -c "mix local.hex --force && mix local.rebar --force && mix compile --warnings-as-errors --force"
+      run: mix compile --warnings-as-errors --force
 
     - name: Coveralls
-      run: >
-        docker-compose run -e GITHUB_TOKEN="$GITHUB_TOKEN" app bash
-        -c "mix local.hex --force && mix local.rebar --force && mix coveralls.github"
+      run: mix coveralls.github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Check formatting
-      run: >
-        docker-compose run app bash
-        -c "mix local.hex --force && mix local.rebar --force && mix format --check-formatted"
+      run: mix format --check-formatted
 
     - name: Credo
-      run: >
-        docker-compose run app bash
-        -c "mix local.hex --force && mix local.rebar --force && mix credo"
+      run: mix credo
 
   publish-hex-package:
     name: Publish Hex Package ⬆️☁️
