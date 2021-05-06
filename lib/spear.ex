@@ -2094,4 +2094,25 @@ defmodule Spear do
 
     Connection.cast(conn, {:push, sub, message})
   end
+
+  @doc """
+  Returns the parked events stream for a persistent subscription stream and
+  group.
+
+  If an event is negatively acknowledged and parked, the persistent subscription
+  will add it to the park stream for the given stream+group combination. It
+  can be useful to read this stream to determine if there are any parked
+  messages.
+
+  ## Examples
+
+      iex> Spear.park_stream("MyStream", "MyGroup")
+      "$persistentsubscription-MyStream::MyGroup-parked"
+  """
+  @doc since: "0.9.1"
+  @doc api: :utils
+  @spec park_stream(stream_name :: String.t(), group_name :: String.t()) :: String.t()
+  def park_stream(stream_name, group_name) when is_binary(stream_name) and is_binary(group_name) do
+    "$persistentsubscription-#{stream_name}::#{group_name}-parked"
+  end
 end

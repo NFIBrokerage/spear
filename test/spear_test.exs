@@ -707,6 +707,11 @@ defmodule SpearTest do
     end
   end
 
+  test "park_stream/2 composes a proper parking stream" do
+    assert Spear.park_stream("MyStream", "MyGroup") ==
+      "$persistentsubscription-MyStream::MyGroup-parked"
+  end
+
   defp random_stream_name do
     "Spear.Test-" <> uuid_v4()
   end
