@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  eventstore:
+    image: eventstore/eventstore:21.2.0-buster-slim
+    environment:
+    - EVENTSTORE_START_STANDARD_PROJECTIONS=True
+    - EVENTSTORE_RUN_PROJECTIONS=All
+    volumes:
+    - spear_eventstore:/var/lib/eventstore
+    - ./eventstoredb:/etc/eventstore:ro
+    ports:
+    - 2113:2113
+
+  app:
+    image: elixir:1.12.0-rc.1
+    depends_on:
+    - eventstore
+    environment:
+    - 'ERL_AFLAGS="-kernel shell_history enabled"'
+    - EVENTSTORE_HOST=eventstore
+    volumes:
+    - ./:/app
+    command: tail -f /dev/null
+
+volumes:
+  spear_eventstore:
