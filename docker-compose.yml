@@ -17,7 +17,7 @@ services:
     depends_on:
     - eventstore
     environment:
-    - 'ERL_AFLAGS="-kernel shell_history enabled"'
+    - 'ERL_AFLAGS=-kernel shell_history enabled'
     - EVENTSTORE_HOST=eventstore
     volumes:
     - ./:/app
