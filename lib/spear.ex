@@ -2112,7 +2112,8 @@ defmodule Spear do
   @doc since: "0.9.1"
   @doc api: :utils
   @spec park_stream(stream_name :: String.t(), group_name :: String.t()) :: String.t()
-  def park_stream(stream_name, group_name) when is_binary(stream_name) and is_binary(group_name) do
+  def park_stream(stream_name, group_name)
+      when is_binary(stream_name) and is_binary(group_name) do
     "$persistentsubscription-#{stream_name}::#{group_name}-parked"
   end
 end
