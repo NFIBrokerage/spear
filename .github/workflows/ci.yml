@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       MIX_ENV: test
+      EVENTSTORE_START_STANDARD_PROJECTIONS: True
+      EVENTSTORE_RUN_PROJECTIONS: All
 
     steps:
     - name: Checkout
