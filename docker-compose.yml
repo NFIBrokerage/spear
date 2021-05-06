@@ -21,6 +21,7 @@ services:
     - EVENTSTORE_HOST=eventstore
     volumes:
     - ./:/app
+    working_dir: /app
     command: tail -f /dev/null
 
 volumes:
