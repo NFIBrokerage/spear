@@ -6,17 +6,20 @@ defmodule Spear.Grpc do
   # You could say this little mint-backed client is the "thrust"
   # of the library (hehe).
 
-  {:ok, mint_version} = :application.get_key(:mint, :vsn)
-  @mint_version mint_version
-
   def user_agent do
+    mint_version =
+      case :application.get_key(:mint, :vsn) do
+        {:ok, version} -> version
+        _ -> '0.0.0'
+      end
+
     spear_version =
       case :application.get_key(:spear, :vsn) do
         {:ok, version} -> version
         _ -> '0.0.0'
       end
 
-    "grpc-elixir-spear/#{spear_version} (mint #{@mint_version}; Elixir #{System.version()}; OTP #{System.otp_release()})"
+    "grpc-elixir-spear/#{spear_version} (mint #{mint_version}; Elixir #{System.version()}; OTP #{System.otp_release()})"
   end
 
   # happy path of parsing DATA frame(s)
