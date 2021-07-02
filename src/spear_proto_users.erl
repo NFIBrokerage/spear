@@ -47,7 +47,7 @@
 -export([gpb_version_source/0]).
 
 -include("spear_proto_users.hrl").
--include_lib("gpb/include/gpb.hrl").
+-include("gpb.hrl").
 
 %% enumerated types
 

@@ -10,7 +10,7 @@
 -ifndef('EVENT_STORE.CLIENT.PROJECTIONS.CREATEREQ.OPTIONS_PB_H').
 -define('EVENT_STORE.CLIENT.PROJECTIONS.CREATEREQ.OPTIONS_PB_H', true).
 -record('event_store.client.projections.CreateReq.Options',
-        {mode                   :: {one_time, spear_proto_projections:'event_store.client.shared.Empty'()} | {transient, spear_proto_projections:'event_store.client.projections.CreateReq.Options.Transient'()} | {continuous, spear_proto_projections:'event_store.client.projections.CreateReq.Options.Continuous'()} | undefined, % oneof
+        {mode                   :: {one_time, spear_proto_projections:'event_store.client.Empty'()} | {transient, spear_proto_projections:'event_store.client.projections.CreateReq.Options.Transient'()} | {continuous, spear_proto_projections:'event_store.client.projections.CreateReq.Options.Continuous'()} | undefined, % oneof
          query = <<>>           :: unicode:chardata() | undefined % = 4, optional
         }).
 -endif.
@@ -49,7 +49,7 @@
 -record('event_store.client.projections.UpdateReq.Options',
         {name = <<>>            :: unicode:chardata() | undefined, % = 1, optional
          query = <<>>           :: unicode:chardata() | undefined, % = 2, optional
-         emit_option            :: {emit_enabled, boolean() | 0 | 1} | {no_emit_options, spear_proto_projections:'event_store.client.shared.Empty'()} | undefined % oneof
+         emit_option            :: {emit_enabled, boolean() | 0 | 1} | {no_emit_options, spear_proto_projections:'event_store.client.Empty'()} | undefined % oneof
         }).
 -endif.
 
@@ -94,7 +94,7 @@
 -ifndef('EVENT_STORE.CLIENT.PROJECTIONS.STATISTICSREQ.OPTIONS_PB_H').
 -define('EVENT_STORE.CLIENT.PROJECTIONS.STATISTICSREQ.OPTIONS_PB_H', true).
 -record('event_store.client.projections.StatisticsReq.Options',
-        {mode                   :: {name, unicode:chardata()} | {all, spear_proto_projections:'event_store.client.shared.Empty'()} | {transient, spear_proto_projections:'event_store.client.shared.Empty'()} | {continuous, spear_proto_projections:'event_store.client.shared.Empty'()} | {one_time, spear_proto_projections:'event_store.client.shared.Empty'()} | undefined % oneof
+        {mode                   :: {name, unicode:chardata()} | {all, spear_proto_projections:'event_store.client.Empty'()} | {transient, spear_proto_projections:'event_store.client.Empty'()} | {continuous, spear_proto_projections:'event_store.client.Empty'()} | {one_time, spear_proto_projections:'event_store.client.Empty'()} | undefined % oneof
         }).
 -endif.
 
@@ -267,32 +267,104 @@
         }).
 -endif.
 
--ifndef('EVENT_STORE.CLIENT.SHARED.UUID.STRUCTURED_PB_H').
--define('EVENT_STORE.CLIENT.SHARED.UUID.STRUCTURED_PB_H', true).
--record('event_store.client.shared.UUID.Structured',
+-ifndef('EVENT_STORE.CLIENT.UUID.STRUCTURED_PB_H').
+-define('EVENT_STORE.CLIENT.UUID.STRUCTURED_PB_H', true).
+-record('event_store.client.UUID.Structured',
         {most_significant_bits = 0 :: integer() | undefined, % = 1, optional, 64 bits
          least_significant_bits = 0 :: integer() | undefined % = 2, optional, 64 bits
         }).
 -endif.
 
--ifndef('EVENT_STORE.CLIENT.SHARED.UUID_PB_H').
--define('EVENT_STORE.CLIENT.SHARED.UUID_PB_H', true).
--record('event_store.client.shared.UUID',
-        {value                  :: {structured, spear_proto_projections:'event_store.client.shared.UUID.Structured'()} | {string, unicode:chardata()} | undefined % oneof
+-ifndef('EVENT_STORE.CLIENT.UUID_PB_H').
+-define('EVENT_STORE.CLIENT.UUID_PB_H', true).
+-record('event_store.client.UUID',
+        {value                  :: {structured, spear_proto_projections:'event_store.client.UUID.Structured'()} | {string, unicode:chardata()} | undefined % oneof
         }).
 -endif.
 
--ifndef('EVENT_STORE.CLIENT.SHARED.EMPTY_PB_H').
--define('EVENT_STORE.CLIENT.SHARED.EMPTY_PB_H', true).
--record('event_store.client.shared.Empty',
+-ifndef('EVENT_STORE.CLIENT.EMPTY_PB_H').
+-define('EVENT_STORE.CLIENT.EMPTY_PB_H', true).
+-record('event_store.client.Empty',
         {
         }).
 -endif.
 
--ifndef('EVENT_STORE.CLIENT.SHARED.STREAMIDENTIFIER_PB_H').
--define('EVENT_STORE.CLIENT.SHARED.STREAMIDENTIFIER_PB_H', true).
--record('event_store.client.shared.StreamIdentifier',
-        {streamName = <<>>      :: iodata() | undefined % = 3, optional
+-ifndef('EVENT_STORE.CLIENT.STREAMIDENTIFIER_PB_H').
+-define('EVENT_STORE.CLIENT.STREAMIDENTIFIER_PB_H', true).
+-record('event_store.client.StreamIdentifier',
+        {stream_name = <<>>     :: iodata() | undefined % = 3, optional
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.ALLSTREAMPOSITION_PB_H').
+-define('EVENT_STORE.CLIENT.ALLSTREAMPOSITION_PB_H', true).
+-record('event_store.client.AllStreamPosition',
+        {commit_position = 0    :: non_neg_integer() | undefined, % = 1, optional, 64 bits
+         prepare_position = 0   :: non_neg_integer() | undefined % = 2, optional, 64 bits
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.WRONGEXPECTEDVERSION_PB_H').
+-define('EVENT_STORE.CLIENT.WRONGEXPECTEDVERSION_PB_H', true).
+-record('event_store.client.WrongExpectedVersion',
+        {current_stream_revision_option :: {current_stream_revision, non_neg_integer()} | {current_no_stream, spear_proto_projections:'google.protobuf.Empty'()} | undefined, % oneof
+         expected_stream_position_option :: {expected_stream_position, non_neg_integer()} | {expected_any, spear_proto_projections:'google.protobuf.Empty'()} | {expected_stream_exists, spear_proto_projections:'google.protobuf.Empty'()} | {expected_no_stream, spear_proto_projections:'google.protobuf.Empty'()} | undefined % oneof
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.ACCESSDENIED_PB_H').
+-define('EVENT_STORE.CLIENT.ACCESSDENIED_PB_H', true).
+-record('event_store.client.AccessDenied',
+        {
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.STREAMDELETED_PB_H').
+-define('EVENT_STORE.CLIENT.STREAMDELETED_PB_H', true).
+-record('event_store.client.StreamDeleted',
+        {stream_identifier = undefined :: spear_proto_projections:'event_store.client.StreamIdentifier'() | undefined % = 1, optional
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.TIMEOUT_PB_H').
+-define('EVENT_STORE.CLIENT.TIMEOUT_PB_H', true).
+-record('event_store.client.Timeout',
+        {
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.UNKNOWN_PB_H').
+-define('EVENT_STORE.CLIENT.UNKNOWN_PB_H', true).
+-record('event_store.client.Unknown',
+        {
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.INVALIDTRANSACTION_PB_H').
+-define('EVENT_STORE.CLIENT.INVALIDTRANSACTION_PB_H', true).
+-record('event_store.client.InvalidTransaction',
+        {
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.MAXIMUMAPPENDSIZEEXCEEDED_PB_H').
+-define('EVENT_STORE.CLIENT.MAXIMUMAPPENDSIZEEXCEEDED_PB_H', true).
+-record('event_store.client.MaximumAppendSizeExceeded',
+        {maxAppendSize = 0      :: non_neg_integer() | undefined % = 1, optional, 32 bits
+        }).
+-endif.
+
+-ifndef('EVENT_STORE.CLIENT.BADREQUEST_PB_H').
+-define('EVENT_STORE.CLIENT.BADREQUEST_PB_H', true).
+-record('event_store.client.BadRequest',
+        {message = <<>>         :: unicode:chardata() | undefined % = 1, optional
+        }).
+-endif.
+
+-ifndef('GOOGLE.PROTOBUF.EMPTY_PB_H').
+-define('GOOGLE.PROTOBUF.EMPTY_PB_H', true).
+-record('google.protobuf.Empty',
+        {
         }).
 -endif.
 

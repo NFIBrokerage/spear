@@ -48,7 +48,7 @@
 -export([gpb_version_source/0]).
 
 -include("spear_proto_projections.hrl").
--include_lib("gpb/include/gpb.hrl").
+-include("gpb.hrl").
 
 %% enumerated types
 -type 'google.protobuf.NullValue'() :: 'NULL_VALUE'.
@@ -121,17 +121,37 @@
 
 -type 'google.protobuf.ListValue'() :: #'google.protobuf.ListValue'{}.
 
--type 'event_store.client.shared.UUID.Structured'() :: #'event_store.client.shared.UUID.Structured'{}.
+-type 'event_store.client.UUID.Structured'() :: #'event_store.client.UUID.Structured'{}.
 
--type 'event_store.client.shared.UUID'() :: #'event_store.client.shared.UUID'{}.
+-type 'event_store.client.UUID'() :: #'event_store.client.UUID'{}.
 
--type 'event_store.client.shared.Empty'() :: #'event_store.client.shared.Empty'{}.
+-type 'event_store.client.Empty'() :: #'event_store.client.Empty'{}.
 
--type 'event_store.client.shared.StreamIdentifier'() :: #'event_store.client.shared.StreamIdentifier'{}.
+-type 'event_store.client.StreamIdentifier'() :: #'event_store.client.StreamIdentifier'{}.
 
--export_type(['event_store.client.projections.CreateReq.Options'/0, 'event_store.client.projections.CreateReq.Options.Continuous'/0, 'event_store.client.projections.CreateReq.Options.Transient'/0, 'event_store.client.projections.CreateReq'/0, 'event_store.client.projections.CreateResp'/0, 'event_store.client.projections.UpdateReq.Options'/0, 'event_store.client.projections.UpdateReq'/0, 'event_store.client.projections.UpdateResp'/0, 'event_store.client.projections.DeleteReq.Options'/0, 'event_store.client.projections.DeleteReq'/0, 'event_store.client.projections.DeleteResp'/0, 'event_store.client.projections.StatisticsReq.Options'/0, 'event_store.client.projections.StatisticsReq'/0, 'event_store.client.projections.StatisticsResp.Details'/0, 'event_store.client.projections.StatisticsResp'/0, 'event_store.client.projections.StateReq.Options'/0, 'event_store.client.projections.StateReq'/0, 'event_store.client.projections.StateResp'/0, 'event_store.client.projections.ResultReq.Options'/0, 'event_store.client.projections.ResultReq'/0, 'event_store.client.projections.ResultResp'/0, 'event_store.client.projections.ResetReq.Options'/0, 'event_store.client.projections.ResetReq'/0, 'event_store.client.projections.ResetResp'/0, 'event_store.client.projections.EnableReq.Options'/0, 'event_store.client.projections.EnableReq'/0, 'event_store.client.projections.EnableResp'/0, 'event_store.client.projections.DisableReq.Options'/0, 'event_store.client.projections.DisableReq'/0, 'event_store.client.projections.DisableResp'/0, 'google.protobuf.Struct'/0, 'google.protobuf.Value'/0, 'google.protobuf.ListValue'/0, 'event_store.client.shared.UUID.Structured'/0, 'event_store.client.shared.UUID'/0, 'event_store.client.shared.Empty'/0, 'event_store.client.shared.StreamIdentifier'/0]).
--type '$msg_name'() :: 'event_store.client.projections.CreateReq.Options' | 'event_store.client.projections.CreateReq.Options.Continuous' | 'event_store.client.projections.CreateReq.Options.Transient' | 'event_store.client.projections.CreateReq' | 'event_store.client.projections.CreateResp' | 'event_store.client.projections.UpdateReq.Options' | 'event_store.client.projections.UpdateReq' | 'event_store.client.projections.UpdateResp' | 'event_store.client.projections.DeleteReq.Options' | 'event_store.client.projections.DeleteReq' | 'event_store.client.projections.DeleteResp' | 'event_store.client.projections.StatisticsReq.Options' | 'event_store.client.projections.StatisticsReq' | 'event_store.client.projections.StatisticsResp.Details' | 'event_store.client.projections.StatisticsResp' | 'event_store.client.projections.StateReq.Options' | 'event_store.client.projections.StateReq' | 'event_store.client.projections.StateResp' | 'event_store.client.projections.ResultReq.Options' | 'event_store.client.projections.ResultReq' | 'event_store.client.projections.ResultResp' | 'event_store.client.projections.ResetReq.Options' | 'event_store.client.projections.ResetReq' | 'event_store.client.projections.ResetResp' | 'event_store.client.projections.EnableReq.Options' | 'event_store.client.projections.EnableReq' | 'event_store.client.projections.EnableResp' | 'event_store.client.projections.DisableReq.Options' | 'event_store.client.projections.DisableReq' | 'event_store.client.projections.DisableResp' | 'google.protobuf.Struct' | 'google.protobuf.Value' | 'google.protobuf.ListValue' | 'event_store.client.shared.UUID.Structured' | 'event_store.client.shared.UUID' | 'event_store.client.shared.Empty' | 'event_store.client.shared.StreamIdentifier'.
--type '$msg'() :: 'event_store.client.projections.CreateReq.Options'() | 'event_store.client.projections.CreateReq.Options.Continuous'() | 'event_store.client.projections.CreateReq.Options.Transient'() | 'event_store.client.projections.CreateReq'() | 'event_store.client.projections.CreateResp'() | 'event_store.client.projections.UpdateReq.Options'() | 'event_store.client.projections.UpdateReq'() | 'event_store.client.projections.UpdateResp'() | 'event_store.client.projections.DeleteReq.Options'() | 'event_store.client.projections.DeleteReq'() | 'event_store.client.projections.DeleteResp'() | 'event_store.client.projections.StatisticsReq.Options'() | 'event_store.client.projections.StatisticsReq'() | 'event_store.client.projections.StatisticsResp.Details'() | 'event_store.client.projections.StatisticsResp'() | 'event_store.client.projections.StateReq.Options'() | 'event_store.client.projections.StateReq'() | 'event_store.client.projections.StateResp'() | 'event_store.client.projections.ResultReq.Options'() | 'event_store.client.projections.ResultReq'() | 'event_store.client.projections.ResultResp'() | 'event_store.client.projections.ResetReq.Options'() | 'event_store.client.projections.ResetReq'() | 'event_store.client.projections.ResetResp'() | 'event_store.client.projections.EnableReq.Options'() | 'event_store.client.projections.EnableReq'() | 'event_store.client.projections.EnableResp'() | 'event_store.client.projections.DisableReq.Options'() | 'event_store.client.projections.DisableReq'() | 'event_store.client.projections.DisableResp'() | 'google.protobuf.Struct'() | 'google.protobuf.Value'() | 'google.protobuf.ListValue'() | 'event_store.client.shared.UUID.Structured'() | 'event_store.client.shared.UUID'() | 'event_store.client.shared.Empty'() | 'event_store.client.shared.StreamIdentifier'().
+-type 'event_store.client.AllStreamPosition'() :: #'event_store.client.AllStreamPosition'{}.
+
+-type 'event_store.client.WrongExpectedVersion'() :: #'event_store.client.WrongExpectedVersion'{}.
+
+-type 'event_store.client.AccessDenied'() :: #'event_store.client.AccessDenied'{}.
+
+-type 'event_store.client.StreamDeleted'() :: #'event_store.client.StreamDeleted'{}.
+
+-type 'event_store.client.Timeout'() :: #'event_store.client.Timeout'{}.
+
+-type 'event_store.client.Unknown'() :: #'event_store.client.Unknown'{}.
+
+-type 'event_store.client.InvalidTransaction'() :: #'event_store.client.InvalidTransaction'{}.
+
+-type 'event_store.client.MaximumAppendSizeExceeded'() :: #'event_store.client.MaximumAppendSizeExceeded'{}.
+
+-type 'event_store.client.BadRequest'() :: #'event_store.client.BadRequest'{}.
+
+-type 'google.protobuf.Empty'() :: #'google.protobuf.Empty'{}.
+
+-export_type(['event_store.client.projections.CreateReq.Options'/0, 'event_store.client.projections.CreateReq.Options.Continuous'/0, 'event_store.client.projections.CreateReq.Options.Transient'/0, 'event_store.client.projections.CreateReq'/0, 'event_store.client.projections.CreateResp'/0, 'event_store.client.projections.UpdateReq.Options'/0, 'event_store.client.projections.UpdateReq'/0, 'event_store.client.projections.UpdateResp'/0, 'event_store.client.projections.DeleteReq.Options'/0, 'event_store.client.projections.DeleteReq'/0, 'event_store.client.projections.DeleteResp'/0, 'event_store.client.projections.StatisticsReq.Options'/0, 'event_store.client.projections.StatisticsReq'/0, 'event_store.client.projections.StatisticsResp.Details'/0, 'event_store.client.projections.StatisticsResp'/0, 'event_store.client.projections.StateReq.Options'/0, 'event_store.client.projections.StateReq'/0, 'event_store.client.projections.StateResp'/0, 'event_store.client.projections.ResultReq.Options'/0, 'event_store.client.projections.ResultReq'/0, 'event_store.client.projections.ResultResp'/0, 'event_store.client.projections.ResetReq.Options'/0, 'event_store.client.projections.ResetReq'/0, 'event_store.client.projections.ResetResp'/0, 'event_store.client.projections.EnableReq.Options'/0, 'event_store.client.projections.EnableReq'/0, 'event_store.client.projections.EnableResp'/0, 'event_store.client.projections.DisableReq.Options'/0, 'event_store.client.projections.DisableReq'/0, 'event_store.client.projections.DisableResp'/0, 'google.protobuf.Struct'/0, 'google.protobuf.Value'/0, 'google.protobuf.ListValue'/0, 'event_store.client.UUID.Structured'/0, 'event_store.client.UUID'/0, 'event_store.client.Empty'/0, 'event_store.client.StreamIdentifier'/0, 'event_store.client.AllStreamPosition'/0, 'event_store.client.WrongExpectedVersion'/0, 'event_store.client.AccessDenied'/0, 'event_store.client.StreamDeleted'/0, 'event_store.client.Timeout'/0, 'event_store.client.Unknown'/0, 'event_store.client.InvalidTransaction'/0, 'event_store.client.MaximumAppendSizeExceeded'/0, 'event_store.client.BadRequest'/0, 'google.protobuf.Empty'/0]).
+-type '$msg_name'() :: 'event_store.client.projections.CreateReq.Options' | 'event_store.client.projections.CreateReq.Options.Continuous' | 'event_store.client.projections.CreateReq.Options.Transient' | 'event_store.client.projections.CreateReq' | 'event_store.client.projections.CreateResp' | 'event_store.client.projections.UpdateReq.Options' | 'event_store.client.projections.UpdateReq' | 'event_store.client.projections.UpdateResp' | 'event_store.client.projections.DeleteReq.Options' | 'event_store.client.projections.DeleteReq' | 'event_store.client.projections.DeleteResp' | 'event_store.client.projections.StatisticsReq.Options' | 'event_store.client.projections.StatisticsReq' | 'event_store.client.projections.StatisticsResp.Details' | 'event_store.client.projections.StatisticsResp' | 'event_store.client.projections.StateReq.Options' | 'event_store.client.projections.StateReq' | 'event_store.client.projections.StateResp' | 'event_store.client.projections.ResultReq.Options' | 'event_store.client.projections.ResultReq' | 'event_store.client.projections.ResultResp' | 'event_store.client.projections.ResetReq.Options' | 'event_store.client.projections.ResetReq' | 'event_store.client.projections.ResetResp' | 'event_store.client.projections.EnableReq.Options' | 'event_store.client.projections.EnableReq' | 'event_store.client.projections.EnableResp' | 'event_store.client.projections.DisableReq.Options' | 'event_store.client.projections.DisableReq' | 'event_store.client.projections.DisableResp' | 'google.protobuf.Struct' | 'google.protobuf.Value' | 'google.protobuf.ListValue' | 'event_store.client.UUID.Structured' | 'event_store.client.UUID' | 'event_store.client.Empty' | 'event_store.client.StreamIdentifier' | 'event_store.client.AllStreamPosition' | 'event_store.client.WrongExpectedVersion' | 'event_store.client.AccessDenied' | 'event_store.client.StreamDeleted' | 'event_store.client.Timeout' | 'event_store.client.Unknown' | 'event_store.client.InvalidTransaction' | 'event_store.client.MaximumAppendSizeExceeded' | 'event_store.client.BadRequest' | 'google.protobuf.Empty'.
+-type '$msg'() :: 'event_store.client.projections.CreateReq.Options'() | 'event_store.client.projections.CreateReq.Options.Continuous'() | 'event_store.client.projections.CreateReq.Options.Transient'() | 'event_store.client.projections.CreateReq'() | 'event_store.client.projections.CreateResp'() | 'event_store.client.projections.UpdateReq.Options'() | 'event_store.client.projections.UpdateReq'() | 'event_store.client.projections.UpdateResp'() | 'event_store.client.projections.DeleteReq.Options'() | 'event_store.client.projections.DeleteReq'() | 'event_store.client.projections.DeleteResp'() | 'event_store.client.projections.StatisticsReq.Options'() | 'event_store.client.projections.StatisticsReq'() | 'event_store.client.projections.StatisticsResp.Details'() | 'event_store.client.projections.StatisticsResp'() | 'event_store.client.projections.StateReq.Options'() | 'event_store.client.projections.StateReq'() | 'event_store.client.projections.StateResp'() | 'event_store.client.projections.ResultReq.Options'() | 'event_store.client.projections.ResultReq'() | 'event_store.client.projections.ResultResp'() | 'event_store.client.projections.ResetReq.Options'() | 'event_store.client.projections.ResetReq'() | 'event_store.client.projections.ResetResp'() | 'event_store.client.projections.EnableReq.Options'() | 'event_store.client.projections.EnableReq'() | 'event_store.client.projections.EnableResp'() | 'event_store.client.projections.DisableReq.Options'() | 'event_store.client.projections.DisableReq'() | 'event_store.client.projections.DisableResp'() | 'google.protobuf.Struct'() | 'google.protobuf.Value'() | 'google.protobuf.ListValue'() | 'event_store.client.UUID.Structured'() | 'event_store.client.UUID'() | 'event_store.client.Empty'() | 'event_store.client.StreamIdentifier'() | 'event_store.client.AllStreamPosition'() | 'event_store.client.WrongExpectedVersion'() | 'event_store.client.AccessDenied'() | 'event_store.client.StreamDeleted'() | 'event_store.client.Timeout'() | 'event_store.client.Unknown'() | 'event_store.client.InvalidTransaction'() | 'event_store.client.MaximumAppendSizeExceeded'() | 'event_store.client.BadRequest'() | 'google.protobuf.Empty'().
 -export_type(['$msg_name'/0, '$msg'/0]).
 
 -record('map<string,google.protobuf.Value>',{key, value}).
@@ -186,10 +206,20 @@ encode_msg(Msg, MsgName, Opts) ->
         'google.protobuf.Struct' -> 'encode_msg_google.protobuf.Struct'(id(Msg, TrUserData), TrUserData);
         'google.protobuf.Value' -> 'encode_msg_google.protobuf.Value'(id(Msg, TrUserData), TrUserData);
         'google.protobuf.ListValue' -> 'encode_msg_google.protobuf.ListValue'(id(Msg, TrUserData), TrUserData);
-        'event_store.client.shared.UUID.Structured' -> 'encode_msg_event_store.client.shared.UUID.Structured'(id(Msg, TrUserData), TrUserData);
-        'event_store.client.shared.UUID' -> 'encode_msg_event_store.client.shared.UUID'(id(Msg, TrUserData), TrUserData);
-        'event_store.client.shared.Empty' -> 'encode_msg_event_store.client.shared.Empty'(id(Msg, TrUserData), TrUserData);
-        'event_store.client.shared.StreamIdentifier' -> 'encode_msg_event_store.client.shared.StreamIdentifier'(id(Msg, TrUserData), TrUserData)
+        'event_store.client.UUID.Structured' -> 'encode_msg_event_store.client.UUID.Structured'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.UUID' -> 'encode_msg_event_store.client.UUID'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.Empty' -> 'encode_msg_event_store.client.Empty'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.StreamIdentifier' -> 'encode_msg_event_store.client.StreamIdentifier'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.AllStreamPosition' -> 'encode_msg_event_store.client.AllStreamPosition'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.WrongExpectedVersion' -> 'encode_msg_event_store.client.WrongExpectedVersion'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.AccessDenied' -> 'encode_msg_event_store.client.AccessDenied'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.StreamDeleted' -> 'encode_msg_event_store.client.StreamDeleted'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.Timeout' -> 'encode_msg_event_store.client.Timeout'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.Unknown' -> 'encode_msg_event_store.client.Unknown'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.InvalidTransaction' -> 'encode_msg_event_store.client.InvalidTransaction'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.MaximumAppendSizeExceeded' -> 'encode_msg_event_store.client.MaximumAppendSizeExceeded'(id(Msg, TrUserData), TrUserData);
+        'event_store.client.BadRequest' -> 'encode_msg_event_store.client.BadRequest'(id(Msg, TrUserData), TrUserData);
+        'google.protobuf.Empty' -> 'encode_msg_google.protobuf.Empty'(id(Msg, TrUserData), TrUserData)
     end.
 
 
@@ -862,10 +892,10 @@ encode_msg(Msg, MsgName, Opts) ->
         end
     end.
 
-'encode_msg_event_store.client.shared.UUID.Structured'(Msg, TrUserData) -> 'encode_msg_event_store.client.shared.UUID.Structured'(Msg, <<>>, TrUserData).
+'encode_msg_event_store.client.UUID.Structured'(Msg, TrUserData) -> 'encode_msg_event_store.client.UUID.Structured'(Msg, <<>>, TrUserData).
 
 
-'encode_msg_event_store.client.shared.UUID.Structured'(#'event_store.client.shared.UUID.Structured'{most_significant_bits = F1, least_significant_bits = F2}, Bin, TrUserData) ->
+'encode_msg_event_store.client.UUID.Structured'(#'event_store.client.UUID.Structured'{most_significant_bits = F1, least_significant_bits = F2}, Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
             true ->
                 begin
@@ -885,24 +915,24 @@ encode_msg(Msg, MsgName, Opts) ->
            end
     end.
 
-'encode_msg_event_store.client.shared.UUID'(Msg, TrUserData) -> 'encode_msg_event_store.client.shared.UUID'(Msg, <<>>, TrUserData).
+'encode_msg_event_store.client.UUID'(Msg, TrUserData) -> 'encode_msg_event_store.client.UUID'(Msg, <<>>, TrUserData).
 
 
-'encode_msg_event_store.client.shared.UUID'(#'event_store.client.shared.UUID'{value = F1}, Bin, TrUserData) ->
+'encode_msg_event_store.client.UUID'(#'event_store.client.UUID'{value = F1}, Bin, TrUserData) ->
     if F1 =:= undefined -> Bin;
        true ->
            case id(F1, TrUserData) of
-               {structured, TF1} -> begin TrTF1 = id(TF1, TrUserData), 'e_mfield_event_store.client.shared.UUID_structured'(TrTF1, <<Bin/binary, 10>>, TrUserData) end;
+               {structured, TF1} -> begin TrTF1 = id(TF1, TrUserData), 'e_mfield_event_store.client.UUID_structured'(TrTF1, <<Bin/binary, 10>>, TrUserData) end;
                {string, TF1} -> begin TrTF1 = id(TF1, TrUserData), e_type_string(TrTF1, <<Bin/binary, 18>>, TrUserData) end
            end
     end.
 
-'encode_msg_event_store.client.shared.Empty'(_Msg, _TrUserData) -> <<>>.
+'encode_msg_event_store.client.Empty'(_Msg, _TrUserData) -> <<>>.
 
-'encode_msg_event_store.client.shared.StreamIdentifier'(Msg, TrUserData) -> 'encode_msg_event_store.client.shared.StreamIdentifier'(Msg, <<>>, TrUserData).
+'encode_msg_event_store.client.StreamIdentifier'(Msg, TrUserData) -> 'encode_msg_event_store.client.StreamIdentifier'(Msg, <<>>, TrUserData).
 
 
-'encode_msg_event_store.client.shared.StreamIdentifier'(#'event_store.client.shared.StreamIdentifier'{streamName = F1}, Bin, TrUserData) ->
+'encode_msg_event_store.client.StreamIdentifier'(#'event_store.client.StreamIdentifier'{stream_name = F1}, Bin, TrUserData) ->
     if F1 == undefined -> Bin;
        true ->
            begin
@@ -913,6 +943,103 @@ encode_msg(Msg, MsgName, Opts) ->
                end
            end
     end.
+
+'encode_msg_event_store.client.AllStreamPosition'(Msg, TrUserData) -> 'encode_msg_event_store.client.AllStreamPosition'(Msg, <<>>, TrUserData).
+
+
+'encode_msg_event_store.client.AllStreamPosition'(#'event_store.client.AllStreamPosition'{commit_position = F1, prepare_position = F2}, Bin, TrUserData) ->
+    B1 = if F1 == undefined -> Bin;
+            true ->
+                begin
+                    TrF1 = id(F1, TrUserData),
+                    if TrF1 =:= 0 -> Bin;
+                       true -> e_varint(TrF1, <<Bin/binary, 8>>, TrUserData)
+                    end
+                end
+         end,
+    if F2 == undefined -> B1;
+       true ->
+           begin
+               TrF2 = id(F2, TrUserData),
+               if TrF2 =:= 0 -> B1;
+                  true -> e_varint(TrF2, <<B1/binary, 16>>, TrUserData)
+               end
+           end
+    end.
+
+'encode_msg_event_store.client.WrongExpectedVersion'(Msg, TrUserData) -> 'encode_msg_event_store.client.WrongExpectedVersion'(Msg, <<>>, TrUserData).
+
+
+'encode_msg_event_store.client.WrongExpectedVersion'(#'event_store.client.WrongExpectedVersion'{current_stream_revision_option = F1, expected_stream_position_option = F2}, Bin, TrUserData) ->
+    B1 = if F1 =:= undefined -> Bin;
+            true ->
+                case id(F1, TrUserData) of
+                    {current_stream_revision, TF1} -> begin TrTF1 = id(TF1, TrUserData), e_varint(TrTF1, <<Bin/binary, 8>>, TrUserData) end;
+                    {current_no_stream, TF1} -> begin TrTF1 = id(TF1, TrUserData), 'e_mfield_event_store.client.WrongExpectedVersion_current_no_stream'(TrTF1, <<Bin/binary, 18>>, TrUserData) end
+                end
+         end,
+    if F2 =:= undefined -> B1;
+       true ->
+           case id(F2, TrUserData) of
+               {expected_stream_position, TF2} -> begin TrTF2 = id(TF2, TrUserData), e_varint(TrTF2, <<B1/binary, 24>>, TrUserData) end;
+               {expected_any, TF2} -> begin TrTF2 = id(TF2, TrUserData), 'e_mfield_event_store.client.WrongExpectedVersion_expected_any'(TrTF2, <<B1/binary, 34>>, TrUserData) end;
+               {expected_stream_exists, TF2} -> begin TrTF2 = id(TF2, TrUserData), 'e_mfield_event_store.client.WrongExpectedVersion_expected_stream_exists'(TrTF2, <<B1/binary, 42>>, TrUserData) end;
+               {expected_no_stream, TF2} -> begin TrTF2 = id(TF2, TrUserData), 'e_mfield_event_store.client.WrongExpectedVersion_expected_no_stream'(TrTF2, <<B1/binary, 50>>, TrUserData) end
+           end
+    end.
+
+'encode_msg_event_store.client.AccessDenied'(_Msg, _TrUserData) -> <<>>.
+
+'encode_msg_event_store.client.StreamDeleted'(Msg, TrUserData) -> 'encode_msg_event_store.client.StreamDeleted'(Msg, <<>>, TrUserData).
+
+
+'encode_msg_event_store.client.StreamDeleted'(#'event_store.client.StreamDeleted'{stream_identifier = F1}, Bin, TrUserData) ->
+    if F1 == undefined -> Bin;
+       true ->
+           begin
+               TrF1 = id(F1, TrUserData),
+               if TrF1 =:= undefined -> Bin;
+                  true -> 'e_mfield_event_store.client.StreamDeleted_stream_identifier'(TrF1, <<Bin/binary, 10>>, TrUserData)
+               end
+           end
+    end.
+
+'encode_msg_event_store.client.Timeout'(_Msg, _TrUserData) -> <<>>.
+
+'encode_msg_event_store.client.Unknown'(_Msg, _TrUserData) -> <<>>.
+
+'encode_msg_event_store.client.InvalidTransaction'(_Msg, _TrUserData) -> <<>>.
+
+'encode_msg_event_store.client.MaximumAppendSizeExceeded'(Msg, TrUserData) -> 'encode_msg_event_store.client.MaximumAppendSizeExceeded'(Msg, <<>>, TrUserData).
+
+
+'encode_msg_event_store.client.MaximumAppendSizeExceeded'(#'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = F1}, Bin, TrUserData) ->
+    if F1 == undefined -> Bin;
+       true ->
+           begin
+               TrF1 = id(F1, TrUserData),
+               if TrF1 =:= 0 -> Bin;
+                  true -> e_varint(TrF1, <<Bin/binary, 8>>, TrUserData)
+               end
+           end
+    end.
+
+'encode_msg_event_store.client.BadRequest'(Msg, TrUserData) -> 'encode_msg_event_store.client.BadRequest'(Msg, <<>>, TrUserData).
+
+
+'encode_msg_event_store.client.BadRequest'(#'event_store.client.BadRequest'{message = F1}, Bin, TrUserData) ->
+    if F1 == undefined -> Bin;
+       true ->
+           begin
+               TrF1 = id(F1, TrUserData),
+               case is_empty_string(TrF1) of
+                   true -> Bin;
+                   false -> e_type_string(TrF1, <<Bin/binary, 10>>, TrUserData)
+               end
+           end
+    end.
+
+'encode_msg_google.protobuf.Empty'(_Msg, _TrUserData) -> <<>>.
 
 'e_mfield_event_store.client.projections.CreateReq.Options_one_time'(_Msg, Bin, _TrUserData) -> <<Bin/binary, 0>>.
 
@@ -1028,8 +1155,21 @@ encode_msg(Msg, MsgName, Opts) ->
     'e_field_google.protobuf.ListValue_values'(Rest, Bin3, TrUserData);
 'e_field_google.protobuf.ListValue_values'([], Bin, _TrUserData) -> Bin.
 
-'e_mfield_event_store.client.shared.UUID_structured'(Msg, Bin, TrUserData) ->
-    SubBin = 'encode_msg_event_store.client.shared.UUID.Structured'(Msg, <<>>, TrUserData),
+'e_mfield_event_store.client.UUID_structured'(Msg, Bin, TrUserData) ->
+    SubBin = 'encode_msg_event_store.client.UUID.Structured'(Msg, <<>>, TrUserData),
+    Bin2 = e_varint(byte_size(SubBin), Bin),
+    <<Bin2/binary, SubBin/binary>>.
+
+'e_mfield_event_store.client.WrongExpectedVersion_current_no_stream'(_Msg, Bin, _TrUserData) -> <<Bin/binary, 0>>.
+
+'e_mfield_event_store.client.WrongExpectedVersion_expected_any'(_Msg, Bin, _TrUserData) -> <<Bin/binary, 0>>.
+
+'e_mfield_event_store.client.WrongExpectedVersion_expected_stream_exists'(_Msg, Bin, _TrUserData) -> <<Bin/binary, 0>>.
+
+'e_mfield_event_store.client.WrongExpectedVersion_expected_no_stream'(_Msg, Bin, _TrUserData) -> <<Bin/binary, 0>>.
+
+'e_mfield_event_store.client.StreamDeleted_stream_identifier'(Msg, Bin, TrUserData) ->
+    SubBin = 'encode_msg_event_store.client.StreamIdentifier'(Msg, <<>>, TrUserData),
     Bin2 = e_varint(byte_size(SubBin), Bin),
     <<Bin2/binary, SubBin/binary>>.
 
@@ -1216,10 +1356,20 @@ decode_msg_2_doit('event_store.client.projections.DisableResp', Bin, TrUserData)
 decode_msg_2_doit('google.protobuf.Struct', Bin, TrUserData) -> id('decode_msg_google.protobuf.Struct'(Bin, TrUserData), TrUserData);
 decode_msg_2_doit('google.protobuf.Value', Bin, TrUserData) -> id('decode_msg_google.protobuf.Value'(Bin, TrUserData), TrUserData);
 decode_msg_2_doit('google.protobuf.ListValue', Bin, TrUserData) -> id('decode_msg_google.protobuf.ListValue'(Bin, TrUserData), TrUserData);
-decode_msg_2_doit('event_store.client.shared.UUID.Structured', Bin, TrUserData) -> id('decode_msg_event_store.client.shared.UUID.Structured'(Bin, TrUserData), TrUserData);
-decode_msg_2_doit('event_store.client.shared.UUID', Bin, TrUserData) -> id('decode_msg_event_store.client.shared.UUID'(Bin, TrUserData), TrUserData);
-decode_msg_2_doit('event_store.client.shared.Empty', Bin, TrUserData) -> id('decode_msg_event_store.client.shared.Empty'(Bin, TrUserData), TrUserData);
-decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData) -> id('decode_msg_event_store.client.shared.StreamIdentifier'(Bin, TrUserData), TrUserData).
+decode_msg_2_doit('event_store.client.UUID.Structured', Bin, TrUserData) -> id('decode_msg_event_store.client.UUID.Structured'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.UUID', Bin, TrUserData) -> id('decode_msg_event_store.client.UUID'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.Empty', Bin, TrUserData) -> id('decode_msg_event_store.client.Empty'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.StreamIdentifier', Bin, TrUserData) -> id('decode_msg_event_store.client.StreamIdentifier'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.AllStreamPosition', Bin, TrUserData) -> id('decode_msg_event_store.client.AllStreamPosition'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.WrongExpectedVersion', Bin, TrUserData) -> id('decode_msg_event_store.client.WrongExpectedVersion'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.AccessDenied', Bin, TrUserData) -> id('decode_msg_event_store.client.AccessDenied'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.StreamDeleted', Bin, TrUserData) -> id('decode_msg_event_store.client.StreamDeleted'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.Timeout', Bin, TrUserData) -> id('decode_msg_event_store.client.Timeout'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.Unknown', Bin, TrUserData) -> id('decode_msg_event_store.client.Unknown'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.InvalidTransaction', Bin, TrUserData) -> id('decode_msg_event_store.client.InvalidTransaction'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.MaximumAppendSizeExceeded', Bin, TrUserData) -> id('decode_msg_event_store.client.MaximumAppendSizeExceeded'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('event_store.client.BadRequest', Bin, TrUserData) -> id('decode_msg_event_store.client.BadRequest'(Bin, TrUserData), TrUserData);
+decode_msg_2_doit('google.protobuf.Empty', Bin, TrUserData) -> id('decode_msg_google.protobuf.Empty'(Bin, TrUserData), TrUserData).
 
 
 
@@ -1255,14 +1405,14 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.CreateReq.Options_one_time'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.CreateReq.Options_one_time'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
 'd_field_event_store.client.projections.CreateReq.Options_one_time'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, F@_2, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.CreateReq.Options'(RestF,
                                                                           0,
                                                                           0,
                                                                           F,
                                                                           case Prev of
                                                                               undefined -> id({one_time, NewFValue}, TrUserData);
-                                                                              {one_time, MVPrev} -> id({one_time, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                              {one_time, MVPrev} -> id({one_time, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                               _ -> id({one_time, NewFValue}, TrUserData)
                                                                           end,
                                                                           F@_2,
@@ -1569,7 +1719,7 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.UpdateReq.Options_no_emit_options'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, F@_3, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.UpdateReq.Options_no_emit_options'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, F@_3, TrUserData);
 'd_field_event_store.client.projections.UpdateReq.Options_no_emit_options'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.UpdateReq.Options'(RestF,
                                                                           0,
                                                                           0,
@@ -1578,7 +1728,7 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
                                                                           F@_2,
                                                                           case Prev of
                                                                               undefined -> id({no_emit_options, NewFValue}, TrUserData);
-                                                                              {no_emit_options, MVPrev} -> id({no_emit_options, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                              {no_emit_options, MVPrev} -> id({no_emit_options, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                               _ -> id({no_emit_options, NewFValue}, TrUserData)
                                                                           end,
                                                                           TrUserData).
@@ -1894,14 +2044,14 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.StatisticsReq.Options_all'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.StatisticsReq.Options_all'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
 'd_field_event_store.client.projections.StatisticsReq.Options_all'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.StatisticsReq.Options'(RestF,
                                                                               0,
                                                                               0,
                                                                               F,
                                                                               case Prev of
                                                                                   undefined -> id({all, NewFValue}, TrUserData);
-                                                                                  {all, MVPrev} -> id({all, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                                  {all, MVPrev} -> id({all, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                                   _ -> id({all, NewFValue}, TrUserData)
                                                                               end,
                                                                               TrUserData).
@@ -1909,14 +2059,14 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.StatisticsReq.Options_transient'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.StatisticsReq.Options_transient'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
 'd_field_event_store.client.projections.StatisticsReq.Options_transient'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.StatisticsReq.Options'(RestF,
                                                                               0,
                                                                               0,
                                                                               F,
                                                                               case Prev of
                                                                                   undefined -> id({transient, NewFValue}, TrUserData);
-                                                                                  {transient, MVPrev} -> id({transient, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                                  {transient, MVPrev} -> id({transient, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                                   _ -> id({transient, NewFValue}, TrUserData)
                                                                               end,
                                                                               TrUserData).
@@ -1924,14 +2074,14 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.StatisticsReq.Options_continuous'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.StatisticsReq.Options_continuous'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
 'd_field_event_store.client.projections.StatisticsReq.Options_continuous'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.StatisticsReq.Options'(RestF,
                                                                               0,
                                                                               0,
                                                                               F,
                                                                               case Prev of
                                                                                   undefined -> id({continuous, NewFValue}, TrUserData);
-                                                                                  {continuous, MVPrev} -> id({continuous, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                                  {continuous, MVPrev} -> id({continuous, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                                   _ -> id({continuous, NewFValue}, TrUserData)
                                                                               end,
                                                                               TrUserData).
@@ -1939,14 +2089,14 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 'd_field_event_store.client.projections.StatisticsReq.Options_one_time'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
     'd_field_event_store.client.projections.StatisticsReq.Options_one_time'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
 'd_field_event_store.client.projections.StatisticsReq.Options_one_time'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
     'dfp_read_field_def_event_store.client.projections.StatisticsReq.Options'(RestF,
                                                                               0,
                                                                               0,
                                                                               F,
                                                                               case Prev of
                                                                                   undefined -> id({one_time, NewFValue}, TrUserData);
-                                                                                  {one_time, MVPrev} -> id({one_time, 'merge_msg_event_store.client.shared.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                                  {one_time, MVPrev} -> id({one_time, 'merge_msg_event_store.client.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
                                                                                   _ -> id({one_time, NewFValue}, TrUserData)
                                                                               end,
                                                                               TrUserData).
@@ -3400,199 +3550,689 @@ decode_msg_2_doit('event_store.client.shared.StreamIdentifier', Bin, TrUserData)
 
 'skip_64_google.protobuf.ListValue'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_google.protobuf.ListValue'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'decode_msg_event_store.client.shared.UUID.Structured'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Bin, 0, 0, 0, id(0, TrUserData), id(0, TrUserData), TrUserData).
+'decode_msg_event_store.client.UUID.Structured'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID.Structured'(Bin, 0, 0, 0, id(0, TrUserData), id(0, TrUserData), TrUserData).
 
-'dfp_read_field_def_event_store.client.shared.UUID.Structured'(<<8, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.shared.UUID.Structured_most_significant_bits'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
-'dfp_read_field_def_event_store.client.shared.UUID.Structured'(<<16, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.shared.UUID.Structured_least_significant_bits'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
-'dfp_read_field_def_event_store.client.shared.UUID.Structured'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.shared.UUID.Structured'{most_significant_bits = F@_1, least_significant_bits = F@_2};
-'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dg_read_field_def_event_store.client.shared.UUID.Structured'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData).
+'dfp_read_field_def_event_store.client.UUID.Structured'(<<8, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.UUID.Structured_most_significant_bits'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.UUID.Structured'(<<16, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.UUID.Structured_least_significant_bits'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.UUID.Structured'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.UUID.Structured'{most_significant_bits = F@_1, least_significant_bits = F@_2};
+'dfp_read_field_def_event_store.client.UUID.Structured'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dg_read_field_def_event_store.client.UUID.Structured'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData).
 
-'dg_read_field_def_event_store.client.shared.UUID.Structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 32 - 7 ->
-    'dg_read_field_def_event_store.client.shared.UUID.Structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
-'dg_read_field_def_event_store.client.shared.UUID.Structured'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, F@_2, TrUserData) ->
+'dg_read_field_def_event_store.client.UUID.Structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.UUID.Structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'dg_read_field_def_event_store.client.UUID.Structured'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, F@_2, TrUserData) ->
     Key = X bsl N + Acc,
     case Key of
-        8 -> 'd_field_event_store.client.shared.UUID.Structured_most_significant_bits'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
-        16 -> 'd_field_event_store.client.shared.UUID.Structured_least_significant_bits'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        8 -> 'd_field_event_store.client.UUID.Structured_most_significant_bits'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        16 -> 'd_field_event_store.client.UUID.Structured_least_significant_bits'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
         _ ->
             case Key band 7 of
-                0 -> 'skip_varint_event_store.client.shared.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
-                1 -> 'skip_64_event_store.client.shared.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
-                2 -> 'skip_length_delimited_event_store.client.shared.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
-                3 -> 'skip_group_event_store.client.shared.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
-                5 -> 'skip_32_event_store.client.shared.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData)
+                0 -> 'skip_varint_event_store.client.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                1 -> 'skip_64_event_store.client.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                3 -> 'skip_group_event_store.client.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                5 -> 'skip_32_event_store.client.UUID.Structured'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData)
             end
     end;
-'dg_read_field_def_event_store.client.shared.UUID.Structured'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.shared.UUID.Structured'{most_significant_bits = F@_1, least_significant_bits = F@_2}.
+'dg_read_field_def_event_store.client.UUID.Structured'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.UUID.Structured'{most_significant_bits = F@_1, least_significant_bits = F@_2}.
 
-'d_field_event_store.client.shared.UUID.Structured_most_significant_bits'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
-    'd_field_event_store.client.shared.UUID.Structured_most_significant_bits'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
-'d_field_event_store.client.shared.UUID.Structured_most_significant_bits'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, F@_2, TrUserData) ->
+'d_field_event_store.client.UUID.Structured_most_significant_bits'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.UUID.Structured_most_significant_bits'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.UUID.Structured_most_significant_bits'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, F@_2, TrUserData) ->
     {NewFValue, RestF} = {begin <<Res:64/signed-native>> = <<(X bsl N + Acc):64/unsigned-native>>, id(Res, TrUserData) end, Rest},
-    'dfp_read_field_def_event_store.client.shared.UUID.Structured'(RestF, 0, 0, F, NewFValue, F@_2, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID.Structured'(RestF, 0, 0, F, NewFValue, F@_2, TrUserData).
 
-'d_field_event_store.client.shared.UUID.Structured_least_significant_bits'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
-    'd_field_event_store.client.shared.UUID.Structured_least_significant_bits'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
-'d_field_event_store.client.shared.UUID.Structured_least_significant_bits'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, _, TrUserData) ->
+'d_field_event_store.client.UUID.Structured_least_significant_bits'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.UUID.Structured_least_significant_bits'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.UUID.Structured_least_significant_bits'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, _, TrUserData) ->
     {NewFValue, RestF} = {begin <<Res:64/signed-native>> = <<(X bsl N + Acc):64/unsigned-native>>, id(Res, TrUserData) end, Rest},
-    'dfp_read_field_def_event_store.client.shared.UUID.Structured'(RestF, 0, 0, F, F@_1, NewFValue, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID.Structured'(RestF, 0, 0, F, F@_1, NewFValue, TrUserData).
 
-'skip_varint_event_store.client.shared.UUID.Structured'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'skip_varint_event_store.client.shared.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
-'skip_varint_event_store.client.shared.UUID.Structured'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+'skip_varint_event_store.client.UUID.Structured'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'skip_varint_event_store.client.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'skip_varint_event_store.client.UUID.Structured'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
 
-'skip_length_delimited_event_store.client.shared.UUID.Structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
-    'skip_length_delimited_event_store.client.shared.UUID.Structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
-'skip_length_delimited_event_store.client.shared.UUID.Structured'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) ->
+'skip_length_delimited_event_store.client.UUID.Structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.UUID.Structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'skip_length_delimited_event_store.client.UUID.Structured'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) ->
     Length = X bsl N + Acc,
     <<_:Length/binary, Rest2/binary>> = Rest,
-    'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Rest2, 0, 0, F, F@_1, F@_2, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID.Structured'(Rest2, 0, 0, F, F@_1, F@_2, TrUserData).
 
-'skip_group_event_store.client.shared.UUID.Structured'(Bin, _, Z2, FNum, F@_1, F@_2, TrUserData) ->
+'skip_group_event_store.client.UUID.Structured'(Bin, _, Z2, FNum, F@_1, F@_2, TrUserData) ->
     {_, Rest} = read_group(Bin, FNum),
-    'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Rest, 0, Z2, FNum, F@_1, F@_2, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID.Structured'(Rest, 0, Z2, FNum, F@_1, F@_2, TrUserData).
 
-'skip_32_event_store.client.shared.UUID.Structured'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+'skip_32_event_store.client.UUID.Structured'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
 
-'skip_64_event_store.client.shared.UUID.Structured'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+'skip_64_event_store.client.UUID.Structured'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID.Structured'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
 
-'decode_msg_event_store.client.shared.UUID'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID'(Bin, 0, 0, 0, id(undefined, TrUserData), TrUserData).
+'decode_msg_event_store.client.UUID'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID'(Bin, 0, 0, 0, id(undefined, TrUserData), TrUserData).
 
-'dfp_read_field_def_event_store.client.shared.UUID'(<<10, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.shared.UUID_structured'(Rest, Z1, Z2, F, F@_1, TrUserData);
-'dfp_read_field_def_event_store.client.shared.UUID'(<<18, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.shared.UUID_string'(Rest, Z1, Z2, F, F@_1, TrUserData);
-'dfp_read_field_def_event_store.client.shared.UUID'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.shared.UUID'{value = F@_1};
-'dfp_read_field_def_event_store.client.shared.UUID'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.shared.UUID'(Other, Z1, Z2, F, F@_1, TrUserData).
+'dfp_read_field_def_event_store.client.UUID'(<<10, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.UUID_structured'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.UUID'(<<18, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.UUID_string'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.UUID'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.UUID'{value = F@_1};
+'dfp_read_field_def_event_store.client.UUID'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.UUID'(Other, Z1, Z2, F, F@_1, TrUserData).
 
-'dg_read_field_def_event_store.client.shared.UUID'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.shared.UUID'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'dg_read_field_def_event_store.client.shared.UUID'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
+'dg_read_field_def_event_store.client.UUID'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.UUID'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'dg_read_field_def_event_store.client.UUID'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
     Key = X bsl N + Acc,
     case Key of
-        10 -> 'd_field_event_store.client.shared.UUID_structured'(Rest, 0, 0, 0, F@_1, TrUserData);
-        18 -> 'd_field_event_store.client.shared.UUID_string'(Rest, 0, 0, 0, F@_1, TrUserData);
+        10 -> 'd_field_event_store.client.UUID_structured'(Rest, 0, 0, 0, F@_1, TrUserData);
+        18 -> 'd_field_event_store.client.UUID_string'(Rest, 0, 0, 0, F@_1, TrUserData);
         _ ->
             case Key band 7 of
-                0 -> 'skip_varint_event_store.client.shared.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                1 -> 'skip_64_event_store.client.shared.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                2 -> 'skip_length_delimited_event_store.client.shared.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                3 -> 'skip_group_event_store.client.shared.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                5 -> 'skip_32_event_store.client.shared.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
+                0 -> 'skip_varint_event_store.client.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                1 -> 'skip_64_event_store.client.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                3 -> 'skip_group_event_store.client.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                5 -> 'skip_32_event_store.client.UUID'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
             end
     end;
-'dg_read_field_def_event_store.client.shared.UUID'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.shared.UUID'{value = F@_1}.
+'dg_read_field_def_event_store.client.UUID'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.UUID'{value = F@_1}.
 
-'d_field_event_store.client.shared.UUID_structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.shared.UUID_structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'d_field_event_store.client.shared.UUID_structured'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
-    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.shared.UUID.Structured'(Bs, TrUserData), TrUserData), Rest2} end,
-    'dfp_read_field_def_event_store.client.shared.UUID'(RestF,
-                                                        0,
-                                                        0,
-                                                        F,
-                                                        case Prev of
-                                                            undefined -> id({structured, NewFValue}, TrUserData);
-                                                            {structured, MVPrev} -> id({structured, 'merge_msg_event_store.client.shared.UUID.Structured'(MVPrev, NewFValue, TrUserData)}, TrUserData);
-                                                            _ -> id({structured, NewFValue}, TrUserData)
-                                                        end,
-                                                        TrUserData).
+'d_field_event_store.client.UUID_structured'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.UUID_structured'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.UUID_structured'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.UUID.Structured'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.UUID'(RestF,
+                                                 0,
+                                                 0,
+                                                 F,
+                                                 case Prev of
+                                                     undefined -> id({structured, NewFValue}, TrUserData);
+                                                     {structured, MVPrev} -> id({structured, 'merge_msg_event_store.client.UUID.Structured'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                     _ -> id({structured, NewFValue}, TrUserData)
+                                                 end,
+                                                 TrUserData).
 
-'d_field_event_store.client.shared.UUID_string'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.shared.UUID_string'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'d_field_event_store.client.shared.UUID_string'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
+'d_field_event_store.client.UUID_string'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.UUID_string'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.UUID_string'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
     {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bytes:Len/binary, Rest2/binary>> = Rest, Bytes2 = binary:copy(Bytes), {id(Bytes2, TrUserData), Rest2} end,
-    'dfp_read_field_def_event_store.client.shared.UUID'(RestF, 0, 0, F, id({string, NewFValue}, TrUserData), TrUserData).
+    'dfp_read_field_def_event_store.client.UUID'(RestF, 0, 0, F, id({string, NewFValue}, TrUserData), TrUserData).
 
-'skip_varint_event_store.client.shared.UUID'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.shared.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData);
-'skip_varint_event_store.client.shared.UUID'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_varint_event_store.client.UUID'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'skip_varint_event_store.client.UUID'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'skip_length_delimited_event_store.client.shared.UUID'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.shared.UUID'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'skip_length_delimited_event_store.client.shared.UUID'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
+'skip_length_delimited_event_store.client.UUID'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.UUID'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'skip_length_delimited_event_store.client.UUID'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
     Length = X bsl N + Acc,
     <<_:Length/binary, Rest2/binary>> = Rest,
-    'dfp_read_field_def_event_store.client.shared.UUID'(Rest2, 0, 0, F, F@_1, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID'(Rest2, 0, 0, F, F@_1, TrUserData).
 
-'skip_group_event_store.client.shared.UUID'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
+'skip_group_event_store.client.UUID'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
     {_, Rest} = read_group(Bin, FNum),
-    'dfp_read_field_def_event_store.client.shared.UUID'(Rest, 0, Z2, FNum, F@_1, TrUserData).
+    'dfp_read_field_def_event_store.client.UUID'(Rest, 0, Z2, FNum, F@_1, TrUserData).
 
-'skip_32_event_store.client.shared.UUID'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_32_event_store.client.UUID'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'skip_64_event_store.client.shared.UUID'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_64_event_store.client.UUID'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.UUID'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'decode_msg_event_store.client.shared.Empty'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.Empty'(Bin, 0, 0, 0, TrUserData).
+'decode_msg_event_store.client.Empty'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.Empty'(Bin, 0, 0, 0, TrUserData).
 
-'dfp_read_field_def_event_store.client.shared.Empty'(<<>>, 0, 0, _, _) -> #'event_store.client.shared.Empty'{};
-'dfp_read_field_def_event_store.client.shared.Empty'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.shared.Empty'(Other, Z1, Z2, F, TrUserData).
+'dfp_read_field_def_event_store.client.Empty'(<<>>, 0, 0, _, _) -> #'event_store.client.Empty'{};
+'dfp_read_field_def_event_store.client.Empty'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.Empty'(Other, Z1, Z2, F, TrUserData).
 
-'dg_read_field_def_event_store.client.shared.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.shared.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
-'dg_read_field_def_event_store.client.shared.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+'dg_read_field_def_event_store.client.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_event_store.client.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
     Key = X bsl N + Acc,
     case Key band 7 of
-        0 -> 'skip_varint_event_store.client.shared.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
-        1 -> 'skip_64_event_store.client.shared.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
-        2 -> 'skip_length_delimited_event_store.client.shared.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
-        3 -> 'skip_group_event_store.client.shared.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
-        5 -> 'skip_32_event_store.client.shared.Empty'(Rest, 0, 0, Key bsr 3, TrUserData)
+        0 -> 'skip_varint_event_store.client.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_event_store.client.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_event_store.client.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_event_store.client.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_event_store.client.Empty'(Rest, 0, 0, Key bsr 3, TrUserData)
     end;
-'dg_read_field_def_event_store.client.shared.Empty'(<<>>, 0, 0, _, _) -> #'event_store.client.shared.Empty'{}.
+'dg_read_field_def_event_store.client.Empty'(<<>>, 0, 0, _, _) -> #'event_store.client.Empty'{}.
 
-'skip_varint_event_store.client.shared.Empty'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.shared.Empty'(Rest, Z1, Z2, F, TrUserData);
-'skip_varint_event_store.client.shared.Empty'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.Empty'(Rest, Z1, Z2, F, TrUserData).
+'skip_varint_event_store.client.Empty'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.Empty'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_event_store.client.Empty'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Empty'(Rest, Z1, Z2, F, TrUserData).
 
-'skip_length_delimited_event_store.client.shared.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.shared.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
-'skip_length_delimited_event_store.client.shared.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+'skip_length_delimited_event_store.client.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_event_store.client.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
     Length = X bsl N + Acc,
     <<_:Length/binary, Rest2/binary>> = Rest,
-    'dfp_read_field_def_event_store.client.shared.Empty'(Rest2, 0, 0, F, TrUserData).
+    'dfp_read_field_def_event_store.client.Empty'(Rest2, 0, 0, F, TrUserData).
 
-'skip_group_event_store.client.shared.Empty'(Bin, _, Z2, FNum, TrUserData) ->
+'skip_group_event_store.client.Empty'(Bin, _, Z2, FNum, TrUserData) ->
     {_, Rest} = read_group(Bin, FNum),
-    'dfp_read_field_def_event_store.client.shared.Empty'(Rest, 0, Z2, FNum, TrUserData).
+    'dfp_read_field_def_event_store.client.Empty'(Rest, 0, Z2, FNum, TrUserData).
 
-'skip_32_event_store.client.shared.Empty'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.Empty'(Rest, Z1, Z2, F, TrUserData).
+'skip_32_event_store.client.Empty'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Empty'(Rest, Z1, Z2, F, TrUserData).
 
-'skip_64_event_store.client.shared.Empty'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.Empty'(Rest, Z1, Z2, F, TrUserData).
+'skip_64_event_store.client.Empty'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Empty'(Rest, Z1, Z2, F, TrUserData).
 
-'decode_msg_event_store.client.shared.StreamIdentifier'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Bin, 0, 0, 0, id(<<>>, TrUserData), TrUserData).
+'decode_msg_event_store.client.StreamIdentifier'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamIdentifier'(Bin, 0, 0, 0, id(<<>>, TrUserData), TrUserData).
 
-'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(<<26, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.shared.StreamIdentifier_streamName'(Rest, Z1, Z2, F, F@_1, TrUserData);
-'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.shared.StreamIdentifier'{streamName = F@_1};
-'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.shared.StreamIdentifier'(Other, Z1, Z2, F, F@_1, TrUserData).
+'dfp_read_field_def_event_store.client.StreamIdentifier'(<<26, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.StreamIdentifier_stream_name'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.StreamIdentifier'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.StreamIdentifier'{stream_name = F@_1};
+'dfp_read_field_def_event_store.client.StreamIdentifier'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.StreamIdentifier'(Other, Z1, Z2, F, F@_1, TrUserData).
 
-'dg_read_field_def_event_store.client.shared.StreamIdentifier'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.shared.StreamIdentifier'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'dg_read_field_def_event_store.client.shared.StreamIdentifier'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
+'dg_read_field_def_event_store.client.StreamIdentifier'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.StreamIdentifier'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'dg_read_field_def_event_store.client.StreamIdentifier'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
     Key = X bsl N + Acc,
     case Key of
-        26 -> 'd_field_event_store.client.shared.StreamIdentifier_streamName'(Rest, 0, 0, 0, F@_1, TrUserData);
+        26 -> 'd_field_event_store.client.StreamIdentifier_stream_name'(Rest, 0, 0, 0, F@_1, TrUserData);
         _ ->
             case Key band 7 of
-                0 -> 'skip_varint_event_store.client.shared.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                1 -> 'skip_64_event_store.client.shared.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                2 -> 'skip_length_delimited_event_store.client.shared.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                3 -> 'skip_group_event_store.client.shared.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
-                5 -> 'skip_32_event_store.client.shared.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
+                0 -> 'skip_varint_event_store.client.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                1 -> 'skip_64_event_store.client.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                3 -> 'skip_group_event_store.client.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                5 -> 'skip_32_event_store.client.StreamIdentifier'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
             end
     end;
-'dg_read_field_def_event_store.client.shared.StreamIdentifier'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.shared.StreamIdentifier'{streamName = F@_1}.
+'dg_read_field_def_event_store.client.StreamIdentifier'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.StreamIdentifier'{stream_name = F@_1}.
 
-'d_field_event_store.client.shared.StreamIdentifier_streamName'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.shared.StreamIdentifier_streamName'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'d_field_event_store.client.shared.StreamIdentifier_streamName'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
+'d_field_event_store.client.StreamIdentifier_stream_name'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.StreamIdentifier_stream_name'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.StreamIdentifier_stream_name'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
     {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bytes:Len/binary, Rest2/binary>> = Rest, Bytes2 = binary:copy(Bytes), {id(Bytes2, TrUserData), Rest2} end,
-    'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(RestF, 0, 0, F, NewFValue, TrUserData).
+    'dfp_read_field_def_event_store.client.StreamIdentifier'(RestF, 0, 0, F, NewFValue, TrUserData).
 
-'skip_varint_event_store.client.shared.StreamIdentifier'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.shared.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData);
-'skip_varint_event_store.client.shared.StreamIdentifier'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_varint_event_store.client.StreamIdentifier'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'skip_varint_event_store.client.StreamIdentifier'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'skip_length_delimited_event_store.client.shared.StreamIdentifier'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
-    'skip_length_delimited_event_store.client.shared.StreamIdentifier'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
-'skip_length_delimited_event_store.client.shared.StreamIdentifier'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
+'skip_length_delimited_event_store.client.StreamIdentifier'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.StreamIdentifier'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'skip_length_delimited_event_store.client.StreamIdentifier'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
     Length = X bsl N + Acc,
     <<_:Length/binary, Rest2/binary>> = Rest,
-    'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Rest2, 0, 0, F, F@_1, TrUserData).
+    'dfp_read_field_def_event_store.client.StreamIdentifier'(Rest2, 0, 0, F, F@_1, TrUserData).
 
-'skip_group_event_store.client.shared.StreamIdentifier'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
+'skip_group_event_store.client.StreamIdentifier'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
     {_, Rest} = read_group(Bin, FNum),
-    'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Rest, 0, Z2, FNum, F@_1, TrUserData).
+    'dfp_read_field_def_event_store.client.StreamIdentifier'(Rest, 0, Z2, FNum, F@_1, TrUserData).
 
-'skip_32_event_store.client.shared.StreamIdentifier'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_32_event_store.client.StreamIdentifier'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
 
-'skip_64_event_store.client.shared.StreamIdentifier'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.shared.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
+'skip_64_event_store.client.StreamIdentifier'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamIdentifier'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'decode_msg_event_store.client.AllStreamPosition'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.AllStreamPosition'(Bin, 0, 0, 0, id(0, TrUserData), id(0, TrUserData), TrUserData).
+
+'dfp_read_field_def_event_store.client.AllStreamPosition'(<<8, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.AllStreamPosition_commit_position'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.AllStreamPosition'(<<16, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.AllStreamPosition_prepare_position'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.AllStreamPosition'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.AllStreamPosition'{commit_position = F@_1, prepare_position = F@_2};
+'dfp_read_field_def_event_store.client.AllStreamPosition'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dg_read_field_def_event_store.client.AllStreamPosition'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'dg_read_field_def_event_store.client.AllStreamPosition'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.AllStreamPosition'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'dg_read_field_def_event_store.client.AllStreamPosition'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, F@_2, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key of
+        8 -> 'd_field_event_store.client.AllStreamPosition_commit_position'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        16 -> 'd_field_event_store.client.AllStreamPosition_prepare_position'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        _ ->
+            case Key band 7 of
+                0 -> 'skip_varint_event_store.client.AllStreamPosition'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                1 -> 'skip_64_event_store.client.AllStreamPosition'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.AllStreamPosition'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                3 -> 'skip_group_event_store.client.AllStreamPosition'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                5 -> 'skip_32_event_store.client.AllStreamPosition'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData)
+            end
+    end;
+'dg_read_field_def_event_store.client.AllStreamPosition'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.AllStreamPosition'{commit_position = F@_1, prepare_position = F@_2}.
+
+'d_field_event_store.client.AllStreamPosition_commit_position'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.AllStreamPosition_commit_position'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.AllStreamPosition_commit_position'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, F@_2, TrUserData) ->
+    {NewFValue, RestF} = {id((X bsl N + Acc) band 18446744073709551615, TrUserData), Rest},
+    'dfp_read_field_def_event_store.client.AllStreamPosition'(RestF, 0, 0, F, NewFValue, F@_2, TrUserData).
+
+'d_field_event_store.client.AllStreamPosition_prepare_position'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.AllStreamPosition_prepare_position'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.AllStreamPosition_prepare_position'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, _, TrUserData) ->
+    {NewFValue, RestF} = {id((X bsl N + Acc) band 18446744073709551615, TrUserData), Rest},
+    'dfp_read_field_def_event_store.client.AllStreamPosition'(RestF, 0, 0, F, F@_1, NewFValue, TrUserData).
+
+'skip_varint_event_store.client.AllStreamPosition'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'skip_varint_event_store.client.AllStreamPosition'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'skip_varint_event_store.client.AllStreamPosition'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.AllStreamPosition'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'skip_length_delimited_event_store.client.AllStreamPosition'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'skip_length_delimited_event_store.client.AllStreamPosition'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'skip_length_delimited_event_store.client.AllStreamPosition'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.AllStreamPosition'(Rest2, 0, 0, F, F@_1, F@_2, TrUserData).
+
+'skip_group_event_store.client.AllStreamPosition'(Bin, _, Z2, FNum, F@_1, F@_2, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.AllStreamPosition'(Rest, 0, Z2, FNum, F@_1, F@_2, TrUserData).
+
+'skip_32_event_store.client.AllStreamPosition'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.AllStreamPosition'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'skip_64_event_store.client.AllStreamPosition'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.AllStreamPosition'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'decode_msg_event_store.client.WrongExpectedVersion'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Bin, 0, 0, 0, id(undefined, TrUserData), id(undefined, TrUserData), TrUserData).
+
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<8, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_current_stream_revision'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<18, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_current_no_stream'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<24, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_expected_stream_position'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<34, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_expected_any'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<42, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_expected_stream_exists'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<50, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'd_field_event_store.client.WrongExpectedVersion_expected_no_stream'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.WrongExpectedVersion'{current_stream_revision_option = F@_1, expected_stream_position_option = F@_2};
+'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dg_read_field_def_event_store.client.WrongExpectedVersion'(Other, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'dg_read_field_def_event_store.client.WrongExpectedVersion'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 32 - 7 ->
+    'dg_read_field_def_event_store.client.WrongExpectedVersion'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'dg_read_field_def_event_store.client.WrongExpectedVersion'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, F@_2, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key of
+        8 -> 'd_field_event_store.client.WrongExpectedVersion_current_stream_revision'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        18 -> 'd_field_event_store.client.WrongExpectedVersion_current_no_stream'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        24 -> 'd_field_event_store.client.WrongExpectedVersion_expected_stream_position'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        34 -> 'd_field_event_store.client.WrongExpectedVersion_expected_any'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        42 -> 'd_field_event_store.client.WrongExpectedVersion_expected_stream_exists'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        50 -> 'd_field_event_store.client.WrongExpectedVersion_expected_no_stream'(Rest, 0, 0, 0, F@_1, F@_2, TrUserData);
+        _ ->
+            case Key band 7 of
+                0 -> 'skip_varint_event_store.client.WrongExpectedVersion'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                1 -> 'skip_64_event_store.client.WrongExpectedVersion'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.WrongExpectedVersion'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                3 -> 'skip_group_event_store.client.WrongExpectedVersion'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData);
+                5 -> 'skip_32_event_store.client.WrongExpectedVersion'(Rest, 0, 0, Key bsr 3, F@_1, F@_2, TrUserData)
+            end
+    end;
+'dg_read_field_def_event_store.client.WrongExpectedVersion'(<<>>, 0, 0, _, F@_1, F@_2, _) -> #'event_store.client.WrongExpectedVersion'{current_stream_revision_option = F@_1, expected_stream_position_option = F@_2}.
+
+'d_field_event_store.client.WrongExpectedVersion_current_stream_revision'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_current_stream_revision'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_current_stream_revision'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, F@_2, TrUserData) ->
+    {NewFValue, RestF} = {id((X bsl N + Acc) band 18446744073709551615, TrUserData), Rest},
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF, 0, 0, F, id({current_stream_revision, NewFValue}, TrUserData), F@_2, TrUserData).
+
+'d_field_event_store.client.WrongExpectedVersion_current_no_stream'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_current_no_stream'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_current_no_stream'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, F@_2, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_google.protobuf.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF,
+                                                                 0,
+                                                                 0,
+                                                                 F,
+                                                                 case Prev of
+                                                                     undefined -> id({current_no_stream, NewFValue}, TrUserData);
+                                                                     {current_no_stream, MVPrev} -> id({current_no_stream, 'merge_msg_google.protobuf.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                     _ -> id({current_no_stream, NewFValue}, TrUserData)
+                                                                 end,
+                                                                 F@_2,
+                                                                 TrUserData).
+
+'d_field_event_store.client.WrongExpectedVersion_expected_stream_position'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_expected_stream_position'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_expected_stream_position'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, _, TrUserData) ->
+    {NewFValue, RestF} = {id((X bsl N + Acc) band 18446744073709551615, TrUserData), Rest},
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF, 0, 0, F, F@_1, id({expected_stream_position, NewFValue}, TrUserData), TrUserData).
+
+'d_field_event_store.client.WrongExpectedVersion_expected_any'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_expected_any'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_expected_any'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, Prev, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_google.protobuf.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF,
+                                                                 0,
+                                                                 0,
+                                                                 F,
+                                                                 F@_1,
+                                                                 case Prev of
+                                                                     undefined -> id({expected_any, NewFValue}, TrUserData);
+                                                                     {expected_any, MVPrev} -> id({expected_any, 'merge_msg_google.protobuf.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                     _ -> id({expected_any, NewFValue}, TrUserData)
+                                                                 end,
+                                                                 TrUserData).
+
+'d_field_event_store.client.WrongExpectedVersion_expected_stream_exists'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_expected_stream_exists'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_expected_stream_exists'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, Prev, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_google.protobuf.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF,
+                                                                 0,
+                                                                 0,
+                                                                 F,
+                                                                 F@_1,
+                                                                 case Prev of
+                                                                     undefined -> id({expected_stream_exists, NewFValue}, TrUserData);
+                                                                     {expected_stream_exists, MVPrev} -> id({expected_stream_exists, 'merge_msg_google.protobuf.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                     _ -> id({expected_stream_exists, NewFValue}, TrUserData)
+                                                                 end,
+                                                                 TrUserData).
+
+'d_field_event_store.client.WrongExpectedVersion_expected_no_stream'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'd_field_event_store.client.WrongExpectedVersion_expected_no_stream'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'d_field_event_store.client.WrongExpectedVersion_expected_no_stream'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, Prev, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_google.protobuf.Empty'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(RestF,
+                                                                 0,
+                                                                 0,
+                                                                 F,
+                                                                 F@_1,
+                                                                 case Prev of
+                                                                     undefined -> id({expected_no_stream, NewFValue}, TrUserData);
+                                                                     {expected_no_stream, MVPrev} -> id({expected_no_stream, 'merge_msg_google.protobuf.Empty'(MVPrev, NewFValue, TrUserData)}, TrUserData);
+                                                                     _ -> id({expected_no_stream, NewFValue}, TrUserData)
+                                                                 end,
+                                                                 TrUserData).
+
+'skip_varint_event_store.client.WrongExpectedVersion'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'skip_varint_event_store.client.WrongExpectedVersion'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData);
+'skip_varint_event_store.client.WrongExpectedVersion'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'skip_length_delimited_event_store.client.WrongExpectedVersion'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) when N < 57 ->
+    'skip_length_delimited_event_store.client.WrongExpectedVersion'(Rest, N + 7, X bsl N + Acc, F, F@_1, F@_2, TrUserData);
+'skip_length_delimited_event_store.client.WrongExpectedVersion'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, F@_2, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Rest2, 0, 0, F, F@_1, F@_2, TrUserData).
+
+'skip_group_event_store.client.WrongExpectedVersion'(Bin, _, Z2, FNum, F@_1, F@_2, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Rest, 0, Z2, FNum, F@_1, F@_2, TrUserData).
+
+'skip_32_event_store.client.WrongExpectedVersion'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'skip_64_event_store.client.WrongExpectedVersion'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, F@_2, TrUserData) -> 'dfp_read_field_def_event_store.client.WrongExpectedVersion'(Rest, Z1, Z2, F, F@_1, F@_2, TrUserData).
+
+'decode_msg_event_store.client.AccessDenied'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.AccessDenied'(Bin, 0, 0, 0, TrUserData).
+
+'dfp_read_field_def_event_store.client.AccessDenied'(<<>>, 0, 0, _, _) -> #'event_store.client.AccessDenied'{};
+'dfp_read_field_def_event_store.client.AccessDenied'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.AccessDenied'(Other, Z1, Z2, F, TrUserData).
+
+'dg_read_field_def_event_store.client.AccessDenied'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.AccessDenied'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_event_store.client.AccessDenied'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key band 7 of
+        0 -> 'skip_varint_event_store.client.AccessDenied'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_event_store.client.AccessDenied'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_event_store.client.AccessDenied'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_event_store.client.AccessDenied'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_event_store.client.AccessDenied'(Rest, 0, 0, Key bsr 3, TrUserData)
+    end;
+'dg_read_field_def_event_store.client.AccessDenied'(<<>>, 0, 0, _, _) -> #'event_store.client.AccessDenied'{}.
+
+'skip_varint_event_store.client.AccessDenied'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.AccessDenied'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_event_store.client.AccessDenied'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.AccessDenied'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_length_delimited_event_store.client.AccessDenied'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.AccessDenied'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_event_store.client.AccessDenied'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.AccessDenied'(Rest2, 0, 0, F, TrUserData).
+
+'skip_group_event_store.client.AccessDenied'(Bin, _, Z2, FNum, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.AccessDenied'(Rest, 0, Z2, FNum, TrUserData).
+
+'skip_32_event_store.client.AccessDenied'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.AccessDenied'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_64_event_store.client.AccessDenied'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.AccessDenied'(Rest, Z1, Z2, F, TrUserData).
+
+'decode_msg_event_store.client.StreamDeleted'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamDeleted'(Bin, 0, 0, 0, id(undefined, TrUserData), TrUserData).
+
+'dfp_read_field_def_event_store.client.StreamDeleted'(<<10, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.StreamDeleted_stream_identifier'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.StreamDeleted'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.StreamDeleted'{stream_identifier = F@_1};
+'dfp_read_field_def_event_store.client.StreamDeleted'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.StreamDeleted'(Other, Z1, Z2, F, F@_1, TrUserData).
+
+'dg_read_field_def_event_store.client.StreamDeleted'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.StreamDeleted'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'dg_read_field_def_event_store.client.StreamDeleted'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key of
+        10 -> 'd_field_event_store.client.StreamDeleted_stream_identifier'(Rest, 0, 0, 0, F@_1, TrUserData);
+        _ ->
+            case Key band 7 of
+                0 -> 'skip_varint_event_store.client.StreamDeleted'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                1 -> 'skip_64_event_store.client.StreamDeleted'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.StreamDeleted'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                3 -> 'skip_group_event_store.client.StreamDeleted'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                5 -> 'skip_32_event_store.client.StreamDeleted'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
+            end
+    end;
+'dg_read_field_def_event_store.client.StreamDeleted'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.StreamDeleted'{stream_identifier = F@_1}.
+
+'d_field_event_store.client.StreamDeleted_stream_identifier'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.StreamDeleted_stream_identifier'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.StreamDeleted_stream_identifier'(<<0:1, X:7, Rest/binary>>, N, Acc, F, Prev, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bs:Len/binary, Rest2/binary>> = Rest, {id('decode_msg_event_store.client.StreamIdentifier'(Bs, TrUserData), TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.StreamDeleted'(RestF,
+                                                          0,
+                                                          0,
+                                                          F,
+                                                          if Prev == undefined -> NewFValue;
+                                                             true -> 'merge_msg_event_store.client.StreamIdentifier'(Prev, NewFValue, TrUserData)
+                                                          end,
+                                                          TrUserData).
+
+'skip_varint_event_store.client.StreamDeleted'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.StreamDeleted'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'skip_varint_event_store.client.StreamDeleted'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamDeleted'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_length_delimited_event_store.client.StreamDeleted'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.StreamDeleted'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'skip_length_delimited_event_store.client.StreamDeleted'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.StreamDeleted'(Rest2, 0, 0, F, F@_1, TrUserData).
+
+'skip_group_event_store.client.StreamDeleted'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.StreamDeleted'(Rest, 0, Z2, FNum, F@_1, TrUserData).
+
+'skip_32_event_store.client.StreamDeleted'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamDeleted'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_64_event_store.client.StreamDeleted'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.StreamDeleted'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'decode_msg_event_store.client.Timeout'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.Timeout'(Bin, 0, 0, 0, TrUserData).
+
+'dfp_read_field_def_event_store.client.Timeout'(<<>>, 0, 0, _, _) -> #'event_store.client.Timeout'{};
+'dfp_read_field_def_event_store.client.Timeout'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.Timeout'(Other, Z1, Z2, F, TrUserData).
+
+'dg_read_field_def_event_store.client.Timeout'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.Timeout'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_event_store.client.Timeout'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key band 7 of
+        0 -> 'skip_varint_event_store.client.Timeout'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_event_store.client.Timeout'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_event_store.client.Timeout'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_event_store.client.Timeout'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_event_store.client.Timeout'(Rest, 0, 0, Key bsr 3, TrUserData)
+    end;
+'dg_read_field_def_event_store.client.Timeout'(<<>>, 0, 0, _, _) -> #'event_store.client.Timeout'{}.
+
+'skip_varint_event_store.client.Timeout'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.Timeout'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_event_store.client.Timeout'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Timeout'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_length_delimited_event_store.client.Timeout'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.Timeout'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_event_store.client.Timeout'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.Timeout'(Rest2, 0, 0, F, TrUserData).
+
+'skip_group_event_store.client.Timeout'(Bin, _, Z2, FNum, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.Timeout'(Rest, 0, Z2, FNum, TrUserData).
+
+'skip_32_event_store.client.Timeout'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Timeout'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_64_event_store.client.Timeout'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Timeout'(Rest, Z1, Z2, F, TrUserData).
+
+'decode_msg_event_store.client.Unknown'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.Unknown'(Bin, 0, 0, 0, TrUserData).
+
+'dfp_read_field_def_event_store.client.Unknown'(<<>>, 0, 0, _, _) -> #'event_store.client.Unknown'{};
+'dfp_read_field_def_event_store.client.Unknown'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.Unknown'(Other, Z1, Z2, F, TrUserData).
+
+'dg_read_field_def_event_store.client.Unknown'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.Unknown'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_event_store.client.Unknown'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key band 7 of
+        0 -> 'skip_varint_event_store.client.Unknown'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_event_store.client.Unknown'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_event_store.client.Unknown'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_event_store.client.Unknown'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_event_store.client.Unknown'(Rest, 0, 0, Key bsr 3, TrUserData)
+    end;
+'dg_read_field_def_event_store.client.Unknown'(<<>>, 0, 0, _, _) -> #'event_store.client.Unknown'{}.
+
+'skip_varint_event_store.client.Unknown'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.Unknown'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_event_store.client.Unknown'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Unknown'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_length_delimited_event_store.client.Unknown'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.Unknown'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_event_store.client.Unknown'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.Unknown'(Rest2, 0, 0, F, TrUserData).
+
+'skip_group_event_store.client.Unknown'(Bin, _, Z2, FNum, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.Unknown'(Rest, 0, Z2, FNum, TrUserData).
+
+'skip_32_event_store.client.Unknown'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Unknown'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_64_event_store.client.Unknown'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.Unknown'(Rest, Z1, Z2, F, TrUserData).
+
+'decode_msg_event_store.client.InvalidTransaction'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.InvalidTransaction'(Bin, 0, 0, 0, TrUserData).
+
+'dfp_read_field_def_event_store.client.InvalidTransaction'(<<>>, 0, 0, _, _) -> #'event_store.client.InvalidTransaction'{};
+'dfp_read_field_def_event_store.client.InvalidTransaction'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_event_store.client.InvalidTransaction'(Other, Z1, Z2, F, TrUserData).
+
+'dg_read_field_def_event_store.client.InvalidTransaction'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.InvalidTransaction'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_event_store.client.InvalidTransaction'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key band 7 of
+        0 -> 'skip_varint_event_store.client.InvalidTransaction'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_event_store.client.InvalidTransaction'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_event_store.client.InvalidTransaction'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_event_store.client.InvalidTransaction'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_event_store.client.InvalidTransaction'(Rest, 0, 0, Key bsr 3, TrUserData)
+    end;
+'dg_read_field_def_event_store.client.InvalidTransaction'(<<>>, 0, 0, _, _) -> #'event_store.client.InvalidTransaction'{}.
+
+'skip_varint_event_store.client.InvalidTransaction'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_event_store.client.InvalidTransaction'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_event_store.client.InvalidTransaction'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.InvalidTransaction'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_length_delimited_event_store.client.InvalidTransaction'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.InvalidTransaction'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_event_store.client.InvalidTransaction'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.InvalidTransaction'(Rest2, 0, 0, F, TrUserData).
+
+'skip_group_event_store.client.InvalidTransaction'(Bin, _, Z2, FNum, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.InvalidTransaction'(Rest, 0, Z2, FNum, TrUserData).
+
+'skip_32_event_store.client.InvalidTransaction'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.InvalidTransaction'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_64_event_store.client.InvalidTransaction'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_event_store.client.InvalidTransaction'(Rest, Z1, Z2, F, TrUserData).
+
+'decode_msg_event_store.client.MaximumAppendSizeExceeded'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Bin, 0, 0, 0, id(0, TrUserData), TrUserData).
+
+'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(<<8, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.MaximumAppendSizeExceeded_maxAppendSize'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = F@_1};
+'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Other, Z1, Z2, F, F@_1, TrUserData).
+
+'dg_read_field_def_event_store.client.MaximumAppendSizeExceeded'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 ->
+    'dg_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'dg_read_field_def_event_store.client.MaximumAppendSizeExceeded'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key of
+        8 -> 'd_field_event_store.client.MaximumAppendSizeExceeded_maxAppendSize'(Rest, 0, 0, 0, F@_1, TrUserData);
+        _ ->
+            case Key band 7 of
+                0 -> 'skip_varint_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                1 -> 'skip_64_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                3 -> 'skip_group_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                5 -> 'skip_32_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
+            end
+    end;
+'dg_read_field_def_event_store.client.MaximumAppendSizeExceeded'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = F@_1}.
+
+'d_field_event_store.client.MaximumAppendSizeExceeded_maxAppendSize'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
+    'd_field_event_store.client.MaximumAppendSizeExceeded_maxAppendSize'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.MaximumAppendSizeExceeded_maxAppendSize'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
+    {NewFValue, RestF} = {id((X bsl N + Acc) band 4294967295, TrUserData), Rest},
+    'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(RestF, 0, 0, F, NewFValue, TrUserData).
+
+'skip_varint_event_store.client.MaximumAppendSizeExceeded'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.MaximumAppendSizeExceeded'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'skip_varint_event_store.client.MaximumAppendSizeExceeded'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_length_delimited_event_store.client.MaximumAppendSizeExceeded'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 ->
+    'skip_length_delimited_event_store.client.MaximumAppendSizeExceeded'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'skip_length_delimited_event_store.client.MaximumAppendSizeExceeded'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest2, 0, 0, F, F@_1, TrUserData).
+
+'skip_group_event_store.client.MaximumAppendSizeExceeded'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest, 0, Z2, FNum, F@_1, TrUserData).
+
+'skip_32_event_store.client.MaximumAppendSizeExceeded'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_64_event_store.client.MaximumAppendSizeExceeded'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.MaximumAppendSizeExceeded'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'decode_msg_event_store.client.BadRequest'(Bin, TrUserData) -> 'dfp_read_field_def_event_store.client.BadRequest'(Bin, 0, 0, 0, id(<<>>, TrUserData), TrUserData).
+
+'dfp_read_field_def_event_store.client.BadRequest'(<<10, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'd_field_event_store.client.BadRequest_message'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'dfp_read_field_def_event_store.client.BadRequest'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.BadRequest'{message = F@_1};
+'dfp_read_field_def_event_store.client.BadRequest'(Other, Z1, Z2, F, F@_1, TrUserData) -> 'dg_read_field_def_event_store.client.BadRequest'(Other, Z1, Z2, F, F@_1, TrUserData).
+
+'dg_read_field_def_event_store.client.BadRequest'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_event_store.client.BadRequest'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'dg_read_field_def_event_store.client.BadRequest'(<<0:1, X:7, Rest/binary>>, N, Acc, _, F@_1, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key of
+        10 -> 'd_field_event_store.client.BadRequest_message'(Rest, 0, 0, 0, F@_1, TrUserData);
+        _ ->
+            case Key band 7 of
+                0 -> 'skip_varint_event_store.client.BadRequest'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                1 -> 'skip_64_event_store.client.BadRequest'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                2 -> 'skip_length_delimited_event_store.client.BadRequest'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                3 -> 'skip_group_event_store.client.BadRequest'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData);
+                5 -> 'skip_32_event_store.client.BadRequest'(Rest, 0, 0, Key bsr 3, F@_1, TrUserData)
+            end
+    end;
+'dg_read_field_def_event_store.client.BadRequest'(<<>>, 0, 0, _, F@_1, _) -> #'event_store.client.BadRequest'{message = F@_1}.
+
+'d_field_event_store.client.BadRequest_message'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'd_field_event_store.client.BadRequest_message'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'d_field_event_store.client.BadRequest_message'(<<0:1, X:7, Rest/binary>>, N, Acc, F, _, TrUserData) ->
+    {NewFValue, RestF} = begin Len = X bsl N + Acc, <<Bytes:Len/binary, Rest2/binary>> = Rest, Bytes2 = binary:copy(Bytes), {id(Bytes2, TrUserData), Rest2} end,
+    'dfp_read_field_def_event_store.client.BadRequest'(RestF, 0, 0, F, NewFValue, TrUserData).
+
+'skip_varint_event_store.client.BadRequest'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'skip_varint_event_store.client.BadRequest'(Rest, Z1, Z2, F, F@_1, TrUserData);
+'skip_varint_event_store.client.BadRequest'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.BadRequest'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_length_delimited_event_store.client.BadRequest'(<<1:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) when N < 57 -> 'skip_length_delimited_event_store.client.BadRequest'(Rest, N + 7, X bsl N + Acc, F, F@_1, TrUserData);
+'skip_length_delimited_event_store.client.BadRequest'(<<0:1, X:7, Rest/binary>>, N, Acc, F, F@_1, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_event_store.client.BadRequest'(Rest2, 0, 0, F, F@_1, TrUserData).
+
+'skip_group_event_store.client.BadRequest'(Bin, _, Z2, FNum, F@_1, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_event_store.client.BadRequest'(Rest, 0, Z2, FNum, F@_1, TrUserData).
+
+'skip_32_event_store.client.BadRequest'(<<_:32, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.BadRequest'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'skip_64_event_store.client.BadRequest'(<<_:64, Rest/binary>>, Z1, Z2, F, F@_1, TrUserData) -> 'dfp_read_field_def_event_store.client.BadRequest'(Rest, Z1, Z2, F, F@_1, TrUserData).
+
+'decode_msg_google.protobuf.Empty'(Bin, TrUserData) -> 'dfp_read_field_def_google.protobuf.Empty'(Bin, 0, 0, 0, TrUserData).
+
+'dfp_read_field_def_google.protobuf.Empty'(<<>>, 0, 0, _, _) -> #'google.protobuf.Empty'{};
+'dfp_read_field_def_google.protobuf.Empty'(Other, Z1, Z2, F, TrUserData) -> 'dg_read_field_def_google.protobuf.Empty'(Other, Z1, Z2, F, TrUserData).
+
+'dg_read_field_def_google.protobuf.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 32 - 7 -> 'dg_read_field_def_google.protobuf.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'dg_read_field_def_google.protobuf.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, _, TrUserData) ->
+    Key = X bsl N + Acc,
+    case Key band 7 of
+        0 -> 'skip_varint_google.protobuf.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        1 -> 'skip_64_google.protobuf.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        2 -> 'skip_length_delimited_google.protobuf.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        3 -> 'skip_group_google.protobuf.Empty'(Rest, 0, 0, Key bsr 3, TrUserData);
+        5 -> 'skip_32_google.protobuf.Empty'(Rest, 0, 0, Key bsr 3, TrUserData)
+    end;
+'dg_read_field_def_google.protobuf.Empty'(<<>>, 0, 0, _, _) -> #'google.protobuf.Empty'{}.
+
+'skip_varint_google.protobuf.Empty'(<<1:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'skip_varint_google.protobuf.Empty'(Rest, Z1, Z2, F, TrUserData);
+'skip_varint_google.protobuf.Empty'(<<0:1, _:7, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_google.protobuf.Empty'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_length_delimited_google.protobuf.Empty'(<<1:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) when N < 57 -> 'skip_length_delimited_google.protobuf.Empty'(Rest, N + 7, X bsl N + Acc, F, TrUserData);
+'skip_length_delimited_google.protobuf.Empty'(<<0:1, X:7, Rest/binary>>, N, Acc, F, TrUserData) ->
+    Length = X bsl N + Acc,
+    <<_:Length/binary, Rest2/binary>> = Rest,
+    'dfp_read_field_def_google.protobuf.Empty'(Rest2, 0, 0, F, TrUserData).
+
+'skip_group_google.protobuf.Empty'(Bin, _, Z2, FNum, TrUserData) ->
+    {_, Rest} = read_group(Bin, FNum),
+    'dfp_read_field_def_google.protobuf.Empty'(Rest, 0, Z2, FNum, TrUserData).
+
+'skip_32_google.protobuf.Empty'(<<_:32, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_google.protobuf.Empty'(Rest, Z1, Z2, F, TrUserData).
+
+'skip_64_google.protobuf.Empty'(<<_:64, Rest/binary>>, Z1, Z2, F, TrUserData) -> 'dfp_read_field_def_google.protobuf.Empty'(Rest, Z1, Z2, F, TrUserData).
 
 'decode_msg_map<string,google.protobuf.Value>'(Bin, TrUserData) -> 'dfp_read_field_def_map<string,google.protobuf.Value>'(Bin, 0, 0, 0, id(<<>>, TrUserData), id(undefined, TrUserData), TrUserData).
 
@@ -3755,17 +4395,27 @@ merge_msgs(Prev, New, MsgName, Opts) ->
         'google.protobuf.Struct' -> 'merge_msg_google.protobuf.Struct'(Prev, New, TrUserData);
         'google.protobuf.Value' -> 'merge_msg_google.protobuf.Value'(Prev, New, TrUserData);
         'google.protobuf.ListValue' -> 'merge_msg_google.protobuf.ListValue'(Prev, New, TrUserData);
-        'event_store.client.shared.UUID.Structured' -> 'merge_msg_event_store.client.shared.UUID.Structured'(Prev, New, TrUserData);
-        'event_store.client.shared.UUID' -> 'merge_msg_event_store.client.shared.UUID'(Prev, New, TrUserData);
-        'event_store.client.shared.Empty' -> 'merge_msg_event_store.client.shared.Empty'(Prev, New, TrUserData);
-        'event_store.client.shared.StreamIdentifier' -> 'merge_msg_event_store.client.shared.StreamIdentifier'(Prev, New, TrUserData)
+        'event_store.client.UUID.Structured' -> 'merge_msg_event_store.client.UUID.Structured'(Prev, New, TrUserData);
+        'event_store.client.UUID' -> 'merge_msg_event_store.client.UUID'(Prev, New, TrUserData);
+        'event_store.client.Empty' -> 'merge_msg_event_store.client.Empty'(Prev, New, TrUserData);
+        'event_store.client.StreamIdentifier' -> 'merge_msg_event_store.client.StreamIdentifier'(Prev, New, TrUserData);
+        'event_store.client.AllStreamPosition' -> 'merge_msg_event_store.client.AllStreamPosition'(Prev, New, TrUserData);
+        'event_store.client.WrongExpectedVersion' -> 'merge_msg_event_store.client.WrongExpectedVersion'(Prev, New, TrUserData);
+        'event_store.client.AccessDenied' -> 'merge_msg_event_store.client.AccessDenied'(Prev, New, TrUserData);
+        'event_store.client.StreamDeleted' -> 'merge_msg_event_store.client.StreamDeleted'(Prev, New, TrUserData);
+        'event_store.client.Timeout' -> 'merge_msg_event_store.client.Timeout'(Prev, New, TrUserData);
+        'event_store.client.Unknown' -> 'merge_msg_event_store.client.Unknown'(Prev, New, TrUserData);
+        'event_store.client.InvalidTransaction' -> 'merge_msg_event_store.client.InvalidTransaction'(Prev, New, TrUserData);
+        'event_store.client.MaximumAppendSizeExceeded' -> 'merge_msg_event_store.client.MaximumAppendSizeExceeded'(Prev, New, TrUserData);
+        'event_store.client.BadRequest' -> 'merge_msg_event_store.client.BadRequest'(Prev, New, TrUserData);
+        'google.protobuf.Empty' -> 'merge_msg_google.protobuf.Empty'(Prev, New, TrUserData)
     end.
 
 -compile({nowarn_unused_function,'merge_msg_event_store.client.projections.CreateReq.Options'/3}).
 'merge_msg_event_store.client.projections.CreateReq.Options'(#'event_store.client.projections.CreateReq.Options'{mode = PFmode, query = PFquery}, #'event_store.client.projections.CreateReq.Options'{mode = NFmode, query = NFquery}, TrUserData) ->
     #'event_store.client.projections.CreateReq.Options'{mode =
                                                             case {PFmode, NFmode} of
-                                                                {{one_time, OPFmode}, {one_time, ONFmode}} -> {one_time, 'merge_msg_event_store.client.shared.Empty'(OPFmode, ONFmode, TrUserData)};
+                                                                {{one_time, OPFmode}, {one_time, ONFmode}} -> {one_time, 'merge_msg_event_store.client.Empty'(OPFmode, ONFmode, TrUserData)};
                                                                 {{transient, OPFmode}, {transient, ONFmode}} -> {transient, 'merge_msg_event_store.client.projections.CreateReq.Options.Transient'(OPFmode, ONFmode, TrUserData)};
                                                                 {{continuous, OPFmode}, {continuous, ONFmode}} -> {continuous, 'merge_msg_event_store.client.projections.CreateReq.Options.Continuous'(OPFmode, ONFmode, TrUserData)};
                                                                 {_, undefined} -> PFmode;
@@ -3819,7 +4469,7 @@ merge_msgs(Prev, New, MsgName, Opts) ->
                                                             end,
                                                         emit_option =
                                                             case {PFemit_option, NFemit_option} of
-                                                                {{no_emit_options, OPFemit_option}, {no_emit_options, ONFemit_option}} -> {no_emit_options, 'merge_msg_event_store.client.shared.Empty'(OPFemit_option, ONFemit_option, TrUserData)};
+                                                                {{no_emit_options, OPFemit_option}, {no_emit_options, ONFemit_option}} -> {no_emit_options, 'merge_msg_event_store.client.Empty'(OPFemit_option, ONFemit_option, TrUserData)};
                                                                 {_, undefined} -> PFemit_option;
                                                                 _ -> NFemit_option
                                                             end}.
@@ -3871,10 +4521,10 @@ merge_msgs(Prev, New, MsgName, Opts) ->
 'merge_msg_event_store.client.projections.StatisticsReq.Options'(#'event_store.client.projections.StatisticsReq.Options'{mode = PFmode}, #'event_store.client.projections.StatisticsReq.Options'{mode = NFmode}, TrUserData) ->
     #'event_store.client.projections.StatisticsReq.Options'{mode =
                                                                 case {PFmode, NFmode} of
-                                                                    {{all, OPFmode}, {all, ONFmode}} -> {all, 'merge_msg_event_store.client.shared.Empty'(OPFmode, ONFmode, TrUserData)};
-                                                                    {{transient, OPFmode}, {transient, ONFmode}} -> {transient, 'merge_msg_event_store.client.shared.Empty'(OPFmode, ONFmode, TrUserData)};
-                                                                    {{continuous, OPFmode}, {continuous, ONFmode}} -> {continuous, 'merge_msg_event_store.client.shared.Empty'(OPFmode, ONFmode, TrUserData)};
-                                                                    {{one_time, OPFmode}, {one_time, ONFmode}} -> {one_time, 'merge_msg_event_store.client.shared.Empty'(OPFmode, ONFmode, TrUserData)};
+                                                                    {{all, OPFmode}, {all, ONFmode}} -> {all, 'merge_msg_event_store.client.Empty'(OPFmode, ONFmode, TrUserData)};
+                                                                    {{transient, OPFmode}, {transient, ONFmode}} -> {transient, 'merge_msg_event_store.client.Empty'(OPFmode, ONFmode, TrUserData)};
+                                                                    {{continuous, OPFmode}, {continuous, ONFmode}} -> {continuous, 'merge_msg_event_store.client.Empty'(OPFmode, ONFmode, TrUserData)};
+                                                                    {{one_time, OPFmode}, {one_time, ONFmode}} -> {one_time, 'merge_msg_event_store.client.Empty'(OPFmode, ONFmode, TrUserData)};
                                                                     {_, undefined} -> PFmode;
                                                                     _ -> NFmode
                                                                 end}.
@@ -4129,36 +4779,106 @@ merge_msgs(Prev, New, MsgName, Opts) ->
                                         NFvalues == undefined -> PFvalues
                                      end}.
 
--compile({nowarn_unused_function,'merge_msg_event_store.client.shared.UUID.Structured'/3}).
-'merge_msg_event_store.client.shared.UUID.Structured'(#'event_store.client.shared.UUID.Structured'{most_significant_bits = PFmost_significant_bits, least_significant_bits = PFleast_significant_bits},
-                                                      #'event_store.client.shared.UUID.Structured'{most_significant_bits = NFmost_significant_bits, least_significant_bits = NFleast_significant_bits}, _) ->
-    #'event_store.client.shared.UUID.Structured'{most_significant_bits =
-                                                     if NFmost_significant_bits =:= undefined -> PFmost_significant_bits;
-                                                        true -> NFmost_significant_bits
-                                                     end,
-                                                 least_significant_bits =
-                                                     if NFleast_significant_bits =:= undefined -> PFleast_significant_bits;
-                                                        true -> NFleast_significant_bits
-                                                     end}.
+-compile({nowarn_unused_function,'merge_msg_event_store.client.UUID.Structured'/3}).
+'merge_msg_event_store.client.UUID.Structured'(#'event_store.client.UUID.Structured'{most_significant_bits = PFmost_significant_bits, least_significant_bits = PFleast_significant_bits},
+                                               #'event_store.client.UUID.Structured'{most_significant_bits = NFmost_significant_bits, least_significant_bits = NFleast_significant_bits}, _) ->
+    #'event_store.client.UUID.Structured'{most_significant_bits =
+                                              if NFmost_significant_bits =:= undefined -> PFmost_significant_bits;
+                                                 true -> NFmost_significant_bits
+                                              end,
+                                          least_significant_bits =
+                                              if NFleast_significant_bits =:= undefined -> PFleast_significant_bits;
+                                                 true -> NFleast_significant_bits
+                                              end}.
 
--compile({nowarn_unused_function,'merge_msg_event_store.client.shared.UUID'/3}).
-'merge_msg_event_store.client.shared.UUID'(#'event_store.client.shared.UUID'{value = PFvalue}, #'event_store.client.shared.UUID'{value = NFvalue}, TrUserData) ->
-    #'event_store.client.shared.UUID'{value =
-                                          case {PFvalue, NFvalue} of
-                                              {{structured, OPFvalue}, {structured, ONFvalue}} -> {structured, 'merge_msg_event_store.client.shared.UUID.Structured'(OPFvalue, ONFvalue, TrUserData)};
-                                              {_, undefined} -> PFvalue;
-                                              _ -> NFvalue
-                                          end}.
+-compile({nowarn_unused_function,'merge_msg_event_store.client.UUID'/3}).
+'merge_msg_event_store.client.UUID'(#'event_store.client.UUID'{value = PFvalue}, #'event_store.client.UUID'{value = NFvalue}, TrUserData) ->
+    #'event_store.client.UUID'{value =
+                                   case {PFvalue, NFvalue} of
+                                       {{structured, OPFvalue}, {structured, ONFvalue}} -> {structured, 'merge_msg_event_store.client.UUID.Structured'(OPFvalue, ONFvalue, TrUserData)};
+                                       {_, undefined} -> PFvalue;
+                                       _ -> NFvalue
+                                   end}.
 
--compile({nowarn_unused_function,'merge_msg_event_store.client.shared.Empty'/3}).
-'merge_msg_event_store.client.shared.Empty'(_Prev, New, _TrUserData) -> New.
+-compile({nowarn_unused_function,'merge_msg_event_store.client.Empty'/3}).
+'merge_msg_event_store.client.Empty'(_Prev, New, _TrUserData) -> New.
 
--compile({nowarn_unused_function,'merge_msg_event_store.client.shared.StreamIdentifier'/3}).
-'merge_msg_event_store.client.shared.StreamIdentifier'(#'event_store.client.shared.StreamIdentifier'{streamName = PFstreamName}, #'event_store.client.shared.StreamIdentifier'{streamName = NFstreamName}, _) ->
-    #'event_store.client.shared.StreamIdentifier'{streamName =
-                                                      if NFstreamName =:= undefined -> PFstreamName;
-                                                         true -> NFstreamName
-                                                      end}.
+-compile({nowarn_unused_function,'merge_msg_event_store.client.StreamIdentifier'/3}).
+'merge_msg_event_store.client.StreamIdentifier'(#'event_store.client.StreamIdentifier'{stream_name = PFstream_name}, #'event_store.client.StreamIdentifier'{stream_name = NFstream_name}, _) ->
+    #'event_store.client.StreamIdentifier'{stream_name =
+                                               if NFstream_name =:= undefined -> PFstream_name;
+                                                  true -> NFstream_name
+                                               end}.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.AllStreamPosition'/3}).
+'merge_msg_event_store.client.AllStreamPosition'(#'event_store.client.AllStreamPosition'{commit_position = PFcommit_position, prepare_position = PFprepare_position},
+                                                 #'event_store.client.AllStreamPosition'{commit_position = NFcommit_position, prepare_position = NFprepare_position}, _) ->
+    #'event_store.client.AllStreamPosition'{commit_position =
+                                                if NFcommit_position =:= undefined -> PFcommit_position;
+                                                   true -> NFcommit_position
+                                                end,
+                                            prepare_position =
+                                                if NFprepare_position =:= undefined -> PFprepare_position;
+                                                   true -> NFprepare_position
+                                                end}.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.WrongExpectedVersion'/3}).
+'merge_msg_event_store.client.WrongExpectedVersion'(#'event_store.client.WrongExpectedVersion'{current_stream_revision_option = PFcurrent_stream_revision_option, expected_stream_position_option = PFexpected_stream_position_option},
+                                                    #'event_store.client.WrongExpectedVersion'{current_stream_revision_option = NFcurrent_stream_revision_option, expected_stream_position_option = NFexpected_stream_position_option}, TrUserData) ->
+    #'event_store.client.WrongExpectedVersion'{current_stream_revision_option =
+                                                   case {PFcurrent_stream_revision_option, NFcurrent_stream_revision_option} of
+                                                       {{current_no_stream, OPFcurrent_stream_revision_option}, {current_no_stream, ONFcurrent_stream_revision_option}} ->
+                                                           {current_no_stream, 'merge_msg_google.protobuf.Empty'(OPFcurrent_stream_revision_option, ONFcurrent_stream_revision_option, TrUserData)};
+                                                       {_, undefined} -> PFcurrent_stream_revision_option;
+                                                       _ -> NFcurrent_stream_revision_option
+                                                   end,
+                                               expected_stream_position_option =
+                                                   case {PFexpected_stream_position_option, NFexpected_stream_position_option} of
+                                                       {{expected_any, OPFexpected_stream_position_option}, {expected_any, ONFexpected_stream_position_option}} -> {expected_any, 'merge_msg_google.protobuf.Empty'(OPFexpected_stream_position_option, ONFexpected_stream_position_option, TrUserData)};
+                                                       {{expected_stream_exists, OPFexpected_stream_position_option}, {expected_stream_exists, ONFexpected_stream_position_option}} ->
+                                                           {expected_stream_exists, 'merge_msg_google.protobuf.Empty'(OPFexpected_stream_position_option, ONFexpected_stream_position_option, TrUserData)};
+                                                       {{expected_no_stream, OPFexpected_stream_position_option}, {expected_no_stream, ONFexpected_stream_position_option}} ->
+                                                           {expected_no_stream, 'merge_msg_google.protobuf.Empty'(OPFexpected_stream_position_option, ONFexpected_stream_position_option, TrUserData)};
+                                                       {_, undefined} -> PFexpected_stream_position_option;
+                                                       _ -> NFexpected_stream_position_option
+                                                   end}.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.AccessDenied'/3}).
+'merge_msg_event_store.client.AccessDenied'(_Prev, New, _TrUserData) -> New.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.StreamDeleted'/3}).
+'merge_msg_event_store.client.StreamDeleted'(#'event_store.client.StreamDeleted'{stream_identifier = PFstream_identifier}, #'event_store.client.StreamDeleted'{stream_identifier = NFstream_identifier}, TrUserData) ->
+    #'event_store.client.StreamDeleted'{stream_identifier =
+                                            if PFstream_identifier /= undefined, NFstream_identifier /= undefined -> 'merge_msg_event_store.client.StreamIdentifier'(PFstream_identifier, NFstream_identifier, TrUserData);
+                                               PFstream_identifier == undefined -> NFstream_identifier;
+                                               NFstream_identifier == undefined -> PFstream_identifier
+                                            end}.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.Timeout'/3}).
+'merge_msg_event_store.client.Timeout'(_Prev, New, _TrUserData) -> New.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.Unknown'/3}).
+'merge_msg_event_store.client.Unknown'(_Prev, New, _TrUserData) -> New.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.InvalidTransaction'/3}).
+'merge_msg_event_store.client.InvalidTransaction'(_Prev, New, _TrUserData) -> New.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.MaximumAppendSizeExceeded'/3}).
+'merge_msg_event_store.client.MaximumAppendSizeExceeded'(#'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = PFmaxAppendSize}, #'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = NFmaxAppendSize}, _) ->
+    #'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize =
+                                                        if NFmaxAppendSize =:= undefined -> PFmaxAppendSize;
+                                                           true -> NFmaxAppendSize
+                                                        end}.
+
+-compile({nowarn_unused_function,'merge_msg_event_store.client.BadRequest'/3}).
+'merge_msg_event_store.client.BadRequest'(#'event_store.client.BadRequest'{message = PFmessage}, #'event_store.client.BadRequest'{message = NFmessage}, _) ->
+    #'event_store.client.BadRequest'{message =
+                                         if NFmessage =:= undefined -> PFmessage;
+                                            true -> NFmessage
+                                         end}.
+
+-compile({nowarn_unused_function,'merge_msg_google.protobuf.Empty'/3}).
+'merge_msg_google.protobuf.Empty'(_Prev, New, _TrUserData) -> New.
 
 
 verify_msg(Msg) when tuple_size(Msg) >= 1 -> verify_msg(Msg, element(1, Msg), []);
@@ -4204,10 +4924,20 @@ verify_msg(Msg, MsgName, Opts) ->
         'google.protobuf.Struct' -> 'v_msg_google.protobuf.Struct'(Msg, [MsgName], TrUserData);
         'google.protobuf.Value' -> 'v_msg_google.protobuf.Value'(Msg, [MsgName], TrUserData);
         'google.protobuf.ListValue' -> 'v_msg_google.protobuf.ListValue'(Msg, [MsgName], TrUserData);
-        'event_store.client.shared.UUID.Structured' -> 'v_msg_event_store.client.shared.UUID.Structured'(Msg, [MsgName], TrUserData);
-        'event_store.client.shared.UUID' -> 'v_msg_event_store.client.shared.UUID'(Msg, [MsgName], TrUserData);
-        'event_store.client.shared.Empty' -> 'v_msg_event_store.client.shared.Empty'(Msg, [MsgName], TrUserData);
-        'event_store.client.shared.StreamIdentifier' -> 'v_msg_event_store.client.shared.StreamIdentifier'(Msg, [MsgName], TrUserData);
+        'event_store.client.UUID.Structured' -> 'v_msg_event_store.client.UUID.Structured'(Msg, [MsgName], TrUserData);
+        'event_store.client.UUID' -> 'v_msg_event_store.client.UUID'(Msg, [MsgName], TrUserData);
+        'event_store.client.Empty' -> 'v_msg_event_store.client.Empty'(Msg, [MsgName], TrUserData);
+        'event_store.client.StreamIdentifier' -> 'v_msg_event_store.client.StreamIdentifier'(Msg, [MsgName], TrUserData);
+        'event_store.client.AllStreamPosition' -> 'v_msg_event_store.client.AllStreamPosition'(Msg, [MsgName], TrUserData);
+        'event_store.client.WrongExpectedVersion' -> 'v_msg_event_store.client.WrongExpectedVersion'(Msg, [MsgName], TrUserData);
+        'event_store.client.AccessDenied' -> 'v_msg_event_store.client.AccessDenied'(Msg, [MsgName], TrUserData);
+        'event_store.client.StreamDeleted' -> 'v_msg_event_store.client.StreamDeleted'(Msg, [MsgName], TrUserData);
+        'event_store.client.Timeout' -> 'v_msg_event_store.client.Timeout'(Msg, [MsgName], TrUserData);
+        'event_store.client.Unknown' -> 'v_msg_event_store.client.Unknown'(Msg, [MsgName], TrUserData);
+        'event_store.client.InvalidTransaction' -> 'v_msg_event_store.client.InvalidTransaction'(Msg, [MsgName], TrUserData);
+        'event_store.client.MaximumAppendSizeExceeded' -> 'v_msg_event_store.client.MaximumAppendSizeExceeded'(Msg, [MsgName], TrUserData);
+        'event_store.client.BadRequest' -> 'v_msg_event_store.client.BadRequest'(Msg, [MsgName], TrUserData);
+        'google.protobuf.Empty' -> 'v_msg_google.protobuf.Empty'(Msg, [MsgName], TrUserData);
         _ -> mk_type_error(not_a_known_message, Msg, [])
     end.
 
@@ -4217,7 +4947,7 @@ verify_msg(Msg, MsgName, Opts) ->
 'v_msg_event_store.client.projections.CreateReq.Options'(#'event_store.client.projections.CreateReq.Options'{mode = F1, query = F2}, Path, TrUserData) ->
     case F1 of
         undefined -> ok;
-        {one_time, OF1} -> 'v_msg_event_store.client.shared.Empty'(OF1, [one_time, mode | Path], TrUserData);
+        {one_time, OF1} -> 'v_msg_event_store.client.Empty'(OF1, [one_time, mode | Path], TrUserData);
         {transient, OF1} -> 'v_msg_event_store.client.projections.CreateReq.Options.Transient'(OF1, [transient, mode | Path], TrUserData);
         {continuous, OF1} -> 'v_msg_event_store.client.projections.CreateReq.Options.Continuous'(OF1, [continuous, mode | Path], TrUserData);
         _ -> mk_type_error(invalid_oneof, F1, [mode | Path])
@@ -4275,7 +5005,7 @@ verify_msg(Msg, MsgName, Opts) ->
     case F3 of
         undefined -> ok;
         {emit_enabled, OF3} -> v_type_bool(OF3, [emit_enabled, emit_option | Path], TrUserData);
-        {no_emit_options, OF3} -> 'v_msg_event_store.client.shared.Empty'(OF3, [no_emit_options, emit_option | Path], TrUserData);
+        {no_emit_options, OF3} -> 'v_msg_event_store.client.Empty'(OF3, [no_emit_options, emit_option | Path], TrUserData);
         _ -> mk_type_error(invalid_oneof, F3, [emit_option | Path])
     end,
     ok;
@@ -4333,10 +5063,10 @@ verify_msg(Msg, MsgName, Opts) ->
     case F1 of
         undefined -> ok;
         {name, OF1} -> v_type_string(OF1, [name, mode | Path], TrUserData);
-        {all, OF1} -> 'v_msg_event_store.client.shared.Empty'(OF1, [all, mode | Path], TrUserData);
-        {transient, OF1} -> 'v_msg_event_store.client.shared.Empty'(OF1, [transient, mode | Path], TrUserData);
-        {continuous, OF1} -> 'v_msg_event_store.client.shared.Empty'(OF1, [continuous, mode | Path], TrUserData);
-        {one_time, OF1} -> 'v_msg_event_store.client.shared.Empty'(OF1, [one_time, mode | Path], TrUserData);
+        {all, OF1} -> 'v_msg_event_store.client.Empty'(OF1, [all, mode | Path], TrUserData);
+        {transient, OF1} -> 'v_msg_event_store.client.Empty'(OF1, [transient, mode | Path], TrUserData);
+        {continuous, OF1} -> 'v_msg_event_store.client.Empty'(OF1, [continuous, mode | Path], TrUserData);
+        {one_time, OF1} -> 'v_msg_event_store.client.Empty'(OF1, [one_time, mode | Path], TrUserData);
         _ -> mk_type_error(invalid_oneof, F1, [mode | Path])
     end,
     ok;
@@ -4595,9 +5325,9 @@ verify_msg(Msg, MsgName, Opts) ->
     ok;
 'v_msg_google.protobuf.ListValue'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'google.protobuf.ListValue'}, X, Path).
 
--compile({nowarn_unused_function,'v_msg_event_store.client.shared.UUID.Structured'/3}).
--dialyzer({nowarn_function,'v_msg_event_store.client.shared.UUID.Structured'/3}).
-'v_msg_event_store.client.shared.UUID.Structured'(#'event_store.client.shared.UUID.Structured'{most_significant_bits = F1, least_significant_bits = F2}, Path, TrUserData) ->
+-compile({nowarn_unused_function,'v_msg_event_store.client.UUID.Structured'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.UUID.Structured'/3}).
+'v_msg_event_store.client.UUID.Structured'(#'event_store.client.UUID.Structured'{most_significant_bits = F1, least_significant_bits = F2}, Path, TrUserData) ->
     if F1 == undefined -> ok;
        true -> v_type_int64(F1, [most_significant_bits | Path], TrUserData)
     end,
@@ -4605,33 +5335,117 @@ verify_msg(Msg, MsgName, Opts) ->
        true -> v_type_int64(F2, [least_significant_bits | Path], TrUserData)
     end,
     ok;
-'v_msg_event_store.client.shared.UUID.Structured'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.shared.UUID.Structured'}, X, Path).
+'v_msg_event_store.client.UUID.Structured'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.UUID.Structured'}, X, Path).
 
--compile({nowarn_unused_function,'v_msg_event_store.client.shared.UUID'/3}).
--dialyzer({nowarn_function,'v_msg_event_store.client.shared.UUID'/3}).
-'v_msg_event_store.client.shared.UUID'(#'event_store.client.shared.UUID'{value = F1}, Path, TrUserData) ->
+-compile({nowarn_unused_function,'v_msg_event_store.client.UUID'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.UUID'/3}).
+'v_msg_event_store.client.UUID'(#'event_store.client.UUID'{value = F1}, Path, TrUserData) ->
     case F1 of
         undefined -> ok;
-        {structured, OF1} -> 'v_msg_event_store.client.shared.UUID.Structured'(OF1, [structured, value | Path], TrUserData);
+        {structured, OF1} -> 'v_msg_event_store.client.UUID.Structured'(OF1, [structured, value | Path], TrUserData);
         {string, OF1} -> v_type_string(OF1, [string, value | Path], TrUserData);
         _ -> mk_type_error(invalid_oneof, F1, [value | Path])
     end,
     ok;
-'v_msg_event_store.client.shared.UUID'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.shared.UUID'}, X, Path).
+'v_msg_event_store.client.UUID'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.UUID'}, X, Path).
 
--compile({nowarn_unused_function,'v_msg_event_store.client.shared.Empty'/3}).
--dialyzer({nowarn_function,'v_msg_event_store.client.shared.Empty'/3}).
-'v_msg_event_store.client.shared.Empty'(#'event_store.client.shared.Empty'{}, _Path, _) -> ok;
-'v_msg_event_store.client.shared.Empty'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.shared.Empty'}, X, Path).
+-compile({nowarn_unused_function,'v_msg_event_store.client.Empty'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.Empty'/3}).
+'v_msg_event_store.client.Empty'(#'event_store.client.Empty'{}, _Path, _) -> ok;
+'v_msg_event_store.client.Empty'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.Empty'}, X, Path).
 
--compile({nowarn_unused_function,'v_msg_event_store.client.shared.StreamIdentifier'/3}).
--dialyzer({nowarn_function,'v_msg_event_store.client.shared.StreamIdentifier'/3}).
-'v_msg_event_store.client.shared.StreamIdentifier'(#'event_store.client.shared.StreamIdentifier'{streamName = F1}, Path, TrUserData) ->
+-compile({nowarn_unused_function,'v_msg_event_store.client.StreamIdentifier'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.StreamIdentifier'/3}).
+'v_msg_event_store.client.StreamIdentifier'(#'event_store.client.StreamIdentifier'{stream_name = F1}, Path, TrUserData) ->
     if F1 == undefined -> ok;
-       true -> v_type_bytes(F1, [streamName | Path], TrUserData)
+       true -> v_type_bytes(F1, [stream_name | Path], TrUserData)
     end,
     ok;
-'v_msg_event_store.client.shared.StreamIdentifier'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.shared.StreamIdentifier'}, X, Path).
+'v_msg_event_store.client.StreamIdentifier'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.StreamIdentifier'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.AllStreamPosition'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.AllStreamPosition'/3}).
+'v_msg_event_store.client.AllStreamPosition'(#'event_store.client.AllStreamPosition'{commit_position = F1, prepare_position = F2}, Path, TrUserData) ->
+    if F1 == undefined -> ok;
+       true -> v_type_uint64(F1, [commit_position | Path], TrUserData)
+    end,
+    if F2 == undefined -> ok;
+       true -> v_type_uint64(F2, [prepare_position | Path], TrUserData)
+    end,
+    ok;
+'v_msg_event_store.client.AllStreamPosition'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.AllStreamPosition'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.WrongExpectedVersion'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.WrongExpectedVersion'/3}).
+'v_msg_event_store.client.WrongExpectedVersion'(#'event_store.client.WrongExpectedVersion'{current_stream_revision_option = F1, expected_stream_position_option = F2}, Path, TrUserData) ->
+    case F1 of
+        undefined -> ok;
+        {current_stream_revision, OF1} -> v_type_uint64(OF1, [current_stream_revision, current_stream_revision_option | Path], TrUserData);
+        {current_no_stream, OF1} -> 'v_msg_google.protobuf.Empty'(OF1, [current_no_stream, current_stream_revision_option | Path], TrUserData);
+        _ -> mk_type_error(invalid_oneof, F1, [current_stream_revision_option | Path])
+    end,
+    case F2 of
+        undefined -> ok;
+        {expected_stream_position, OF2} -> v_type_uint64(OF2, [expected_stream_position, expected_stream_position_option | Path], TrUserData);
+        {expected_any, OF2} -> 'v_msg_google.protobuf.Empty'(OF2, [expected_any, expected_stream_position_option | Path], TrUserData);
+        {expected_stream_exists, OF2} -> 'v_msg_google.protobuf.Empty'(OF2, [expected_stream_exists, expected_stream_position_option | Path], TrUserData);
+        {expected_no_stream, OF2} -> 'v_msg_google.protobuf.Empty'(OF2, [expected_no_stream, expected_stream_position_option | Path], TrUserData);
+        _ -> mk_type_error(invalid_oneof, F2, [expected_stream_position_option | Path])
+    end,
+    ok;
+'v_msg_event_store.client.WrongExpectedVersion'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.WrongExpectedVersion'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.AccessDenied'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.AccessDenied'/3}).
+'v_msg_event_store.client.AccessDenied'(#'event_store.client.AccessDenied'{}, _Path, _) -> ok;
+'v_msg_event_store.client.AccessDenied'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.AccessDenied'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.StreamDeleted'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.StreamDeleted'/3}).
+'v_msg_event_store.client.StreamDeleted'(#'event_store.client.StreamDeleted'{stream_identifier = F1}, Path, TrUserData) ->
+    if F1 == undefined -> ok;
+       true -> 'v_msg_event_store.client.StreamIdentifier'(F1, [stream_identifier | Path], TrUserData)
+    end,
+    ok;
+'v_msg_event_store.client.StreamDeleted'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.StreamDeleted'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.Timeout'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.Timeout'/3}).
+'v_msg_event_store.client.Timeout'(#'event_store.client.Timeout'{}, _Path, _) -> ok;
+'v_msg_event_store.client.Timeout'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.Timeout'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.Unknown'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.Unknown'/3}).
+'v_msg_event_store.client.Unknown'(#'event_store.client.Unknown'{}, _Path, _) -> ok;
+'v_msg_event_store.client.Unknown'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.Unknown'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.InvalidTransaction'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.InvalidTransaction'/3}).
+'v_msg_event_store.client.InvalidTransaction'(#'event_store.client.InvalidTransaction'{}, _Path, _) -> ok;
+'v_msg_event_store.client.InvalidTransaction'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.InvalidTransaction'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.MaximumAppendSizeExceeded'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.MaximumAppendSizeExceeded'/3}).
+'v_msg_event_store.client.MaximumAppendSizeExceeded'(#'event_store.client.MaximumAppendSizeExceeded'{maxAppendSize = F1}, Path, TrUserData) ->
+    if F1 == undefined -> ok;
+       true -> v_type_uint32(F1, [maxAppendSize | Path], TrUserData)
+    end,
+    ok;
+'v_msg_event_store.client.MaximumAppendSizeExceeded'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.MaximumAppendSizeExceeded'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_event_store.client.BadRequest'/3}).
+-dialyzer({nowarn_function,'v_msg_event_store.client.BadRequest'/3}).
+'v_msg_event_store.client.BadRequest'(#'event_store.client.BadRequest'{message = F1}, Path, TrUserData) ->
+    if F1 == undefined -> ok;
+       true -> v_type_string(F1, [message | Path], TrUserData)
+    end,
+    ok;
+'v_msg_event_store.client.BadRequest'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'event_store.client.BadRequest'}, X, Path).
+
+-compile({nowarn_unused_function,'v_msg_google.protobuf.Empty'/3}).
+-dialyzer({nowarn_function,'v_msg_google.protobuf.Empty'/3}).
+'v_msg_google.protobuf.Empty'(#'google.protobuf.Empty'{}, _Path, _) -> ok;
+'v_msg_google.protobuf.Empty'(X, Path, _TrUserData) -> mk_type_error({expected_msg, 'google.protobuf.Empty'}, X, Path).
 
 -compile({nowarn_unused_function,'v_enum_google.protobuf.NullValue'/3}).
 -dialyzer({nowarn_function,'v_enum_google.protobuf.NullValue'/3}).
@@ -4650,6 +5464,18 @@ v_type_int32(X, Path, _TrUserData) -> mk_type_error({bad_integer, int32, signed,
 v_type_int64(N, _Path, _TrUserData) when -9223372036854775808 =< N, N =< 9223372036854775807 -> ok;
 v_type_int64(N, Path, _TrUserData) when is_integer(N) -> mk_type_error({value_out_of_range, int64, signed, 64}, N, Path);
 v_type_int64(X, Path, _TrUserData) -> mk_type_error({bad_integer, int64, signed, 64}, X, Path).
+
+-compile({nowarn_unused_function,v_type_uint32/3}).
+-dialyzer({nowarn_function,v_type_uint32/3}).
+v_type_uint32(N, _Path, _TrUserData) when 0 =< N, N =< 4294967295 -> ok;
+v_type_uint32(N, Path, _TrUserData) when is_integer(N) -> mk_type_error({value_out_of_range, uint32, unsigned, 32}, N, Path);
+v_type_uint32(X, Path, _TrUserData) -> mk_type_error({bad_integer, uint32, unsigned, 32}, X, Path).
+
+-compile({nowarn_unused_function,v_type_uint64/3}).
+-dialyzer({nowarn_function,v_type_uint64/3}).
+v_type_uint64(N, _Path, _TrUserData) when 0 =< N, N =< 18446744073709551615 -> ok;
+v_type_uint64(N, Path, _TrUserData) when is_integer(N) -> mk_type_error({value_out_of_range, uint64, unsigned, 64}, N, Path);
+v_type_uint64(X, Path, _TrUserData) -> mk_type_error({bad_integer, uint64, unsigned, 64}, X, Path).
 
 -compile({nowarn_unused_function,v_type_bool/3}).
 -dialyzer({nowarn_function,v_type_bool/3}).
@@ -4787,7 +5613,7 @@ get_msg_defs() ->
      {{msg, 'event_store.client.projections.CreateReq.Options'},
       [#gpb_oneof{name = mode, rnum = 2,
                   fields =
-                      [#field{name = one_time, fnum = 1, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
+                      [#field{name = one_time, fnum = 1, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
                        #field{name = transient, fnum = 2, rnum = 2, type = {msg, 'event_store.client.projections.CreateReq.Options.Transient'}, occurrence = optional, opts = []},
                        #field{name = continuous, fnum = 3, rnum = 2, type = {msg, 'event_store.client.projections.CreateReq.Options.Continuous'}, occurrence = optional, opts = []}],
                   opts = []},
@@ -4801,8 +5627,7 @@ get_msg_defs() ->
       [#field{name = name, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []},
        #field{name = query, fnum = 2, rnum = 3, type = string, occurrence = optional, opts = []},
        #gpb_oneof{name = emit_option, rnum = 4,
-                  fields = [#field{name = emit_enabled, fnum = 3, rnum = 4, type = bool, occurrence = optional, opts = []}, #field{name = no_emit_options, fnum = 4, rnum = 4, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []}],
-                  opts = []}]},
+                  fields = [#field{name = emit_enabled, fnum = 3, rnum = 4, type = bool, occurrence = optional, opts = []}, #field{name = no_emit_options, fnum = 4, rnum = 4, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []}], opts = []}]},
      {{msg, 'event_store.client.projections.UpdateReq'}, [#field{name = options, fnum = 1, rnum = 2, type = {msg, 'event_store.client.projections.UpdateReq.Options'}, occurrence = optional, opts = []}]},
      {{msg, 'event_store.client.projections.UpdateResp'}, []},
      {{msg, 'event_store.client.projections.DeleteReq.Options'},
@@ -4816,10 +5641,10 @@ get_msg_defs() ->
       [#gpb_oneof{name = mode, rnum = 2,
                   fields =
                       [#field{name = name, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []},
-                       #field{name = all, fnum = 2, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                       #field{name = transient, fnum = 3, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                       #field{name = continuous, fnum = 4, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                       #field{name = one_time, fnum = 5, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []}],
+                       #field{name = all, fnum = 2, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                       #field{name = transient, fnum = 3, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                       #field{name = continuous, fnum = 4, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                       #field{name = one_time, fnum = 5, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []}],
                   opts = []}]},
      {{msg, 'event_store.client.projections.StatisticsReq'}, [#field{name = options, fnum = 1, rnum = 2, type = {msg, 'event_store.client.projections.StatisticsReq.Options'}, occurrence = optional, opts = []}]},
      {{msg, 'event_store.client.projections.StatisticsResp.Details'},
@@ -4872,14 +5697,34 @@ get_msg_defs() ->
                        #field{name = list_value, fnum = 6, rnum = 2, type = {msg, 'google.protobuf.ListValue'}, occurrence = optional, opts = []}],
                   opts = []}]},
      {{msg, 'google.protobuf.ListValue'}, [#field{name = values, fnum = 1, rnum = 2, type = {msg, 'google.protobuf.Value'}, occurrence = repeated, opts = []}]},
-     {{msg, 'event_store.client.shared.UUID.Structured'},
+     {{msg, 'event_store.client.UUID.Structured'},
       [#field{name = most_significant_bits, fnum = 1, rnum = 2, type = int64, occurrence = optional, opts = []}, #field{name = least_significant_bits, fnum = 2, rnum = 3, type = int64, occurrence = optional, opts = []}]},
-     {{msg, 'event_store.client.shared.UUID'},
+     {{msg, 'event_store.client.UUID'},
       [#gpb_oneof{name = value, rnum = 2,
-                  fields = [#field{name = structured, fnum = 1, rnum = 2, type = {msg, 'event_store.client.shared.UUID.Structured'}, occurrence = optional, opts = []}, #field{name = string, fnum = 2, rnum = 2, type = string, occurrence = optional, opts = []}],
+                  fields = [#field{name = structured, fnum = 1, rnum = 2, type = {msg, 'event_store.client.UUID.Structured'}, occurrence = optional, opts = []}, #field{name = string, fnum = 2, rnum = 2, type = string, occurrence = optional, opts = []}], opts = []}]},
+     {{msg, 'event_store.client.Empty'}, []},
+     {{msg, 'event_store.client.StreamIdentifier'}, [#field{name = stream_name, fnum = 3, rnum = 2, type = bytes, occurrence = optional, opts = []}]},
+     {{msg, 'event_store.client.AllStreamPosition'},
+      [#field{name = commit_position, fnum = 1, rnum = 2, type = uint64, occurrence = optional, opts = []}, #field{name = prepare_position, fnum = 2, rnum = 3, type = uint64, occurrence = optional, opts = []}]},
+     {{msg, 'event_store.client.WrongExpectedVersion'},
+      [#gpb_oneof{name = current_stream_revision_option, rnum = 2,
+                  fields = [#field{name = current_stream_revision, fnum = 1, rnum = 2, type = uint64, occurrence = optional, opts = []}, #field{name = current_no_stream, fnum = 2, rnum = 2, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []}],
+                  opts = []},
+       #gpb_oneof{name = expected_stream_position_option, rnum = 3,
+                  fields =
+                      [#field{name = expected_stream_position, fnum = 3, rnum = 3, type = uint64, occurrence = optional, opts = []},
+                       #field{name = expected_any, fnum = 4, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []},
+                       #field{name = expected_stream_exists, fnum = 5, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []},
+                       #field{name = expected_no_stream, fnum = 6, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []}],
                   opts = []}]},
-     {{msg, 'event_store.client.shared.Empty'}, []},
-     {{msg, 'event_store.client.shared.StreamIdentifier'}, [#field{name = streamName, fnum = 3, rnum = 2, type = bytes, occurrence = optional, opts = []}]}].
+     {{msg, 'event_store.client.AccessDenied'}, []},
+     {{msg, 'event_store.client.StreamDeleted'}, [#field{name = stream_identifier, fnum = 1, rnum = 2, type = {msg, 'event_store.client.StreamIdentifier'}, occurrence = optional, opts = []}]},
+     {{msg, 'event_store.client.Timeout'}, []},
+     {{msg, 'event_store.client.Unknown'}, []},
+     {{msg, 'event_store.client.InvalidTransaction'}, []},
+     {{msg, 'event_store.client.MaximumAppendSizeExceeded'}, [#field{name = maxAppendSize, fnum = 1, rnum = 2, type = uint32, occurrence = optional, opts = []}]},
+     {{msg, 'event_store.client.BadRequest'}, [#field{name = message, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []}]},
+     {{msg, 'google.protobuf.Empty'}, []}].
 
 
 get_msg_names() ->
@@ -4916,10 +5761,20 @@ get_msg_names() ->
      'google.protobuf.Struct',
      'google.protobuf.Value',
      'google.protobuf.ListValue',
-     'event_store.client.shared.UUID.Structured',
-     'event_store.client.shared.UUID',
-     'event_store.client.shared.Empty',
-     'event_store.client.shared.StreamIdentifier'].
+     'event_store.client.UUID.Structured',
+     'event_store.client.UUID',
+     'event_store.client.Empty',
+     'event_store.client.StreamIdentifier',
+     'event_store.client.AllStreamPosition',
+     'event_store.client.WrongExpectedVersion',
+     'event_store.client.AccessDenied',
+     'event_store.client.StreamDeleted',
+     'event_store.client.Timeout',
+     'event_store.client.Unknown',
+     'event_store.client.InvalidTransaction',
+     'event_store.client.MaximumAppendSizeExceeded',
+     'event_store.client.BadRequest',
+     'google.protobuf.Empty'].
 
 
 get_group_names() -> [].
@@ -4959,10 +5814,20 @@ get_msg_or_group_names() ->
      'google.protobuf.Struct',
      'google.protobuf.Value',
      'google.protobuf.ListValue',
-     'event_store.client.shared.UUID.Structured',
-     'event_store.client.shared.UUID',
-     'event_store.client.shared.Empty',
-     'event_store.client.shared.StreamIdentifier'].
+     'event_store.client.UUID.Structured',
+     'event_store.client.UUID',
+     'event_store.client.Empty',
+     'event_store.client.StreamIdentifier',
+     'event_store.client.AllStreamPosition',
+     'event_store.client.WrongExpectedVersion',
+     'event_store.client.AccessDenied',
+     'event_store.client.StreamDeleted',
+     'event_store.client.Timeout',
+     'event_store.client.Unknown',
+     'event_store.client.InvalidTransaction',
+     'event_store.client.MaximumAppendSizeExceeded',
+     'event_store.client.BadRequest',
+     'google.protobuf.Empty'].
 
 
 get_enum_names() -> ['google.protobuf.NullValue'].
@@ -4985,7 +5850,7 @@ fetch_enum_def(EnumName) ->
 find_msg_def('event_store.client.projections.CreateReq.Options') ->
     [#gpb_oneof{name = mode, rnum = 2,
                 fields =
-                    [#field{name = one_time, fnum = 1, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
+                    [#field{name = one_time, fnum = 1, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
                      #field{name = transient, fnum = 2, rnum = 2, type = {msg, 'event_store.client.projections.CreateReq.Options.Transient'}, occurrence = optional, opts = []},
                      #field{name = continuous, fnum = 3, rnum = 2, type = {msg, 'event_store.client.projections.CreateReq.Options.Continuous'}, occurrence = optional, opts = []}],
                 opts = []},
@@ -4999,8 +5864,7 @@ find_msg_def('event_store.client.projections.UpdateReq.Options') ->
     [#field{name = name, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []},
      #field{name = query, fnum = 2, rnum = 3, type = string, occurrence = optional, opts = []},
      #gpb_oneof{name = emit_option, rnum = 4,
-                fields = [#field{name = emit_enabled, fnum = 3, rnum = 4, type = bool, occurrence = optional, opts = []}, #field{name = no_emit_options, fnum = 4, rnum = 4, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []}],
-                opts = []}];
+                fields = [#field{name = emit_enabled, fnum = 3, rnum = 4, type = bool, occurrence = optional, opts = []}, #field{name = no_emit_options, fnum = 4, rnum = 4, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []}], opts = []}];
 find_msg_def('event_store.client.projections.UpdateReq') -> [#field{name = options, fnum = 1, rnum = 2, type = {msg, 'event_store.client.projections.UpdateReq.Options'}, occurrence = optional, opts = []}];
 find_msg_def('event_store.client.projections.UpdateResp') -> [];
 find_msg_def('event_store.client.projections.DeleteReq.Options') ->
@@ -5014,10 +5878,10 @@ find_msg_def('event_store.client.projections.StatisticsReq.Options') ->
     [#gpb_oneof{name = mode, rnum = 2,
                 fields =
                     [#field{name = name, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []},
-                     #field{name = all, fnum = 2, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                     #field{name = transient, fnum = 3, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                     #field{name = continuous, fnum = 4, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []},
-                     #field{name = one_time, fnum = 5, rnum = 2, type = {msg, 'event_store.client.shared.Empty'}, occurrence = optional, opts = []}],
+                     #field{name = all, fnum = 2, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                     #field{name = transient, fnum = 3, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                     #field{name = continuous, fnum = 4, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []},
+                     #field{name = one_time, fnum = 5, rnum = 2, type = {msg, 'event_store.client.Empty'}, occurrence = optional, opts = []}],
                 opts = []}];
 find_msg_def('event_store.client.projections.StatisticsReq') -> [#field{name = options, fnum = 1, rnum = 2, type = {msg, 'event_store.client.projections.StatisticsReq.Options'}, occurrence = optional, opts = []}];
 find_msg_def('event_store.client.projections.StatisticsResp.Details') ->
@@ -5072,14 +5936,34 @@ find_msg_def('google.protobuf.Value') ->
                      #field{name = list_value, fnum = 6, rnum = 2, type = {msg, 'google.protobuf.ListValue'}, occurrence = optional, opts = []}],
                 opts = []}];
 find_msg_def('google.protobuf.ListValue') -> [#field{name = values, fnum = 1, rnum = 2, type = {msg, 'google.protobuf.Value'}, occurrence = repeated, opts = []}];
-find_msg_def('event_store.client.shared.UUID.Structured') ->
+find_msg_def('event_store.client.UUID.Structured') ->
     [#field{name = most_significant_bits, fnum = 1, rnum = 2, type = int64, occurrence = optional, opts = []}, #field{name = least_significant_bits, fnum = 2, rnum = 3, type = int64, occurrence = optional, opts = []}];
-find_msg_def('event_store.client.shared.UUID') ->
+find_msg_def('event_store.client.UUID') ->
     [#gpb_oneof{name = value, rnum = 2,
-                fields = [#field{name = structured, fnum = 1, rnum = 2, type = {msg, 'event_store.client.shared.UUID.Structured'}, occurrence = optional, opts = []}, #field{name = string, fnum = 2, rnum = 2, type = string, occurrence = optional, opts = []}],
+                fields = [#field{name = structured, fnum = 1, rnum = 2, type = {msg, 'event_store.client.UUID.Structured'}, occurrence = optional, opts = []}, #field{name = string, fnum = 2, rnum = 2, type = string, occurrence = optional, opts = []}], opts = []}];
+find_msg_def('event_store.client.Empty') -> [];
+find_msg_def('event_store.client.StreamIdentifier') -> [#field{name = stream_name, fnum = 3, rnum = 2, type = bytes, occurrence = optional, opts = []}];
+find_msg_def('event_store.client.AllStreamPosition') ->
+    [#field{name = commit_position, fnum = 1, rnum = 2, type = uint64, occurrence = optional, opts = []}, #field{name = prepare_position, fnum = 2, rnum = 3, type = uint64, occurrence = optional, opts = []}];
+find_msg_def('event_store.client.WrongExpectedVersion') ->
+    [#gpb_oneof{name = current_stream_revision_option, rnum = 2,
+                fields = [#field{name = current_stream_revision, fnum = 1, rnum = 2, type = uint64, occurrence = optional, opts = []}, #field{name = current_no_stream, fnum = 2, rnum = 2, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []}],
+                opts = []},
+     #gpb_oneof{name = expected_stream_position_option, rnum = 3,
+                fields =
+                    [#field{name = expected_stream_position, fnum = 3, rnum = 3, type = uint64, occurrence = optional, opts = []},
+                     #field{name = expected_any, fnum = 4, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []},
+                     #field{name = expected_stream_exists, fnum = 5, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []},
+                     #field{name = expected_no_stream, fnum = 6, rnum = 3, type = {msg, 'google.protobuf.Empty'}, occurrence = optional, opts = []}],
                 opts = []}];
-find_msg_def('event_store.client.shared.Empty') -> [];
-find_msg_def('event_store.client.shared.StreamIdentifier') -> [#field{name = streamName, fnum = 3, rnum = 2, type = bytes, occurrence = optional, opts = []}];
+find_msg_def('event_store.client.AccessDenied') -> [];
+find_msg_def('event_store.client.StreamDeleted') -> [#field{name = stream_identifier, fnum = 1, rnum = 2, type = {msg, 'event_store.client.StreamIdentifier'}, occurrence = optional, opts = []}];
+find_msg_def('event_store.client.Timeout') -> [];
+find_msg_def('event_store.client.Unknown') -> [];
+find_msg_def('event_store.client.InvalidTransaction') -> [];
+find_msg_def('event_store.client.MaximumAppendSizeExceeded') -> [#field{name = maxAppendSize, fnum = 1, rnum = 2, type = uint32, occurrence = optional, opts = []}];
+find_msg_def('event_store.client.BadRequest') -> [#field{name = message, fnum = 1, rnum = 2, type = string, occurrence = optional, opts = []}];
+find_msg_def('google.protobuf.Empty') -> [];
 find_msg_def(_) -> error.
 
 
@@ -5113,7 +5997,7 @@ get_service_def('event_store.client.projections.Projections') ->
       #rpc{name = 'Reset', input = 'event_store.client.projections.ResetReq', output = 'event_store.client.projections.ResetResp', input_stream = false, output_stream = false, opts = []},
       #rpc{name = 'State', input = 'event_store.client.projections.StateReq', output = 'event_store.client.projections.StateResp', input_stream = false, output_stream = false, opts = []},
       #rpc{name = 'Result', input = 'event_store.client.projections.ResultReq', output = 'event_store.client.projections.ResultResp', input_stream = false, output_stream = false, opts = []},
-      #rpc{name = 'RestartSubsystem', input = 'event_store.client.shared.Empty', output = 'event_store.client.shared.Empty', input_stream = false, output_stream = false, opts = []}]};
+      #rpc{name = 'RestartSubsystem', input = 'event_store.client.Empty', output = 'event_store.client.Empty', input_stream = false, output_stream = false, opts = []}]};
 get_service_def(_) -> error.
 
 
@@ -5143,8 +6027,7 @@ find_rpc_def(_, _) -> error.
     #rpc{name = 'State', input = 'event_store.client.projections.StateReq', output = 'event_store.client.projections.StateResp', input_stream = false, output_stream = false, opts = []};
 'find_rpc_def_event_store.client.projections.Projections'('Result') ->
     #rpc{name = 'Result', input = 'event_store.client.projections.ResultReq', output = 'event_store.client.projections.ResultResp', input_stream = false, output_stream = false, opts = []};
-'find_rpc_def_event_store.client.projections.Projections'('RestartSubsystem') ->
-    #rpc{name = 'RestartSubsystem', input = 'event_store.client.shared.Empty', output = 'event_store.client.shared.Empty', input_stream = false, output_stream = false, opts = []};
+'find_rpc_def_event_store.client.projections.Projections'('RestartSubsystem') -> #rpc{name = 'RestartSubsystem', input = 'event_store.client.Empty', output = 'event_store.client.Empty', input_stream = false, output_stream = false, opts = []};
 'find_rpc_def_event_store.client.projections.Projections'(_) -> error.
 
 
@@ -5232,10 +6115,20 @@ fqbin_to_msg_name(<<"event_store.client.projections.DisableResp">>) -> 'event_st
 fqbin_to_msg_name(<<"google.protobuf.Struct">>) -> 'google.protobuf.Struct';
 fqbin_to_msg_name(<<"google.protobuf.Value">>) -> 'google.protobuf.Value';
 fqbin_to_msg_name(<<"google.protobuf.ListValue">>) -> 'google.protobuf.ListValue';
-fqbin_to_msg_name(<<"event_store.client.shared.UUID.Structured">>) -> 'event_store.client.shared.UUID.Structured';
-fqbin_to_msg_name(<<"event_store.client.shared.UUID">>) -> 'event_store.client.shared.UUID';
-fqbin_to_msg_name(<<"event_store.client.shared.Empty">>) -> 'event_store.client.shared.Empty';
-fqbin_to_msg_name(<<"event_store.client.shared.StreamIdentifier">>) -> 'event_store.client.shared.StreamIdentifier';
+fqbin_to_msg_name(<<"event_store.client.UUID.Structured">>) -> 'event_store.client.UUID.Structured';
+fqbin_to_msg_name(<<"event_store.client.UUID">>) -> 'event_store.client.UUID';
+fqbin_to_msg_name(<<"event_store.client.Empty">>) -> 'event_store.client.Empty';
+fqbin_to_msg_name(<<"event_store.client.StreamIdentifier">>) -> 'event_store.client.StreamIdentifier';
+fqbin_to_msg_name(<<"event_store.client.AllStreamPosition">>) -> 'event_store.client.AllStreamPosition';
+fqbin_to_msg_name(<<"event_store.client.WrongExpectedVersion">>) -> 'event_store.client.WrongExpectedVersion';
+fqbin_to_msg_name(<<"event_store.client.AccessDenied">>) -> 'event_store.client.AccessDenied';
+fqbin_to_msg_name(<<"event_store.client.StreamDeleted">>) -> 'event_store.client.StreamDeleted';
+fqbin_to_msg_name(<<"event_store.client.Timeout">>) -> 'event_store.client.Timeout';
+fqbin_to_msg_name(<<"event_store.client.Unknown">>) -> 'event_store.client.Unknown';
+fqbin_to_msg_name(<<"event_store.client.InvalidTransaction">>) -> 'event_store.client.InvalidTransaction';
+fqbin_to_msg_name(<<"event_store.client.MaximumAppendSizeExceeded">>) -> 'event_store.client.MaximumAppendSizeExceeded';
+fqbin_to_msg_name(<<"event_store.client.BadRequest">>) -> 'event_store.client.BadRequest';
+fqbin_to_msg_name(<<"google.protobuf.Empty">>) -> 'google.protobuf.Empty';
 fqbin_to_msg_name(E) -> error({gpb_error, {badmsg, E}}).
 
 
@@ -5272,10 +6165,20 @@ msg_name_to_fqbin('event_store.client.projections.DisableResp') -> <<"event_stor
 msg_name_to_fqbin('google.protobuf.Struct') -> <<"google.protobuf.Struct">>;
 msg_name_to_fqbin('google.protobuf.Value') -> <<"google.protobuf.Value">>;
 msg_name_to_fqbin('google.protobuf.ListValue') -> <<"google.protobuf.ListValue">>;
-msg_name_to_fqbin('event_store.client.shared.UUID.Structured') -> <<"event_store.client.shared.UUID.Structured">>;
-msg_name_to_fqbin('event_store.client.shared.UUID') -> <<"event_store.client.shared.UUID">>;
-msg_name_to_fqbin('event_store.client.shared.Empty') -> <<"event_store.client.shared.Empty">>;
-msg_name_to_fqbin('event_store.client.shared.StreamIdentifier') -> <<"event_store.client.shared.StreamIdentifier">>;
+msg_name_to_fqbin('event_store.client.UUID.Structured') -> <<"event_store.client.UUID.Structured">>;
+msg_name_to_fqbin('event_store.client.UUID') -> <<"event_store.client.UUID">>;
+msg_name_to_fqbin('event_store.client.Empty') -> <<"event_store.client.Empty">>;
+msg_name_to_fqbin('event_store.client.StreamIdentifier') -> <<"event_store.client.StreamIdentifier">>;
+msg_name_to_fqbin('event_store.client.AllStreamPosition') -> <<"event_store.client.AllStreamPosition">>;
+msg_name_to_fqbin('event_store.client.WrongExpectedVersion') -> <<"event_store.client.WrongExpectedVersion">>;
+msg_name_to_fqbin('event_store.client.AccessDenied') -> <<"event_store.client.AccessDenied">>;
+msg_name_to_fqbin('event_store.client.StreamDeleted') -> <<"event_store.client.StreamDeleted">>;
+msg_name_to_fqbin('event_store.client.Timeout') -> <<"event_store.client.Timeout">>;
+msg_name_to_fqbin('event_store.client.Unknown') -> <<"event_store.client.Unknown">>;
+msg_name_to_fqbin('event_store.client.InvalidTransaction') -> <<"event_store.client.InvalidTransaction">>;
+msg_name_to_fqbin('event_store.client.MaximumAppendSizeExceeded') -> <<"event_store.client.MaximumAppendSizeExceeded">>;
+msg_name_to_fqbin('event_store.client.BadRequest') -> <<"event_store.client.BadRequest">>;
+msg_name_to_fqbin('google.protobuf.Empty') -> <<"google.protobuf.Empty">>;
 msg_name_to_fqbin(E) -> error({gpb_error, {badmsg, E}}).
 
 
@@ -5303,7 +6206,7 @@ source_basename() -> "projections.proto".
 %% source file. The files are returned with extension,
 %% see get_all_proto_names/0 for a version that returns
 %% the basenames sans extension
-get_all_source_basenames() -> ["projections.proto", "struct.proto", "shared.proto"].
+get_all_source_basenames() -> ["projections.proto", "struct.proto", "shared.proto", "empty.proto"].
 
 
 %% Retrieve all proto file names, also imported ones.
@@ -5311,7 +6214,7 @@ get_all_source_basenames() -> ["projections.proto", "struct.proto", "shared.prot
 %% source file. The files are returned sans .proto extension,
 %% to make it easier to use them with the various get_xyz_containment
 %% functions.
-get_all_proto_names() -> ["projections", "struct", "shared"].
+get_all_proto_names() -> ["projections", "struct", "shared", "empty"].
 
 
 get_msg_containment("projections") ->
@@ -5346,19 +6249,35 @@ get_msg_containment("projections") ->
      'event_store.client.projections.UpdateReq.Options',
      'event_store.client.projections.UpdateResp'];
 get_msg_containment("struct") -> ['google.protobuf.ListValue', 'google.protobuf.Struct', 'google.protobuf.Value'];
-get_msg_containment("shared") -> ['event_store.client.shared.Empty', 'event_store.client.shared.StreamIdentifier', 'event_store.client.shared.UUID', 'event_store.client.shared.UUID.Structured'];
+get_msg_containment("shared") ->
+    ['event_store.client.AccessDenied',
+     'event_store.client.AllStreamPosition',
+     'event_store.client.BadRequest',
+     'event_store.client.Empty',
+     'event_store.client.InvalidTransaction',
+     'event_store.client.MaximumAppendSizeExceeded',
+     'event_store.client.StreamDeleted',
+     'event_store.client.StreamIdentifier',
+     'event_store.client.Timeout',
+     'event_store.client.UUID',
+     'event_store.client.UUID.Structured',
+     'event_store.client.Unknown',
+     'event_store.client.WrongExpectedVersion'];
+get_msg_containment("empty") -> ['google.protobuf.Empty'];
 get_msg_containment(P) -> error({gpb_error, {badproto, P}}).
 
 
 get_pkg_containment("projections") -> 'event_store.client.projections';
 get_pkg_containment("struct") -> 'google.protobuf';
-get_pkg_containment("shared") -> 'event_store.client.shared';
+get_pkg_containment("shared") -> 'event_store.client';
+get_pkg_containment("empty") -> 'google.protobuf';
 get_pkg_containment(P) -> error({gpb_error, {badproto, P}}).
 
 
 get_service_containment("projections") -> ['event_store.client.projections.Projections'];
 get_service_containment("struct") -> [];
 get_service_containment("shared") -> [];
+get_service_containment("empty") -> [];
 get_service_containment(P) -> error({gpb_error, {badproto, P}}).
 
 
@@ -5375,12 +6294,14 @@ get_rpc_containment("projections") ->
      {'event_store.client.projections.Projections', 'RestartSubsystem'}];
 get_rpc_containment("struct") -> [];
 get_rpc_containment("shared") -> [];
+get_rpc_containment("empty") -> [];
 get_rpc_containment(P) -> error({gpb_error, {badproto, P}}).
 
 
 get_enum_containment("projections") -> [];
 get_enum_containment("struct") -> ['google.protobuf.NullValue'];
 get_enum_containment("shared") -> [];
+get_enum_containment("empty") -> [];
 get_enum_containment(P) -> error({gpb_error, {badproto, P}}).
 
 
@@ -5402,7 +6323,7 @@ get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.EnableReq">>) -
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.DisableReq">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.DeleteReq">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.CreateReq">>) -> "projections";
-get_proto_by_msg_name_as_fqbin(<<"event_store.client.shared.StreamIdentifier">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.StreamIdentifier">>) -> "shared";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.UpdateReq.Options">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.StatisticsResp.Details">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.StatisticsReq.Options">>) -> "projections";
@@ -5414,13 +6335,23 @@ get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.DisableReq.Opti
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.DeleteReq.Options">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.CreateReq.Options.Continuous">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.CreateReq.Options">>) -> "projections";
-get_proto_by_msg_name_as_fqbin(<<"event_store.client.shared.UUID.Structured">>) -> "shared";
-get_proto_by_msg_name_as_fqbin(<<"event_store.client.shared.UUID">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.UUID.Structured">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.UUID">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.Timeout">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.StreamDeleted">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.MaximumAppendSizeExceeded">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.BadRequest">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.AccessDenied">>) -> "shared";
 get_proto_by_msg_name_as_fqbin(<<"google.protobuf.Struct">>) -> "struct";
 get_proto_by_msg_name_as_fqbin(<<"event_store.client.projections.CreateReq.Options.Transient">>) -> "projections";
 get_proto_by_msg_name_as_fqbin(<<"google.protobuf.Value">>) -> "struct";
 get_proto_by_msg_name_as_fqbin(<<"google.protobuf.ListValue">>) -> "struct";
-get_proto_by_msg_name_as_fqbin(<<"event_store.client.shared.Empty">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"google.protobuf.Empty">>) -> "empty";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.Empty">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.WrongExpectedVersion">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.Unknown">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.InvalidTransaction">>) -> "shared";
+get_proto_by_msg_name_as_fqbin(<<"event_store.client.AllStreamPosition">>) -> "shared";
 get_proto_by_msg_name_as_fqbin(E) -> error({gpb_error, {badmsg, E}}).
 
 
@@ -5433,8 +6364,8 @@ get_proto_by_enum_name_as_fqbin(E) -> error({gpb_error, {badenum, E}}).
 
 
 get_protos_by_pkg_name_as_fqbin(<<"event_store.client.projections">>) -> ["projections"];
-get_protos_by_pkg_name_as_fqbin(<<"event_store.client.shared">>) -> ["shared"];
-get_protos_by_pkg_name_as_fqbin(<<"google.protobuf">>) -> ["struct"];
+get_protos_by_pkg_name_as_fqbin(<<"event_store.client">>) -> ["shared"];
+get_protos_by_pkg_name_as_fqbin(<<"google.protobuf">>) -> ["empty", "struct"];
 get_protos_by_pkg_name_as_fqbin(E) -> error({gpb_error, {badpkg, E}}).
 
 
