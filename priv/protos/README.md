@@ -6,6 +6,19 @@ Last time the protobufs were copied from the upstream:
 EventStore/EventStore@668a98b43c5b3d0d045c3ee4019c156ec4cae829
 ```
 
+## How to go get the protobufs
+
+1. Clone the `git@github.com:EventStore/EventStore.git` repository
+1. Remove all protos currently in this directory: `rm *.proto`
+1. Copy all protos from the EventStore repo
+    ```
+    cp path/to/EventStore/src/EventStore/src/Protos/Grpc/*.proto .
+    ```
+1. Remove any cluster protobuf definitions, leaving only client protos and google data-structures
+    ```
+    grep -l 'package event_store\.cluster' *.proto | xargs rm
+    ```
+
 ## How to generate the erl/hrl files from these protobufs
 
 1. Get deps for this repo: `mix deps.get`
