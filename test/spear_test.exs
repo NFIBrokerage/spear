@@ -668,8 +668,8 @@ defmodule SpearTest do
       assert {:error, reason} =
                Spear.update_persistent_subscription(c.conn, stream, group, settings)
 
-      assert reason.message == "Unexpected UpdatePersistentSubscriptionResult: DoesNotExist"
-      assert reason.status == :unknown
+      assert reason.message == "Subscription group #{group} on stream #{stream} does not exist."
+      assert reason.status == :not_found
     end
 
     test "you cannot delete a persistent subscription that does not exist", c do
