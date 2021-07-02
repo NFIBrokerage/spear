@@ -337,7 +337,7 @@ defmodule Spear.Event do
           data: body,
           metadata: metadata,
           prepare_position: prepare_position,
-          stream_identifier: Shared.stream_identifier(streamName: stream_name),
+          stream_identifier: Shared.stream_identifier(stream_name: stream_name),
           stream_revision: stream_revision
         },
         opts

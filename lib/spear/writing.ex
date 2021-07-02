@@ -29,7 +29,7 @@ defmodule Spear.Writing do
         {:options,
          append_req_options(
            expected_stream_revision: map_expectation(params.expect),
-           stream_identifier: stream_identifier(streamName: params.stream)
+           stream_identifier: stream_identifier(stream_name: params.stream)
          )}
     )
   end
@@ -38,7 +38,7 @@ defmodule Spear.Writing do
     delete_req(
       options:
         delete_req_options(
-          stream_identifier: stream_identifier(streamName: params.stream),
+          stream_identifier: stream_identifier(stream_name: params.stream),
           expected_stream_revision: map_expectation(params.expect)
         )
     )
@@ -48,7 +48,7 @@ defmodule Spear.Writing do
     tombstone_req(
       options:
         tombstone_req_options(
-          stream_identifier: stream_identifier(streamName: params.stream),
+          stream_identifier: stream_identifier(stream_name: params.stream),
           expected_stream_revision: map_expectation(params.expect)
         )
     )
