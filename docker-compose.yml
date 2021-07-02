@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eventstore:
-    image: eventstore/eventstore:21.2.0-buster-slim
+    image: eventstore/eventstore:21.6.0-buster-slim
     environment:
     - EVENTSTORE_START_STANDARD_PROJECTIONS=True
     - EVENTSTORE_RUN_PROJECTIONS=All
@@ -13,7 +13,7 @@ services:
     - 2113:2113
 
   app:
-    image: elixir:1.12.0
+    image: elixir:1.12.1
     depends_on:
     - eventstore
     environment:
