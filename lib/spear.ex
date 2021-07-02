@@ -1626,6 +1626,7 @@ defmodule Spear do
       Persistent.create_req(
         options:
           Persistent.create_req_options(
+            stream_identifier: Shared.stream_identifier(stream_name: stream_name),
             stream_option:
               Spear.PersistentSubscription.map_create_stream_option(stream_name, opts),
             group_name: group_name,
@@ -1675,6 +1676,7 @@ defmodule Spear do
       Persistent.update_req(
         options:
           Persistent.update_req_options(
+            stream_identifier: Shared.stream_identifier(stream_name: stream_name),
             stream_option:
               Spear.PersistentSubscription.map_update_stream_option(stream_name, opts),
             group_name: group_name,
