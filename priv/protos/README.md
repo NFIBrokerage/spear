@@ -3,7 +3,7 @@
 Last time the protobufs were copied from the upstream:
 
 ```
-EventStore/EventStore@6eedacecd6a4da8ab705a82d5229f5c630f60277
+EventStore/EventStore@668a98b43c5b3d0d045c3ee4019c156ec4cae829
 ```
 
 ## How to generate the erl/hrl files from these protobufs
