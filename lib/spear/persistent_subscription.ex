@@ -3,6 +3,9 @@ defmodule Spear.PersistentSubscription do
   A struct representing a persistent subscription and its settings
   """
 
+  require Spear.Records.Shared, as: Shared
+  require Spear.Records.Persistent, as: Persistent
+
   @typedoc """
   The action the EventStoreDB should take for an event's nack
 
@@ -109,4 +112,51 @@ defmodule Spear.PersistentSubscription do
   def map_nack_action(:skip), do: :Skip
   def map_nack_action(:stop), do: :Stop
   def map_nack_action(_), do: :Unknown
+
+  @doc false
+  # coveralls-ignore-start
+  def map_short_stream_option(stream_name) when is_binary(stream_name) do
+    {:stream_identifier, Shared.stream_identifier(stream_name: stream_name)}
+  end
+
+  def map_short_stream_option(:all) do
+    {:all, Shared.empty()}
+  end
+
+  @doc false
+  def map_create_stream_option(stream_name, opts) when is_binary(stream_name) do
+    {:stream,
+     Persistent.create_req_stream_options(
+       stream_identifier: Shared.stream_identifier(stream_name: stream_name),
+       revision_option: map_revision(opts)
+     )}
+  end
+
+  def map_create_stream_option(:all, _opts) do
+    # YARD
+    {:all, Persistent.create_req_all_options()}
+  end
+
+  def map_update_stream_option(stream_name, opts) when is_binary(stream_name) do
+    {:stream,
+     Persistent.update_req_stream_options(
+       stream_identifier: Shared.stream_identifier(stream_name: stream_name),
+       revision_option: map_revision(opts)
+     )}
+  end
+
+  def map_update_stream_option(:all, _opts) do
+    # YARD
+    {:all, Persistent.update_req_all_options()}
+  end
+
+  defp map_revision(opts) do
+    case Keyword.get(opts, :from, :start) do
+      :start -> {:start, Shared.empty()}
+      :end -> {:end, Shared.empty()}
+      revision when is_integer(revision) -> {:revision, revision}
+    end
+  end
+
+  # coveralls-ignore-stop
 end

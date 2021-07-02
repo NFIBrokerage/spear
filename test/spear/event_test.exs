@@ -46,25 +46,25 @@ defmodule Spear.EventTest do
      {:event,
       {:"event_store.client.streams.ReadResp.ReadEvent",
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID", {:string, "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8"}},
-        {:"event_store.client.shared.StreamIdentifier", "MySpearDemo"}, 0,
-        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        {:"event_store.client.UUID", {:string, "9e3a8bcf-0c22-4a38-85c6-2054a0342ec8"}},
+        {:"event_store.client.StreamIdentifier", "MySpearDemo"}, 0, 18_446_744_073_709_551_615,
+        18_446_744_073_709_551_615,
         [
           {"content-type", "application/json"},
           {"type", "IExAndSpear"},
           {"created", "16182579177572156"}
         ], "", "{\"hello\":\"world\"}"},
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID", {:string, "5fc66e27-b9ff-44fe-b463-9bfc29e05a01"}},
-        {:"event_store.client.shared.StreamIdentifier", "$streams"}, 1949,
-        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        {:"event_store.client.UUID", {:string, "5fc66e27-b9ff-44fe-b463-9bfc29e05a01"}},
+        {:"event_store.client.StreamIdentifier", "$streams"}, 1949, 18_446_744_073_709_551_615,
+        18_446_744_073_709_551_615,
         [
           {"content-type", "application/octet-stream"},
           {"type", "$>"},
           {"created", "16182579177661961"}
         ],
         "{\"$v\":\"1:-1:1:4\",\"$c\":8068857,\"$p\":8068857,\"$causedBy\":\"9e3a8bcf-0c22-4a38-85c6-2054a0342ec8\"}",
-        "0@MySpearDemo"}, {:no_position, {:"event_store.client.shared.Empty"}}}}}
+        "0@MySpearDemo"}, {:no_position, {:"event_store.client.Empty"}}}}}
   end
 
   defp deleted_event(_c), do: [event: deleted_event()]
@@ -77,9 +77,9 @@ defmodule Spear.EventTest do
      {:event,
       {:"event_store.client.streams.ReadResp.ReadEvent", :undefined,
        {:"event_store.client.streams.ReadResp.ReadEvent.RecordedEvent",
-        {:"event_store.client.shared.UUID", {:string, "b58ab56c-58c5-44f1-ba20-6e292a6310d6"}},
-        {:"event_store.client.shared.StreamIdentifier", "$et-$deleted"}, 254,
-        18_446_744_073_709_551_615, 18_446_744_073_709_551_615,
+        {:"event_store.client.UUID", {:string, "b58ab56c-58c5-44f1-ba20-6e292a6310d6"}},
+        {:"event_store.client.StreamIdentifier", "$et-$deleted"}, 254, 18_446_744_073_709_551_615,
+        18_446_744_073_709_551_615,
         [
           {"content-type", "application/octet-stream"},
           {"type", "$>"},
@@ -87,6 +87,6 @@ defmodule Spear.EventTest do
         ],
         "{\"$v\":\"4:-1:1:4\",\"$c\":8039193,\"$p\":8039193,\"$deleted\":-1,\"$causedBy\":\"566823ae-f4a0-4288-9072-61870b7c0516\"}",
         "0@Spear.Test-fca49a09-e219-4292-a1b8-01a199dc4538"},
-       {:no_position, {:"event_store.client.shared.Empty"}}}}}
+       {:no_position, {:"event_store.client.Empty"}}}}}
   end
 end

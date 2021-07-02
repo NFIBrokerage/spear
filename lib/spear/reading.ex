@@ -68,7 +68,7 @@ defmodule Spear.Reading do
   defp map_stream(stream_name, from) when is_binary(stream_name) do
     {:stream,
      Streams.read_req_options_stream_options(
-       stream_identifier: stream_identifier(streamName: stream_name),
+       stream_identifier: stream_identifier(stream_name: stream_name),
        revision_option: map_stream_revision(from)
      )}
   end

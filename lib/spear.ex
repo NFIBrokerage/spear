@@ -1522,7 +1522,7 @@ defmodule Spear do
   ## Examples
 
       iex> Spear.cluster_info(conn)
-      {:ok,                 
+      {:ok,
        [
          %Spear.ClusterMember{
            address: "127.0.0.1",
@@ -1579,7 +1579,7 @@ defmodule Spear do
       Persistent.delete_req(
         options:
           Persistent.delete_req_options(
-            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
             group_name: group_name
           )
       )
@@ -1626,7 +1626,9 @@ defmodule Spear do
       Persistent.create_req(
         options:
           Persistent.create_req_options(
-            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            stream_identifier: Shared.stream_identifier(stream_name: stream_name),
+            stream_option:
+              Spear.PersistentSubscription.map_create_stream_option(stream_name, opts),
             group_name: group_name,
             settings: Spear.PersistentSubscription.Settings.to_record(settings, :create)
           )
@@ -1674,7 +1676,9 @@ defmodule Spear do
       Persistent.update_req(
         options:
           Persistent.update_req_options(
-            stream_identifier: Shared.stream_identifier(streamName: stream_name),
+            stream_identifier: Shared.stream_identifier(stream_name: stream_name),
+            stream_option:
+              Spear.PersistentSubscription.map_update_stream_option(stream_name, opts),
             group_name: group_name,
             settings: Spear.PersistentSubscription.Settings.to_record(settings, :update)
           )
@@ -1889,7 +1893,7 @@ defmodule Spear do
         content:
           {:options,
            Persistent.read_req_options(
-             stream_identifier: Shared.stream_identifier(streamName: stream_name),
+             stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
              group_name: group_name,
              buffer_size: opts[:buffer_size],
              uuid_option: Persistent.read_req_options_uuid_option(content: {:string, empty()})
