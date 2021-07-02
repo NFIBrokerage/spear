@@ -50,7 +50,7 @@
 -export([gpb_version_source/0]).
 
 -include("spear_proto_persistent.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 -type 'event_store.client.persistent_subscriptions.ReadReq.Nack.Action'() :: 'Unknown' | 'Park' | 'Retry' | 'Skip' | 'Stop'.

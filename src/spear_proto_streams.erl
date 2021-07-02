@@ -49,7 +49,7 @@
 -export([gpb_version_source/0]).
 
 -include("spear_proto_streams.hrl").
--include("gpb.hrl").
+-include_lib("gpb/include/gpb.hrl").
 
 %% enumerated types
 -type 'event_store.client.streams.ReadReq.Options.ReadDirection'() :: 'Forwards' | 'Backwards'.
