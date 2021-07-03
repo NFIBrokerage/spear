@@ -63,7 +63,7 @@ Spear's reliance on Mint and `:gpb` give it a very small dependency tree:
 $ mix deps.tree --only prod
 spear
 ├── connection ~> 1.0 (Hex package)
-├── event_store_db_gpb_protobufs ~> 0.1 (Hex package)
+├── event_store_db_gpb_protobufs ~> 2.0 (Hex package)
 │   └── gpb ~> 4.0 (Hex package)
 ├── gpb ~> 4.0 (Hex package)
 ├── jason >= 0.0.0 (Hex package)
