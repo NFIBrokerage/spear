@@ -77,7 +77,7 @@ defmodule Spear.Reading.Stream do
   def unfold_chunk(buffer) when is_binary(buffer) do
     Spear.Grpc.decode_next_message(
       buffer,
-      {:spear_proto_streams, :"event_store.client.streams.ReadResp"}
+      {Spear.Records.Streams.service_module(), :"event_store.client.streams.ReadResp"}
     )
   end
 

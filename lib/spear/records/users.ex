@@ -3,5 +3,5 @@ defmodule Spear.Records.Users do
   A record macro interface for interacting with the EventStoreDB Users API
   """
 
-  use Spear.Records, service_module: :spear_proto_users
+  use Spear.Records, service_module: :users
 end

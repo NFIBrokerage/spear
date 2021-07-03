@@ -4,6 +4,8 @@ defmodule Spear.Records do
   @callback service_module() :: module()
   @callback service() :: atom()
 
+  @prefix :event_store_db_gpb_protobufs_
+
   @doc """
   a macro that extracts all records from the gpb generated .hrl files in src/
 
@@ -19,6 +21,8 @@ defmodule Spear.Records do
   this is where that comes from!
   """
   defmacro __using__(service_module: service_module) do
+    service_module = String.to_atom("#{@prefix}#{service_module}")
+
     quote do
       require Record
 
@@ -26,8 +30,11 @@ defmodule Spear.Records do
 
       prefix = (unquote(service_module).get_package_name() |> Atom.to_string()) <> "."
 
+      record_path =
+        Path.join(["event_store_db_gpb_protobufs", "include", "#{unquote(service_module)}.hrl"])
+
       records =
-        Record.extract_all(from: Path.join(["src", "#{unquote(service_module)}.hrl"]))
+        Record.extract_all(from_lib: record_path)
         |> Enum.map(fn {name, attrs} -> {name, Atom.to_string(name), attrs} end)
         |> Enum.filter(fn {_name, string_name, _attrs} ->
           String.starts_with?(string_name, prefix)

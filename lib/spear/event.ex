@@ -228,7 +228,7 @@ defmodule Spear.Event do
            custom_metadata: event.metadata.custom_metadata,
            data: encoder.(event.body),
            id: Shared.uuid(value: {:string, event.id}),
-           metadata: [{"content-type", event.metadata.content_type}, {"type", event.type}]
+           metadata: %{"content-type" => event.metadata.content_type, "type" => event.type}
          )}
     )
   end

@@ -3,5 +3,5 @@ defmodule Spear.Records.Operations do
   A record macro interface for interacting with the EventStoreDB Operations API
   """
 
-  use Spear.Records, service_module: :spear_proto_operations
+  use Spear.Records, service_module: :operations
 end

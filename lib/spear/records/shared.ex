@@ -3,5 +3,5 @@ defmodule Spear.Records.Shared do
   Shared record definitions for EventStoreDB messages
   """
 
-  use Spear.Records, service_module: :spear_proto_shared
+  use Spear.Records, service_module: :shared
 end
