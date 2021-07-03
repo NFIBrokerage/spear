@@ -3,5 +3,5 @@ defmodule Spear.Records.Projections do
   A record macro interface for interacting with the EventStoreDB Projections API
   """
 
-  use Spear.Records, service_module: :spear_proto_projections
+  use Spear.Records, service_module: :projections
 end

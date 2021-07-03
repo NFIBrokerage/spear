@@ -3,5 +3,5 @@ defmodule Spear.Records.Persistent do
   A record macro interface for interacting with the EventStoreDB Persistent Subscriptions API
   """
 
-  use Spear.Records, service_module: :spear_proto_persistent
+  use Spear.Records, service_module: :persistent
 end

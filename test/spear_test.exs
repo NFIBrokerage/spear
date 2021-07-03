@@ -387,7 +387,8 @@ defmodule SpearTest do
       :ok = [random_event()] |> Spear.append(c.conn, c.stream_name)
 
       filter =
-        Spear.Filter.exclude_system_events() |> Spear.Filter.checkpoint_after(@checkpoint_after)
+        Spear.Filter.exclude_system_events()
+        |> Spear.Filter.checkpoint_after(@checkpoint_after)
 
       {:ok, sub} = Spear.subscribe(c.conn, self(), :all, filter: filter)
 

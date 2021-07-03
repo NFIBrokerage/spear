@@ -3,5 +3,5 @@ defmodule Spear.Records.Streams do
   A record macro interface for interacting with the EventStoreDB Streams API
   """
 
-  use Spear.Records, service_module: :spear_proto_streams
+  use Spear.Records, service_module: :streams
 end
