@@ -67,7 +67,7 @@ defmodule Spear.MixProject do
   defp package do
     [
       name: "spear",
-      files: ~w(lib src .formatter.exs mix.exs README.md .version),
+      files: ~w(lib .formatter.exs mix.exs README.md .version),
       licenses: ["Apache-2.0"],
       links: %{
         "GitHub" => @source_url,
