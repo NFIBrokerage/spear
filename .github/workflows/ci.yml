@@ -10,6 +10,7 @@ jobs:
     name: Bless
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         beam:
         - elixir: "1.7.4"
@@ -72,17 +73,17 @@ jobs:
       run: mix compile --warnings-as-errors --force
 
     - name: Coveralls
-      if: matrix.beam.elixir == "1.12.2"
+      if: matrix.beam.elixir == '1.12.2'
       run: mix coveralls.github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run tests
-      if: matrix.beam.elixir != "1.12.2"
+      if: matrix.beam.elixir != '1.12.2'
       run: mix test --exclude ${{ matrix.beam.elixir }}:false
 
     - name: Check formatting
-      if: matrix.beam.elixir == "1.12.2"
+      if: matrix.beam.elixir == '1.12.2'
       run: mix format --check-formatted
 
     - name: Credo
