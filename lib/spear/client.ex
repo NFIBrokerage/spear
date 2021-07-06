@@ -581,6 +581,13 @@ defmodule Spear.Client do
             ) :: :ok | {:error, any()}
 
   @doc """
+  A wrapper around `Spear.subscribe_to_stats/2`
+  """
+  @doc since: "0.10.0"
+  @callback subscribe_to_stats(subscriber :: pid() | GenServer.name()) ::
+              {:ok, reference()} | {:error, any()}
+
+  @doc """
   A wrapper around `Spear.subscribe_to_stats/3`
   """
   @doc since: "0.10.0"
@@ -588,13 +595,6 @@ defmodule Spear.Client do
               subscriber :: pid() | GenServer.name(),
               opts :: Keyword.t()
             ) :: {:ok, reference()} | {:error, any()}
-
-  @doc """
-  A wrapper around `Spear.subscribe_to_stats/2`
-  """
-  @doc since: "0.10.0"
-  @callback subscribe_to_stats(subscriber :: pid() | GenServer.name()) ::
-              {:ok, reference()} | {:error, any()}
 
   @optional_callbacks start_link: 1
 
