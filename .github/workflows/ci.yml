@@ -25,7 +25,7 @@ jobs:
         env:
           EVENTSTORE_START_STANDARD_PROJECTIONS: True
           EVENTSTORE_RUN_PROJECTIONS: All
-          EVENTSTORE_INSECURE: True
+        command: /opt/eventstore/eventstored --insecure --run-projections=All
         ports:
         - 2113:2113
     env:
