@@ -9,7 +9,7 @@ defmodule SpearTest do
   @max_append_bytes 1_048_576
   @checkpoint_after Integer.pow(32, 3)
 
-  @config Application.compile_env!(:spear, :config)
+  @config Application.fetch_env!(:spear, :config)
 
   setup do
     conn = start_supervised!({Spear.Connection, @config})
