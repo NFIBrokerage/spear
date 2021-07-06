@@ -73,13 +73,13 @@ jobs:
       run: mix compile --warnings-as-errors --force
 
     - name: Coveralls
-      if: ${{ matrix.beam.elixir == '1.12.2' && matrix.eventstore == "21.6.0" }}
+      if: ${{ matrix.beam.elixir == '1.12.2' && matrix.eventstore == '21.6.0' }}
       run: mix coveralls.github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run tests
-      if: ${{ matrix.beam.elixir != '1.12.2' && matrix.eventstore != "21.6.0" }}
+      if: ${{ matrix.beam.elixir != '1.12.2' && matrix.eventstore != '21.6.0' }}
       run: mix test --exclude ${{ matrix.eventstore }}:false
 
     - name: Check formatting
