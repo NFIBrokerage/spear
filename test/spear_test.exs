@@ -616,6 +616,7 @@ defmodule SpearTest do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
     end
 
+    @tag "20.10.2": false
     test "the cluster info shows one active node on localhost", c do
       assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
                Spear.cluster_info(c.conn)
