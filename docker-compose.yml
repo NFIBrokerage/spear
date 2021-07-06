@@ -9,6 +9,7 @@ services:
     volumes:
     - spear_eventstore:/var/lib/eventstore
     - ./eventstoredb:/etc/eventstore:ro
+    # command: "--insecure --run-projections=All"
     ports:
     - 2113:2113
 
