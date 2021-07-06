@@ -70,7 +70,7 @@ defmodule SpearTest do
 
       assert ^expected_event_numbers =
                Spear.stream!(c.conn, c.stream_name, direction: :backwards, from: :end)
-               |> then(to_event_numbers)
+               |> to_event_numbers.()
 
       # and with read_stream/3
       assert {:ok, events} =
