@@ -79,7 +79,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run tests
-      if: ${{ matrix.beam.elixir != '1.12.2' && matrix.eventstore != '21.6.0' }}
+      if: ${{ matrix.beam.elixir != '1.12.2' || matrix.eventstore != '21.6.0' }}
       run: mix test --exclude ${{ matrix.eventstore }}:false
 
     - name: Check formatting
