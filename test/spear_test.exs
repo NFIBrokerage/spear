@@ -5,6 +5,7 @@ defmodule SpearTest do
 
   import Spear.Records.Streams, only: [read_resp: 0, read_resp: 1]
   import Spear.Uuid, only: [uuid_v4: 0]
+  import VersionHelper
 
   @max_append_bytes 1_048_576
   @checkpoint_after 32 * 32 * 32
@@ -616,7 +617,7 @@ defmodule SpearTest do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
     end
 
-    @tag "20.10.2": false
+    @tag compatible("~> 21.0")
     test "the cluster info shows one active node on localhost", c do
       assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
                Spear.cluster_info(c.conn)
@@ -767,6 +768,18 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, category, from: last_event) |> Enum.count() == 4
 
       assert Spear.stream!(c.conn, category, from: :start, chunk_size: 2) |> Enum.count() == 6
+    end
+
+    @tag compatible("~> 21.0")
+    test "a process may subscribe to stats updates with subscribe_to_stats/3", c do
+      assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), interval: 200)
+      assert_receive stats when is_map(stats)
+      assert_receive stats when is_map(stats)
+      assert Spear.cancel_subscription(c.conn, subscription) == :ok
+
+      assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), raw?: true)
+      assert_receive {^subscription, stats} when is_tuple(stats)
+      assert Spear.cancel_subscription(c.conn, subscription) == :ok
     end
   end
 
