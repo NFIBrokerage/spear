@@ -1,6 +1,6 @@
 defmodule VersionHelper do
   @moduledoc """
-  Provides a macro that tags tests depending on their compatibilty with the
+  Provides a function that tags tests depending on their compatibilty with the
   EventStoreDB version declared in the env
   """
 
