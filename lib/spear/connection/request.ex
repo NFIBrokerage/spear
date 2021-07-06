@@ -17,6 +17,7 @@ defmodule Spear.Connection.Request do
 
   require Spear.Records.Streams, as: Streams
   require Spear.Records.Persistent, as: Persistent
+  require Spear.Records.Monitoring, as: Monitoring
 
   defstruct [
     :continuation,
@@ -257,6 +258,21 @@ defmodule Spear.Connection.Request do
         GenServer.reply(request.from, {:ok, request.request_ref})
 
         request = put_in(request.from, nil)
+        put_in(request.response.data, rest)
+
+      {Monitoring.stats_resp() = message, rest} ->
+        request =
+          update_in(request.from, fn
+            nil ->
+              nil
+
+            from ->
+              GenServer.reply(from, {:ok, request.request_ref})
+
+              nil
+          end)
+
+        send(subscriber, through.(message, request.request_ref))
         put_in(request.response.data, rest)
 
       {message, rest} ->

@@ -69,6 +69,7 @@ defmodule Spear do
   require Spear.Records.Operations, as: Operations
   require Spear.Records.Gossip, as: Gossip
   require Spear.Records.Persistent, as: Persistent
+  require Spear.Records.Monitoring, as: Monitoring
   require Spear.Records.Shared, as: Shared
 
   @doc """
@@ -2119,5 +2120,97 @@ defmodule Spear do
   def park_stream(stream_name, group_name)
       when is_binary(stream_name) and is_binary(group_name) do
     "$persistentsubscription-#{stream_name}::#{group_name}-parked"
+  end
+
+  @doc """
+  Subscribes a process to stats updates from the EventStoreDB
+
+  This function subscribes a process in the same way as `subscribe/4`: the
+  function will return a reference representing the subscription and the
+  stats messages will be sent to the subscriber process with `send/2`.
+
+  This subscription can be cancelled with `cancel_subscription/3`.
+
+  This functionality was added to EventStoreDB in release v21.6.0. Prior
+  EventStoreDB versions will throw a GRPC error when attempting to use
+  this function.
+
+  ## Options
+
+  * `:interval` - (default: `5_000` - 5 seconds) the interval after which
+    a new stats message should be sent. By default, stats messages arrive
+    every five seconds.
+  * `:use_metadata?` - (default: `true`) undocumented option. See the
+    EventStoreDB implementation for more information.
+  * `:timeout` - (default: `5_000` - 5 seconds) the GenServer timeout to
+    use when requesting a subscription to stats
+  * `:raw?` - (default: `false`) whether to emit the stats messages as
+    'raw' `Spear.Records.Monitoring.stats_resp/0` records in a tuple of
+    `{subscription :: reference(), Spear.Records.Monitoring.stats_resp()}`.
+    By default, stats messages are returned as maps.
+  * `:credentials` - (default: `nil`) credentials to use to perform this
+    subscription request.
+
+  ## Examples
+
+      iex> Spear.subscribe_to_stats(conn, self())
+      {:ok, #Reference<0.359109646.3547594759.216222>}
+      iex> flush()
+      %{
+        "es-queue-Projection Core #2-length" => "0",
+        "es-queue-Worker #1-lengthLifetimePeak" => "0",
+        "es-queue-Worker #3-lengthCurrentTryPeak" => "0",
+        "es-queue-StorageReaderQueue #9-avgProcessingTime" => "0",
+        "es-queue-StorageReaderQueue #6-idleTimePercent" => "100",
+        ..
+      }
+  """
+  @doc since: "0.10.0"
+  @doc api: :monitoring
+  @spec subscribe_to_stats(
+          connection :: Spear.Connection.t(),
+          subscriber :: pid() | GenServer.name(),
+          opts :: Keyword.t()
+        ) ::
+          {:ok, reference()} | {:error, any()}
+  def subscribe_to_stats(conn, subscriber, opts \\ []) do
+    default_subscribe_opts = [
+      use_metadata?: false,
+      interval: 5_000,
+      timeout: 5_000,
+      raw?: false,
+      credentials: nil
+    ]
+
+    opts =
+      default_subscribe_opts
+      |> Keyword.merge(opts)
+
+    stats_req =
+      Monitoring.stats_req(
+        use_metadata: opts[:use_metadata?],
+        refresh_time_period_in_ms: opts[:interval]
+      )
+
+    request =
+      %Spear.Request{
+        api: {Monitoring, :Stats},
+        messages: [stats_req],
+        credentials: nil
+      }
+      |> Spear.Request.expand()
+
+    through =
+      if opts[:raw?] do
+        fn message, request_ref -> {request_ref, message} end
+      else
+        fn Monitoring.stats_resp(stats: stats), _ -> stats end
+      end
+
+    Connection.call(
+      conn,
+      {{:subscription, subscriber, through}, request},
+      opts[:timeout]
+    )
   end
 end

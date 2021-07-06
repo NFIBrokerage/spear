@@ -768,6 +768,17 @@ defmodule SpearTest do
 
       assert Spear.stream!(c.conn, category, from: :start, chunk_size: 2) |> Enum.count() == 6
     end
+
+    test "a process may subscribe to stats updates with subscribe_to_stats/3", c do
+      assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), interval: 200)
+      assert_receive stats when map_size(stats) >= 500
+      assert_receive stats when map_size(stats) >= 500
+      assert Spear.cancel_subscription(c.conn, subscription) == :ok
+
+      assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), raw?: true)
+      assert_receive {^subscription, stats} when is_tuple(stats)
+      assert Spear.cancel_subscription(c.conn, subscription) == :ok
+    end
   end
 
   test "park_stream/2 composes a proper parking stream" do
