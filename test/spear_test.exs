@@ -7,7 +7,7 @@ defmodule SpearTest do
   import Spear.Uuid, only: [uuid_v4: 0]
 
   @max_append_bytes 1_048_576
-  @checkpoint_after Integer.pow(32, 3)
+  @checkpoint_after 32 * 32 * 32
 
   @config Application.fetch_env!(:spear, :config)
 
