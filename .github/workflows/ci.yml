@@ -23,6 +23,7 @@ jobs:
     env:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost
+      EVENTSTORE_VERSION: ${{ matrix.eventstore }}
 
     steps:
     - name: Checkout
@@ -80,7 +81,7 @@ jobs:
 
     - name: Run tests
       if: ${{ matrix.beam.elixir != '1.12.2' || matrix.eventstore != '21.6.0' }}
-      run: mix test --exclude ${{ matrix.eventstore }}:false
+      run: mix test --exclude version_incompatible
 
     - name: Check formatting
       if: matrix.beam.elixir == '1.12.2'

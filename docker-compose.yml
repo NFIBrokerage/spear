@@ -20,6 +20,7 @@ services:
     environment:
     - 'ERL_AFLAGS=-kernel shell_history enabled'
     - EVENTSTORE_HOST=eventstore
+    - EVENTSTORE_VERSION=21.6.0
     volumes:
     - ./:/app
     working_dir: /app
