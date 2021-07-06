@@ -771,8 +771,8 @@ defmodule SpearTest do
 
     test "a process may subscribe to stats updates with subscribe_to_stats/3", c do
       assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), interval: 200)
-      assert_receive stats when map_size(stats) >= 500
-      assert_receive stats when map_size(stats) >= 500
+      assert_receive stats when is_map(stats)
+      assert_receive stats when is_map(stats)
       assert Spear.cancel_subscription(c.conn, subscription) == :ok
 
       assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), raw?: true)
