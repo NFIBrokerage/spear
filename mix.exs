@@ -117,7 +117,8 @@ defmodule Spear.MixProject do
           Spear.Records.Projections,
           Spear.Records.Persistent,
           Spear.Records.Users,
-          Spear.Records.Gossip
+          Spear.Records.Gossip,
+          Spear.Records.Monitoring
         ]
       ],
       groups_for_functions: [
@@ -127,7 +128,8 @@ defmodule Spear.MixProject do
         Operations: &(&1[:api] == :operations),
         Projections: &(&1[:api] == :projections),
         "Persistent Subscriptions": &(&1[:api] == :persistent),
-        Gossip: &(&1[:api] == :gossip)
+        Gossip: &(&1[:api] == :gossip),
+        Gossip: &(&1[:api] == :monitoring)
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"
