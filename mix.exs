@@ -129,7 +129,7 @@ defmodule Spear.MixProject do
         Projections: &(&1[:api] == :projections),
         "Persistent Subscriptions": &(&1[:api] == :persistent),
         Gossip: &(&1[:api] == :gossip),
-        Gossip: &(&1[:api] == :monitoring)
+        Monitoring: &(&1[:api] == :monitoring)
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"
