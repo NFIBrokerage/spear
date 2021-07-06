@@ -66,7 +66,7 @@ defmodule SpearTest do
 
     test "a stream may be streamed backwards", c do
       to_event_numbers = fn events -> Stream.map(events, & &1.body) |> Enum.to_list() end
-      expected_event_numbers = Enum.to_list(6..0//-1)
+      expected_event_numbers = Enum.to_list(6..0)
 
       assert ^expected_event_numbers =
                Spear.stream!(c.conn, c.stream_name, direction: :backwards, from: :end)
@@ -92,7 +92,7 @@ defmodule SpearTest do
     test "subscribing at the beginning of a stream emits all of the events", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :start)
 
-      for n <- 0..6//1 do
+      for n <- 0..6 do
         assert_receive %Spear.Event{body: ^n, metadata: %{subscription: ^sub}}
       end
 
@@ -110,7 +110,7 @@ defmodule SpearTest do
     test "a raw subscription will return ReadResp records", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, raw?: true)
 
-      for _n <- 0..6//1 do
+      for _n <- 0..6 do
         assert_receive {^sub, read_resp()}
       end
 
@@ -363,7 +363,7 @@ defmodule SpearTest do
       assert_receive %Spear.Event{body: 0} = event, 1_000
       assert %Spear.Filter.Checkpoint{} = Spear.Event.to_checkpoint(event)
 
-      for n <- 1..4//1 do
+      for n <- 1..4 do
         assert_receive %Spear.Event{body: ^n}
       end
 
@@ -376,7 +376,7 @@ defmodule SpearTest do
 
       assert_receive %Spear.Event{body: 0}, 1_000
 
-      for n <- 1..4//1 do
+      for n <- 1..4 do
         assert_receive %Spear.Event{body: ^n}
       end
 
