@@ -580,6 +580,22 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.subscribe_to_stats/3`
+  """
+  @doc since: "0.10.0"
+  @callback subscribe_to_stats(
+              subscriber :: pid() | GenServer.name(),
+              opts :: Keyword.t()
+            ) :: {:ok, reference()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.subscribe_to_stats/2`
+  """
+  @doc since: "0.10.0"
+  @callback subscribe_to_stats(subscriber :: pid() | GenServer.name()) ::
+              {:ok, reference()} | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -766,6 +782,11 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def nack(subscription, event_or_ids, opts \\ []) do
         Spear.nack(__MODULE__, subscription, event_or_ids, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def subscribe_to_stats(subscriber, opts \\ []) do
+        Spear.subscribe_to_stats(__MODULE__, subscriber, opts)
       end
     end
   end
