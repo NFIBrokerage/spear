@@ -11,7 +11,7 @@ make_server = fn ->
   ]
 
   _insecure_params = [
-    connection_string: "esdb://localhost:2113"
+    connection_string: "esdb://#{host}:2113"
   ]
 
   {:ok, pid} = Spear.Connection.start_link(secure_params)
