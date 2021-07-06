@@ -17,7 +17,7 @@ jobs:
         - elixir: "1.12.2"
           otp: "24.0"
         eventstore:
-        - 20.6.0
+        - 20.6.2
         - 21.6.0
     env:
       MIX_ENV: test
