@@ -31,7 +31,7 @@ jobs:
       run: sed -i 's/21.6.0/${{ matrix.eventstore }}/g' docker-compose.yml
 
     - name: Spawn docker-compose EventStoreDB container
-      run: docker-compose up eventstore --detach
+      run: docker-compose up --detach eventstore
 
     - name: Setup Elixir and Erlang versions
       uses: erlef/setup-beam@v1.7.0
