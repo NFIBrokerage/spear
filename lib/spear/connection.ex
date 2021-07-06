@@ -220,7 +220,7 @@ defmodule Spear.Connection do
 
   def handle_cast({:push, request_ref, message}, s) when is_reference(request_ref) do
     # YARD backpressure and http2 window sizes
-    with %Request{rpc: rpc} <- s.requests[request_ref],
+    with %{rpc: rpc} <- s.requests[request_ref],
          {wire_data, _size} =
            Spear.Request.to_wire_data(message, rpc.service_module, rpc.request_type),
          {:ok, conn} <- Mint.HTTP2.stream_request_body(s.conn, request_ref, wire_data) do
@@ -304,7 +304,7 @@ defmodule Spear.Connection do
 
   @impl Connection
   def handle_info({:DOWN, monitor_ref, :process, _object, _reason}, s) do
-    with {:ok, %Request{request_ref: request_ref} = request} <-
+    with {:ok, %{request_ref: request_ref} = request} <-
            fetch_subscription(s, monitor_ref),
          {^request, s} <- pop_in(s.requests[request_ref]),
          {:ok, conn} <- Mint.HTTP2.cancel_request(s.conn, request_ref) do
@@ -406,10 +406,10 @@ defmodule Spear.Connection do
     {request, s} = pop_in(s.requests[request_ref])
 
     case request do
-      %Request{type: {:subscription, subscriber, _through}, from: nil} ->
+      %{type: {:subscription, subscriber, _through}, from: nil} ->
         send(subscriber, {:eos, request_ref, :dropped})
 
-      %Request{from: from, response: response} ->
+      %{from: from, response: response} ->
         Connection.reply(from, {:ok, response})
     end
 
@@ -447,7 +447,7 @@ defmodule Spear.Connection do
     :ok = s.requests |> Map.values() |> Enum.each(&close_request/1)
   end
 
-  defp close_request(%Request{
+  defp close_request(%{
          type: {:subscription, proc, _through},
          from: nil,
          request_ref: request_ref
@@ -455,12 +455,12 @@ defmodule Spear.Connection do
     send(proc, {:eos, request_ref, :closed})
   end
 
-  defp close_request(%Request{type: _, from: from}) do
+  defp close_request(%{type: _, from: from}) do
     Connection.reply(from, {:error, :closed})
   end
 
   @doc false
-  @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, %Request{}} | :error
+  @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, Request.t()} | :error
   def fetch_subscription(s, monitor_ref) do
     Enum.find_value(s.requests, :error, fn {_request_ref, request} ->
       request.monitor_ref == monitor_ref && {:ok, request}
