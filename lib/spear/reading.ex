@@ -73,13 +73,13 @@ defmodule Spear.Reading do
      )}
   end
 
+  # coveralls-ignore-start
   defp map_all_position(Streams.read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)
     |> map_all_position()
   end
 
-  # coveralls-ignore-start
   defp map_all_position(%Spear.Event{link: %Spear.Event{} = link}) do
     map_all_position(link)
   end

@@ -321,12 +321,15 @@ defmodule Spear.Event do
   """
   @doc since: "0.1.0"
   @spec to_checkpoint(t()) :: Spear.Filter.Checkpoint.t()
+  # coveralls-ignore-start
   def to_checkpoint(%__MODULE__{metadata: metadata}) do
     struct(
       Spear.Filter.Checkpoint,
       Map.take(metadata, ~w[commit_position prepare_position subscription]a)
     )
   end
+
+  # coveralls-ignore-stop
 
   @doc false
   def from_recorded_event(

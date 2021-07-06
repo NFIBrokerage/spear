@@ -348,6 +348,7 @@ defmodule SpearTest do
       assert reason == %Spear.ExpectationViolation{current: :empty, expected: :exists}
     end
 
+    @tag :flaky
     test "a subscription to :all will eventually catch a stream pattern", c do
       <<"Spear.Test-", first_four::binary-size(4), _::binary>> = c.stream_name
       prefix = "Spear.Test-" <> first_four
@@ -430,6 +431,7 @@ defmodule SpearTest do
       Spear.cancel_subscription(c.conn, sub)
     end
 
+    @tag :flaky
     test "a subscription can pick up from where it left off with a ReadResp", c do
       filter = %Spear.Filter{
         on: :stream_name,
