@@ -242,6 +242,7 @@ defmodule SpearTest do
       assert Spear.delete_persistent_subscription(c.conn, c.stream_name, group) == :ok
     end
 
+    @tag compatible("~> 21.6")
     test "a psub to :all works as expected", c do
       group = uuid_v4()
       settings = %Spear.PersistentSubscription.Settings{}
