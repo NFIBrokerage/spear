@@ -84,7 +84,7 @@ defmodule Spear.PersistentSubscription do
   @doc false
   def from_map(map) do
     %__MODULE__{
-      stream_name: map["stream"],
+      stream_name: map_stream_name(map["stream"]),
       group_name: map["group"],
       settings: %Spear.PersistentSubscription.Settings{
         resolve_links?: map["resolveLinkTos"],
@@ -106,6 +106,9 @@ defmodule Spear.PersistentSubscription do
   defp to_atom(string) when is_binary(string), do: String.to_atom(string)
   defp to_atom(_), do: nil
 
+  defp map_stream_name("$all"), do: :all
+  defp map_stream_name(name), do: name
+
   @doc false
   def map_nack_action(:park), do: :Park
   def map_nack_action(:retry), do: :Retry
@@ -114,7 +117,21 @@ defmodule Spear.PersistentSubscription do
   def map_nack_action(_), do: :Unknown
 
   @doc false
+  def build_create_request(stream_name, group_name, settings, opts) do
+    Persistent.create_req(
+      options:
+        Persistent.create_req_options(
+          stream_identifier: map_create_request_stream_identifier(stream_name),
+          stream_option: map_create_stream_option(stream_name, opts),
+          group_name: group_name,
+          settings: Spear.PersistentSubscription.Settings.to_record(settings, :create)
+        )
+    )
+  end
+
+  @doc false
   # coveralls-ignore-start
+  # coveralls-ignore-stop
   def map_short_stream_option(stream_name) when is_binary(stream_name) do
     {:stream_identifier, Shared.stream_identifier(stream_name: stream_name)}
   end
@@ -132,9 +149,29 @@ defmodule Spear.PersistentSubscription do
      )}
   end
 
-  def map_create_stream_option(:all, _opts) do
-    # YARD
-    {:all, Persistent.create_req_all_options()}
+  def map_create_stream_option(:all, opts) do
+    from = Keyword.get(opts, :from, :start)
+
+    position =
+      with {:position, commit, prepare} <- map_all_position(from) do
+        # coveralls-ignore-start
+        {:position,
+         Persistent.create_req_position(commit_position: commit, prepare_position: prepare)}
+
+        # coveralls-ignore-stop
+      end
+
+    {:all,
+     Persistent.create_req_all_options(
+       all_option: position,
+       filter_option: map_filter(Keyword.get(opts, :filter))
+     )}
+  end
+
+  defp map_create_request_stream_identifier(:all), do: :undefined
+
+  defp map_create_request_stream_identifier(stream_name) do
+    Shared.stream_identifier(stream_name: stream_name)
   end
 
   def map_update_stream_option(stream_name, opts) when is_binary(stream_name) do
@@ -145,11 +182,23 @@ defmodule Spear.PersistentSubscription do
      )}
   end
 
-  def map_update_stream_option(:all, _opts) do
-    # YARD
-    {:all, Persistent.update_req_all_options()}
+  # this is roughly the same as the creation options but doesn't include
+  # the filter option, just the position option
+  def map_update_stream_option(:all, opts) do
+    # coveralls-ignore-start
+    from = Keyword.get(opts, :from, :start)
+
+    position =
+      with {:position, commit, prepare} <- map_all_position(from) do
+        {:position,
+         Persistent.update_req_position(commit_position: commit, prepare_position: prepare)}
+      end
+
+    {:all, Persistent.update_req_all_options(all_option: position)}
+    # coveralls-ignore-stop
   end
 
+  # coveralls-ignore-start
   defp map_revision(opts) do
     case Keyword.get(opts, :from, :start) do
       :start -> {:start, Shared.empty()}
@@ -157,6 +206,37 @@ defmodule Spear.PersistentSubscription do
       revision when is_integer(revision) -> {:revision, revision}
     end
   end
+
+  defp map_all_position(Persistent.read_resp() = read_resp) do
+    read_resp
+    |> Spear.Event.from_read_response(link?: true)
+    |> map_all_position()
+  end
+
+  defp map_all_position(%Spear.Event{link: %Spear.Event{} = link}) do
+    map_all_position(link)
+  end
+
+  defp map_all_position(%Spear.Event{
+         metadata: %{commit_position: commit, prepare_position: prepare}
+       }) do
+    {:position, commit, prepare}
+  end
+
+  defp map_all_position(%Spear.Filter.Checkpoint{
+         commit_position: commit,
+         prepare_position: prepare
+       }) do
+    {:position, commit, prepare}
+  end
+
+  defp map_all_position(:start), do: {:start, Shared.empty()}
+  defp map_all_position(:end), do: {:end, Shared.empty()}
+
+  defp map_filter(%Spear.Filter{} = filter),
+    do: {:filter, Spear.Filter._to_persistent_filter_options(filter)}
+
+  defp map_filter(nil), do: {:no_filter, Shared.empty()}
 
   # coveralls-ignore-stop
 end

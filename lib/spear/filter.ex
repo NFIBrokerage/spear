@@ -92,13 +92,9 @@ defmodule Spear.Filter do
   `:checkpoint_after` field in this struct.
   """
 
-  import Spear.Records.Streams,
-    only: [
-      read_req_options_filter_options: 1,
-      read_req_options_filter_options_expression: 1
-    ]
-
-  import Spear.Records.Shared, only: [empty: 0]
+  require Spear.Records.Streams, as: Streams
+  require Spear.Records.Persistent, as: Persistent
+  require Spear.Records.Shared, as: Shared
 
   @checkpoint_multiplier 32
   @default_checkpoint_after 32 * @checkpoint_multiplier
@@ -265,11 +261,11 @@ defmodule Spear.Filter do
 
   @doc false
   def _to_filter_options(%__MODULE__{} = filter) do
-    read_req_options_filter_options(
+    Streams.read_req_options_filter_options(
       checkpointIntervalMultiplier: div(filter.checkpoint_after, @checkpoint_multiplier),
       filter: map_inner_filter(filter),
       # YARD exactly how does one use the `:max` option here?
-      window: {:count, empty()}
+      window: {:count, Shared.empty()}
     )
   end
 
@@ -285,11 +281,40 @@ defmodule Spear.Filter do
   end
 
   defp map_filter_expression(regex) when is_binary(regex) do
-    read_req_options_filter_options_expression(regex: regex)
+    Streams.read_req_options_filter_options_expression(regex: regex)
   end
 
   defp map_filter_expression(prefixes) when is_list(prefixes) do
-    read_req_options_filter_options_expression(prefix: prefixes)
+    Streams.read_req_options_filter_options_expression(prefix: prefixes)
+  end
+
+  @doc false
+  def _to_persistent_filter_options(%__MODULE__{} = filter) do
+    Persistent.create_req_all_options_filter_options(
+      checkpointIntervalMultiplier: div(filter.checkpoint_after, @checkpoint_multiplier),
+      filter: map_persistent_inner_filter(filter),
+      # YARD exactly how does one use the `:max` option here?
+      window: {:count, Shared.empty()}
+    )
+  end
+
+  defp map_persistent_inner_filter(%__MODULE__{} = filter) do
+    {map_filter_type(filter.on), map_persistent_filter_expression(filter.by)}
+  end
+
+  # coveralls-ignore-start
+  defp map_persistent_filter_expression(%Regex{} = regex) do
+    regex |> Regex.source() |> map_persistent_filter_expression()
+  end
+
+  defp map_persistent_filter_expression(regex) when is_binary(regex) do
+    Persistent.create_req_all_options_filter_options_expression(regex: regex)
+  end
+
+  # coveralls-ignore-stop
+
+  defp map_persistent_filter_expression(prefixes) when is_list(prefixes) do
+    Persistent.create_req_all_options_filter_options_expression(prefix: prefixes)
   end
 end
 
@@ -301,7 +326,7 @@ end
 #       filter
 #       |> body()
 #       |> Code.Identifier.escape(?/)
-# 
+#
 #     ["~f/", escaped, ?/, opts(filter)]
 #     |> IO.iodata_to_binary()
 #     |> Inspect.Algebra.color(:regex, opts)
@@ -310,7 +335,7 @@ end
 #   defp body(%Spear.Filter{by: prefixes}) when is_list(prefixes), do: Enum.join(prefixes, " ")
 #   defp body(%Spear.Filter{by: %Regex{} = regex}), do: Regex.source(regex)
 #   defp body(%Spear.Filter{by: other}), do: to_string(other)
-# 
+#
 #   defp opts(%Spear.Filter{by: by, on: on}) do
 #     [by_opt(by), on_opt(on)]
 #   end

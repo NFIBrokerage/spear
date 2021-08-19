@@ -6,7 +6,29 @@ The format is based on [Keep a
 Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+*Note*: certain Spear versions add support for new EventStoreDB features gated
+behind new EventStoreDB versions. You should not downgrade your Spear version
+in order to avoid these features: Spear aims to keep a stable interface usable
+across all EventStoreDB versions v20+.
+
 ## 0.10.0 - [UNRELEASED]
+
+### Added
+
+- Implemented the creation, updating, reading, and deletion of persistent
+  subscriptions to the :all stream
+    - Note that this feature requires an EventStoreDB v21.6.0 or later
+- Added a dependency on the `:event_store_db_gpb_protobfs` package
+    - this package is just a convenience for developing spear: we can
+      build gpb definitions for the EventStoreDB protobufs on-the-fly
+      via the rebar3 gpb plugin, so we never need to commit the erl/hrl
+      files for the generated gpb modules.
+    - this also allows other (non-Elixir even) libraries to take advantage
+      of versioned, pre-generated gpb definitions for the EventStoreDB
+      grpc interface
+- Added `Spear.subscribe_to_stats/3` and `c:Spear.Client.subscribe_to_stats/2`
+    - this opens a subscription for EventStoreDB monitoring
+    - this feature requires EventStoreDB v21.6.0 or later
 
 ### Fixed
 
