@@ -270,16 +270,6 @@ defmodule SpearTest do
     end
   end
 
-  defp collect_psub_events(conn, subscription, acc \\ []) do
-    receive do
-      %Spear.Event{} = event ->
-        Spear.ack(conn, subscription, event)
-        collect_psub_events(conn, subscription, [event | acc])
-    after
-      500 -> :lists.reverse(acc)
-    end
-  end
-
   describe "given a subscription to a stream" do
     setup c do
       {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name)
@@ -850,5 +840,15 @@ defmodule SpearTest do
       status: :invalid_argument,
       status_code: 3
     }
+  end
+
+  defp collect_psub_events(conn, subscription, acc \\ []) do
+    receive do
+      %Spear.Event{} = event ->
+        Spear.ack(conn, subscription, event)
+        collect_psub_events(conn, subscription, [event | acc])
+    after
+      500 -> :lists.reverse(acc)
+    end
   end
 end
