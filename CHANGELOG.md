@@ -14,6 +14,12 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
   subscriptions to the :all stream
     - Note that this feature requires an EventStoreDB v21.6.0 or later
 
+### Fixed
+
+- Fixed the `Spear.set_global_acl/4` function to correctly append ACL
+  data as an event to the `$streams` metadata stream, instead of to
+  the `$streams` stream directly.
+
 ## 0.9.1 - 2021-06-01
 
 ### Added
