@@ -1575,7 +1575,7 @@ defmodule Spear do
   def delete_persistent_subscription(conn, stream_name, group_name, opts \\ [])
 
   def delete_persistent_subscription(conn, stream_name, group_name, opts)
-      when is_binary(stream_name) and is_binary(group_name) do
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     message =
       Persistent.delete_req(
         options:
@@ -1608,7 +1608,7 @@ defmodule Spear do
   @doc api: :persistent
   @spec create_persistent_subscription(
           connection :: Spear.Connection.t(),
-          stream_name :: String.t(),
+          stream_name :: String.t() | :all,
           group_name :: String.t(),
           settings :: Spear.PersistentSubscription.Settings.t(),
           opts :: Keyword.t()
@@ -1622,7 +1622,7 @@ defmodule Spear do
         %Spear.PersistentSubscription.Settings{} = settings,
         opts
       )
-      when is_binary(stream_name) and is_binary(group_name) do
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     message =
       Persistent.create_req(
         options:
@@ -1672,7 +1672,7 @@ defmodule Spear do
         %Spear.PersistentSubscription.Settings{} = settings,
         opts
       )
-      when is_binary(stream_name) and is_binary(group_name) do
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     message =
       Persistent.update_req(
         options:
@@ -1868,14 +1868,14 @@ defmodule Spear do
   @spec connect_to_persistent_subscription(
           connection :: Spear.Connection.t(),
           subscriber :: pid() | GenServer.name(),
-          stream_name :: String.t(),
+          stream_name :: String.t() | :all,
           group_name :: String.t(),
           opts :: Keyword.t()
         ) :: {:ok, subscription :: reference()} | {:error, any()}
   def connect_to_persistent_subscription(conn, subscriber, stream_name, group_name, opts \\ [])
 
   def connect_to_persistent_subscription(conn, subscriber, stream_name, group_name, opts)
-      when is_binary(stream_name) and is_binary(group_name) do
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     default_subscribe_opts = [
       timeout: 5_000,
       raw?: false,

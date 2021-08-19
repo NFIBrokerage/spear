@@ -462,7 +462,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback create_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               settings :: Spear.PersistentSubscription.Settings.t()
             ) :: :ok | {:error, any()}
@@ -472,7 +472,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback create_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               settings :: Spear.PersistentSubscription.Settings.t(),
               opts :: Keyword.t()
@@ -483,7 +483,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback update_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               settings :: Spear.PersistentSubscription.Settings.t()
             ) :: :ok | {:error, any()}
@@ -493,7 +493,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback update_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               settings :: Spear.PersistentSubscription.Settings.t(),
               opts :: Keyword.t()
@@ -504,7 +504,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback delete_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t()
             ) :: :ok | {:error, any()}
 
@@ -513,7 +513,7 @@ defmodule Spear.Client do
   """
   @doc since: "0.6.0"
   @callback delete_persistent_subscription(
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
@@ -537,7 +537,7 @@ defmodule Spear.Client do
   @doc since: "0.6.0"
   @callback connect_to_persistent_subscription(
               subscriber :: pid() | GenServer.name(),
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t()
             ) :: {:ok, reference()} | {:error, any()}
 
@@ -547,7 +547,7 @@ defmodule Spear.Client do
   @doc since: "0.6.0"
   @callback connect_to_persistent_subscription(
               subscriber :: pid() | GenServer.name(),
-              stream_name :: String.t(),
+              stream_name :: String.t() | :all,
               group_name :: String.t(),
               opts :: Keyword.t()
             ) :: {:ok, reference()} | {:error, any()}
