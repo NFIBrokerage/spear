@@ -1597,11 +1597,35 @@ defmodule Spear do
 
   ## Options
 
-  Options are passed to `request/5`.
+  * `:from` - the position or revision in the stream where the persistent
+    subscription should start. This option may be `:start` or `:end`
+    describing the beginning or end of the stream. When the `stream_name`
+    is `:all`, this paramater describes the prepare and commit positions
+    in the `:all` stream which can be found on any event emitted from a
+    subscription to the `:all` stream. When the `stream_name` is not the
+    `:all` stream, this option may be an integer representing the event
+    number in the stream from which the subscription should start. This
+    may be found on any `t:Spear.Event.t/0`. This option may be passed
+    a `t:Spear.Event.t/0`, from which either the revision or position will
+    be determined based on the stream name. This option overwrites the
+    `:revision` field on the `t:Spear.PersistentSubscription.Settings.t/0`
+    type which is now deprecated.
+
+  * `:filter` - a filter to apply while reading from the `:all` stream.
+    This option only applies when reading the `:all` stream. The same
+    data structure works for regular and persistent subscriptions to
+    the `:all` stream. See the `t:Spear.Filter.t/0` documentation for
+    more information.
+
+  Remaining options are passed to `request/5`.
 
   ## Examples
 
       iex> Spear.create_persistent_subscription(conn, "my_stream", "my_group", %Spear.PersistentSubscription.Settings{})
+      :ok
+      iex> import Spear.Filter
+      iex> filter = ~f/My.Aggregate.A- My.Aggregate.B-/ps
+      iex> Spear.create_persistent_subscription(conn, :all, "my_all_group", %Spear.PersistentSubscription.Settings{}, filter: filter)
       :ok
   """
   @doc since: "0.6.0"
@@ -1624,16 +1648,7 @@ defmodule Spear do
       )
       when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     message =
-      Persistent.create_req(
-        options:
-          Persistent.create_req_options(
-            stream_identifier: Shared.stream_identifier(stream_name: stream_name),
-            stream_option:
-              Spear.PersistentSubscription.map_create_stream_option(stream_name, opts),
-            group_name: group_name,
-            settings: Spear.PersistentSubscription.Settings.to_record(settings, :create)
-          )
-      )
+      Spear.PersistentSubscription.build_create_request(stream_name, group_name, settings, opts)
 
     with {:ok, Persistent.create_resp()} <- request(conn, Persistent, :Create, [message], opts) do
       :ok

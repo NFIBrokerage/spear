@@ -65,7 +65,7 @@ defmodule Spear.PersistentSubscription.Settings do
   def to_record(%__MODULE__{} = settings, :create) do
     create_req_settings(
       resolve_links: settings.resolve_links?,
-      revision: settings.revision,
+      revision: map_revision(settings.revision),
       extra_statistics: settings.extra_statistics?,
       max_retry_count: settings.max_retry_count,
       min_checkpoint_count: settings.min_checkpoint_count,
@@ -83,7 +83,7 @@ defmodule Spear.PersistentSubscription.Settings do
   def to_record(%__MODULE__{} = settings, :update) do
     update_req_settings(
       resolve_links: settings.resolve_links?,
-      revision: settings.revision,
+      revision: map_revision(settings.revision),
       extra_statistics: settings.extra_statistics?,
       max_retry_count: settings.max_retry_count,
       min_checkpoint_count: settings.min_checkpoint_count,
@@ -106,4 +106,9 @@ defmodule Spear.PersistentSubscription.Settings do
   defp map_checkpoint_after(ms) when is_integer(ms), do: {:checkpoint_after_ms, ms}
 
   # coveralls-ignore-stop
+
+  # this option is deprecated, so it's ok to leave it nil (e.g. when we're
+  # creating a persistent subscription to the :all stream)
+  defp map_revision(revision) when is_integer(revision), do: revision
+  defp map_revision(_), do: nil
 end

@@ -241,6 +241,43 @@ defmodule SpearTest do
 
       assert Spear.delete_persistent_subscription(c.conn, c.stream_name, group) == :ok
     end
+
+    test "a psub to :all works as expected", c do
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      filter = %Spear.Filter{
+        on: :stream_name,
+        by: [c.stream_name],
+        checkpoint_after: @checkpoint_after
+      }
+
+      assert Spear.create_persistent_subscription(c.conn, :all, group, settings,
+               from: :start,
+               filter: filter
+             ) == :ok
+
+      assert {:ok, sub} = Spear.connect_to_persistent_subscription(c.conn, self(), :all, group)
+
+      events = collect_psub_events(c.conn, sub)
+
+      assert Spear.cancel_subscription(c.conn, sub) == :ok
+
+      assert Spear.delete_persistent_subscription(c.conn, :all, group) == :ok
+
+      assert length(events) == 7
+      assert Enum.all?(events, &(&1.metadata.stream_name == c.stream_name))
+    end
+  end
+
+  defp collect_psub_events(conn, subscription, acc \\ []) do
+    receive do
+      %Spear.Event{} = event ->
+        Spear.ack(conn, subscription, event)
+        collect_psub_events(conn, subscription, [event | acc])
+    after
+      500 -> :lists.reverse(acc)
+    end
   end
 
   describe "given a subscription to a stream" do
