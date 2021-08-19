@@ -1595,6 +1595,10 @@ defmodule Spear do
 
   See `t:Spear.PersistentSubscription.Settings.t/0` for more information.
 
+  Note that persistent subscriptions to the `:all` stream with server-side
+  filtering is a feature introduced in EventStoreDB v21.6.0. Attempting
+  to use the `:all` stream on older EventStoreDB versions will fail.
+
   ## Options
 
   * `:from` - the position or revision in the stream where the persistent
@@ -1659,6 +1663,10 @@ defmodule Spear do
   Updates an existing persistent subscription
 
   See `t:Spear.PersistentSubscription.Settings.t/0` for more information.
+
+  Note that persistent subscriptions to the `:all` stream with server-side
+  filtering is a feature introduced in EventStoreDB v21.6.0. Attempting
+  to use the `:all` stream on older EventStoreDB versions will fail.
 
   ## Options
 
@@ -1835,6 +1843,10 @@ defmodule Spear do
   Like subscriptions from `subscribe/4`, events can be correlated to their
   subscription by the `:subscription` key in each `Spear.Event.metadata`
   map.
+
+  Note that persistent subscriptions to the `:all` stream with server-side
+  filtering is a feature introduced in EventStoreDB v21.6.0. Attempting
+  to use the `:all` stream on older EventStoreDB versions will fail.
 
   ## Backpressure
 
