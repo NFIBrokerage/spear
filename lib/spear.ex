@@ -681,7 +681,7 @@ defmodule Spear do
   @doc """
   Sets the global stream ACL
 
-  This function appends an event to the `$streams` EventStoreDB stream
+  This function appends metadata to the `$streams` EventStoreDB stream
   detailing how the EventStoreDB should allow access to user and system
   streams (with the `user_acl` and `system_acl` arguments, respectively).
 
@@ -720,7 +720,7 @@ defmodule Spear do
 
     Spear.Writing.build_global_acl_event(user_acl, system_acl, json_encode!)
     |> List.wrap()
-    |> Spear.append(conn, "$streams", opts)
+    |> Spear.append(conn, "$$$streams", opts)
   end
 
   @doc """
