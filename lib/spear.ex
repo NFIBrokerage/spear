@@ -412,6 +412,52 @@ defmodule Spear do
   end
 
   @doc """
+  Appends an enumeration of events to an EventStoreDB stream
+
+  ## Options
+
+  * `:expect` - (default: `:any`) the expectation to set on the
+    status of the stream. The write will fail if the expectation fails. See
+    `Spear.ExpectationViolation` for more information about expectations.
+  * `:deadline` - TODO
+  * `:send_ack_to` - (default: `self()`) a process or process name which
+    should receive acknowledgement messages detailing whether a batch has
+    succeded or failed to be committed by the deadline.
+  * `:done?` - (default: false) controls whether this batch of events should
+    close out the entire batch-append request. Attempting to send more batches
+    on the same `batch_id` after a chunk with the `:done?` flag set to `true`
+    will fail.
+  * `:raw?` - (default: `false`) a boolean which controls whether the return
+    signature should TODO
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
+
+  ## Examples
+
+      iex> TODO.todo()
+  """
+  @doc since: "0.10.0"
+  @doc api: :streams
+  @spec append_batch(
+          event_stream :: Enumerable.t(),
+          connection :: Spear.Connection.t(),
+          batch_id :: reference() | :new,
+          stream_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, batch_id :: reference()} | {:error, term()}
+  def append_batch(event_stream, conn, batch_id, stream_name, opts \\ []) when is_binary(stream_name) and (is_reference(batch_id) or batch_id == :new) do
+    _default_write_opts = [
+      expect: :any,
+      raw?: false,
+      stream: stream_name
+    ]
+
+    # TODO
+  end
+
+  @doc """
   Subscribes a process to an EventStoreDB stream
 
   Unlike `read_stream/3` or `stream!/3`, this function does not return an
