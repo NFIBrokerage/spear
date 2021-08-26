@@ -12,7 +12,6 @@ defmodule Spear.StreamPosition do
   # doc metadata for this module
   # also document Spear.AllPosition
 
-  require Spear.Records.Shared, as: Shared
   require Spear.Records.Streams, as: Streams
   alias Spear.AllPosition
 
@@ -47,7 +46,7 @@ defmodule Spear.StreamPosition do
     %__MODULE__{
       kind: :all_position,
       next: AllPosition.from_record(next),
-      last: AllPosition.from_recordlast()
+      last: AllPosition.from_record(last)
     }
   end
 end
