@@ -17,6 +17,7 @@ defmodule Spear.Reading.Stream do
 
   require Spear.Records.Streams, as: Streams
   alias Spear.Reading
+  require Spear.Records.Streams, as: Streams
 
   # matches explicitly on event ReadResps
   defmacrop event do

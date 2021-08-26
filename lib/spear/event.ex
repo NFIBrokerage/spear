@@ -6,6 +6,7 @@ defmodule Spear.Event do
   AppendReq and ReadResp records
   """
 
+  alias Spear.StreamPosition
   require Spear.Records.Streams, as: Streams
   require Spear.Records.Persistent, as: Persistent
   require Spear.Records.Shared, as: Shared
@@ -321,13 +322,20 @@ defmodule Spear.Event do
   """
   @doc since: "0.1.0"
   @spec from_read_response(tuple(), Keyword.t()) :: t()
-  def from_read_response(read_response, opts \\ []) do
+  def from_read_response(read_response, opts \\ [])
+
+  def from_read_response({_type, {:event, _event}} = read_response, opts) do
     {force_follow_link?, remaining_opts} = Keyword.pop(opts, :link?, false)
 
     read_response
     |> destructure_read_response(force_follow_link?)
     |> record_to_map()
     |> from_recorded_event(remaining_opts)
+  end
+
+  def from_read_response({_type, {position, _position_info}} = read_response, _opts)
+      when position in [:stream_position, :all_stream_position] do
+    StreamPosition.from_read_response(read_response)
   end
 
   @doc """
