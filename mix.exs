@@ -108,7 +108,9 @@ defmodule Spear.MixProject do
           Spear.ClusterMember,
           Spear.Scavenge,
           Spear.PersistentSubscription,
-          Spear.PersistentSubscription.Settings
+          Spear.PersistentSubscription.Settings,
+          Spear.Position,
+          Spear.BatchAppendResult
         ],
         "Record interfaces": [
           Spear.Records.Shared,
@@ -118,7 +120,9 @@ defmodule Spear.MixProject do
           Spear.Records.Persistent,
           Spear.Records.Users,
           Spear.Records.Gossip,
-          Spear.Records.Monitoring
+          Spear.Records.Monitoring,
+          Spear.Records.Google,
+          Spear.Records.Status
         ]
       ],
       groups_for_functions: [
