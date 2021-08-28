@@ -129,11 +129,13 @@ defmodule Spear.Connection.Request do
         [:eof | message_buffer]
       end
 
-    stream_messages(
-      put_request(state, request),
+    state
+    |> put_request(request)
+    |> stream_messages(
       request.request_ref,
       messages
     )
+    |> post_stream_hook(request.request_ref)
   end
 
   defp handle_contination(
@@ -219,6 +221,25 @@ defmodule Spear.Connection.Request do
     end
   end
 
+  # the bidirectional BatchAppend has some odd behavior if the first
+  # batch is a fragment: we want to reply with `{:ok, request_ref}` as
+  # soon as we're done sending the fragment because the server won't
+  # reply (it's awaiting the rest of the batch to respond)
+  defp post_stream_hook({:ok, state}, request_ref) do
+    case state.requests[request_ref] do
+      %__MODULE__{rpc: %Spear.Rpc{name: :BatchAppend}} = request ->
+        {:ok, put_request(state, reply_once(request))}
+
+      _ ->
+        {:ok, state}
+    end
+  end
+
+  # coveralls-ignore-start
+  defp post_stream_hook(stream_result, _request_ref), do: stream_result
+
+  # coveralls-ignore-stop
+
   def continue_requests(state) do
     state.requests
     |> Enum.filter(fn
@@ -261,16 +282,7 @@ defmodule Spear.Connection.Request do
         put_in(request.response.data, rest)
 
       {Monitoring.stats_resp() = message, rest} ->
-        request =
-          update_in(request.from, fn
-            nil ->
-              nil
-
-            from ->
-              GenServer.reply(from, {:ok, request.request_ref})
-
-              nil
-          end)
+        request = reply_once(request)
 
         send(subscriber, through.(message, request.request_ref))
         put_in(request.response.data, rest)
@@ -285,6 +297,17 @@ defmodule Spear.Connection.Request do
         update_in(request.response.data, fn data -> data <> new_data end)
         # coveralls-ignore-stop
     end
+  end
+
+  defp reply_once(request) do
+    update_in(request.from, fn
+      nil ->
+        nil
+
+      from ->
+        GenServer.reply(from, {:ok, request.request_ref})
+        nil
+    end)
   end
 
   defp monitor_subscription({:subscription, subscriber, _through}) do

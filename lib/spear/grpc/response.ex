@@ -30,6 +30,12 @@ defmodule Grpc.Response do
     15 => :data_loss,
     16 => :unauthenticated
   }
+  @reverse_capitalized_status_code_mapping Map.new(@status_code_mapping, fn {status_code, status} ->
+                                             {status
+                                              |> Atom.to_string()
+                                              |> String.upcase()
+                                              |> String.to_atom(), status_code}
+                                           end)
 
   def from_connection_response(%Response{status: status}, _request, _raw?) when status != 200 do
     %__MODULE__{
@@ -104,4 +110,10 @@ defmodule Grpc.Response do
   end
 
   def map_status(_), do: :unknown
+
+  for {status, code} <- @reverse_capitalized_status_code_mapping do
+    def status_code(unquote(status)), do: unquote(code)
+  end
+
+  def status_code(_), do: 2
 end
