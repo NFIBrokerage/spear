@@ -456,13 +456,6 @@ defmodule Spear do
   * `:expect` - (default: `:any`) the expectation to set on the
     status of the stream. The write will fail if the expectation fails. See
     `Spear.ExpectationViolation` for more information about expectations.
-  * `:deadline` - (default: `nil`) the time the EventStoreDB
-    has to write the batch of events. This can be passed as a `t:DateTime.t/0`
-    or as a tuple of the gregorian seconds `{seconds, nanos}`, or as `nil`
-    which represents that the deadline time is up to the server. If this
-    timestamp comes before the server's current timestamp, the write will
-    time out. If this value exceeds the EventStoreDB's configured write
-    commit timeout, the write commit timeout will be used as the deadline.
   * `:send_ack_to` - (default: `self()`) a process or process name which
     should receive acknowledgement messages detailing whether a batch has
     succeded or failed to be committed by the deadline.
