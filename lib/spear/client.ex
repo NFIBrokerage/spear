@@ -77,6 +77,29 @@ defmodule Spear.Client do
               :ok | {:error, any()}
 
   @doc """
+  A wrapper around `Spear.append_batch/4`
+  """
+  @doc since: "0.10.0"
+  @callback append_batch(
+              event_stream :: Enumerable.t(),
+              request_id :: reference() | :new,
+              stream_name :: String.t()
+            ) ::
+              :ok | {:error, any()} | tuple()
+
+  @doc """
+  A wrapper around `Spear.append_batch/5`
+  """
+  @doc since: "0.10.0"
+  @callback append_batch(
+              event_stream :: Enumerable.t(),
+              request_id :: reference() | :new,
+              stream_name :: String.t(),
+              opts :: Keyword.t()
+            ) ::
+              :ok | {:error, any()} | tuple()
+
+  @doc """
   A wrapper around `Spear.cancel_subscription/2`
   """
   @doc since: "0.1.0"
@@ -616,6 +639,11 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def append(event_stream, stream_name, opts \\ []) do
         Spear.append(event_stream, __MODULE__, stream_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def append_batch(event_stream, request_id, stream_name, opts \\ []) do
+        Spear.append_batch(event_stream, __MODULE__, request_id, stream_name, opts)
       end
 
       @impl unquote(__MODULE__)

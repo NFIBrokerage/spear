@@ -18,6 +18,7 @@ across all EventStoreDB versions v20+.
 - Implemented the creation, updating, reading, and deletion of persistent
   subscriptions to the :all stream
     - Note that this feature requires an EventStoreDB v21.6.0 or later
+- Implemented `Spear.append_batch/5` for high-throughput asynchronous appends
 - Added a dependency on the `:event_store_db_gpb_protobfs` package
     - this package is just a convenience for developing spear: we can
       build gpb definitions for the EventStoreDB protobufs on-the-fly

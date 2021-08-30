@@ -412,6 +412,164 @@ defmodule Spear do
   end
 
   @doc """
+  Appends an enumeration of events to an EventStoreDB stream
+
+  BatchAppend is a feature added in EventStoreDB version 21.6.0 which aims
+  to optimize append throughput. It works like a persistent subscription
+  in reverse: the client sends chunks of events to write and once the
+  events have been committed, the client receives an acknowledgement
+  message.
+
+  BatchAppends have a life cycle: a new batch append request is created
+  by passing the `:new` atom as the `request_id` argument and a request
+  is concluded by calling `Spear.cancel_subscription/2` on the `request_id`.
+
+  See the [Writing Events](guides/writing_events.md) guide for more information
+  about batching and when to prefer the `append_batch/5` function over
+  `append/4`.
+
+  ## Fragmentation
+
+  By default, each invocation of `append_batch/5` sends a single protobuf
+  message across the wire for all events in the `event_stream` argument.
+  If the `event_stream` argument is very large (> ~1MB), this may be undesirable
+  from a networking perspective.
+
+  The `:done?` flag can be set to `false` to mark a batch as a fragment,
+  which prevents the EventStoreDB from attempting to commit any events
+  sent for the batch until a fragment with the `:done?` flag set
+  to `true` is sent. Each batch of events after the first fragment must
+  pass the initial fragment's `batch_id` in the `:batch_id` option. A
+  set of fragments can be concluded by sending a final `append_batch/5`
+  with the `:done?` option set to `true`.
+
+  ## Options
+
+  * `:done?` - (default: `true`) controls whether the current chunk of events
+    being written is complete. See the "Fragmentation" section above for
+    more details.
+  * `:batch_id` - (default: `Spear.Uuid.uuid_v4()`) the unique ID of the
+    batch of events being appended. This must be passed the `batch_id`
+    returned by the first request which sets `:done?` to `false` until
+    a final fragment is appended (`done?: true`). See the "Fragmentation"
+    section above for more details.
+  * `:expect` - (default: `:any`) the expectation to set on the
+    status of the stream. The write will fail if the expectation fails. See
+    `Spear.ExpectationViolation` for more information about expectations.
+  * `:send_ack_to` - (default: `self()`) a process or process name which
+    should receive acknowledgement messages detailing whether a batch has
+    succeded or failed to be committed by the deadline.
+  * `:raw?` - (default: `false`) a boolean which controls whether messages
+    emitted to the `:send_ack_to` process are decoded from
+    `Spear.Records.Streams.batch_append_resp/0` records. Spear preserves
+    most of the information when decoding the record into the
+    `t:Spear.BatchAppendResult.t/0` struct, but it discards duplicated
+    information such as stream name and expected revision. Setting
+    the `:raw?` flag allows one to decode the record however they wish.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
+  * `:timeout` - (default: `5_000`) the timeout for the initial call to
+    open the batch request>
+
+  ## Examples
+
+      iex> {:ok, first_batch_id, request_id} =
+      ...>   Spear.append_batch(first_batch, conn, :new, first_stream_name)
+      {:ok, "496ba076-098f-4108-a2ca-c73f7b94c06f", #Reference<0.1691282361.2492989441.105913>}
+      iex> receive do
+      ...>   %Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^first_batch_id, result: result} ->
+      ...>     result
+      ...> end
+      :ok
+      iex> {:ok, second_batch_id} =
+      ...>   Spear.append_batch(second_batch, conn, batch_id, second_stream_name)
+      {:ok, "3a1ed972-716c-4679-9cc7-c23c3544e538"}
+      iex> receive(do: (%Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^second_batch_id, result: result}) -> result))
+      :ok
+      iex> {:ok, third_batch_id} =
+      ...>   Spear.append_batch(third_batch, conn, batch_id, third_stream_name)
+      {:ok, "b4eb1330-8c59-48d0-8a0b-2df33672cc0b"}
+      iex> receive(do: (%Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^third_batch_id, result: result}) -> result))
+      :ok
+      iex> Spear.cancel_subscription(conn, request_id)
+      :ok
+  """
+  @doc since: "0.10.0"
+  @doc api: :streams
+  @spec append_batch(
+          event_stream :: Enumerable.t(),
+          connection :: Spear.Connection.t(),
+          request_id :: reference() | :new,
+          stream_name :: String.t(),
+          opts :: Keyword.t()
+        ) ::
+          {:ok, batch_id :: String.t()}
+          | {:ok, batch_id :: String.t(), request_id :: reference()}
+          | {:error, term()}
+  def append_batch(event_stream, conn, request_id, stream_name, opts \\ [])
+      when is_binary(stream_name) and (is_reference(request_id) or request_id == :new) do
+    declared_batch_id = Keyword.get(opts, :batch_id)
+
+    default_write_opts = [
+      explicit_batch_id?: declared_batch_id != nil,
+      expect: :any,
+      deadline: nil,
+      done?: true,
+      raw?: false,
+      batch_id: declared_batch_id || Spear.Event.uuid_v4(),
+      timeout: 5_000
+    ]
+
+    opts =
+      default_write_opts
+      |> Keyword.merge(opts)
+      |> Keyword.merge(events: event_stream, stream_name: stream_name)
+
+    message =
+      opts
+      |> Map.new()
+      |> Spear.Writing.build_batch_append_request()
+
+    call_or_cast_batch(conn, message, request_id, opts)
+  end
+
+  # the first batch is a GenServer.call/3 so we can get back the request_id
+  defp call_or_cast_batch(conn, message, :new, opts) do
+    subscriber = Keyword.get(opts, :send_ack_to, self())
+
+    through = &Spear.BatchAppendResult.from_record(&1, &2, opts[:raw?])
+
+    request =
+      %Spear.Request{
+        api: {Streams, :BatchAppend},
+        messages: [message],
+        credentials: opts[:credentials]
+      }
+      |> Spear.Request.expand()
+
+    call = {{:subscription, subscriber, through}, request}
+
+    case Connection.call(conn, call, opts[:timeout]) do
+      {:ok, subscription} when is_reference(subscription) ->
+        {:ok, opts[:batch_id], subscription}
+
+      # coveralls-ignore-start
+      error ->
+        error
+
+        # coveralls-ignore-stop
+    end
+  end
+
+  # subsequent batches are casts: totally async
+  defp call_or_cast_batch(conn, message, request_id, opts) do
+    :ok = Connection.cast(conn, {:push, request_id, message})
+    {:ok, opts[:batch_id]}
+  end
+
+  @doc """
   Subscribes a process to an EventStoreDB stream
 
   Unlike `read_stream/3` or `stream!/3`, this function does not return an

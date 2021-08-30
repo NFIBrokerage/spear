@@ -24,7 +24,7 @@ services:
     volumes:
     - ./:/app
     working_dir: /app
-    command: tail -f /dev/null
+    command: bash -c "mix local.rebar --force && mix local.hex --force && tail -f /dev/null"
 
 volumes:
   spear_eventstore:

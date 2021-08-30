@@ -811,6 +811,149 @@ defmodule SpearTest do
       assert_receive {^subscription, stats} when is_tuple(stats)
       assert Spear.cancel_subscription(c.conn, subscription) == :ok
     end
+
+    @tag compatible("~> 21.6")
+    test "append_batch/5 appends a batch of events", c do
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, expect: :empty)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: :ok,
+        batch_id: ^batch_id,
+        request_id: ^request_id,
+        revision: revision
+      }
+
+      assert {:ok, batch_id} =
+               random_events()
+               |> Stream.drop(5)
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, request_id, c.stream_name, expect: revision)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: :ok,
+        batch_id: ^batch_id,
+        request_id: ^request_id
+      }
+
+      assert {:ok, batch_id} =
+               random_events()
+               |> Stream.drop(10)
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, request_id, c.stream_name, expect: :exists)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: :ok,
+        batch_id: ^batch_id,
+        request_id: ^request_id
+      }
+
+      assert {:ok, batch_id} =
+               random_events()
+               |> Stream.drop(15)
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, request_id, c.stream_name)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: :ok,
+        batch_id: ^batch_id,
+        request_id: ^request_id
+      }
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..19)
+    end
+
+    @tag compatible("~> 21.6")
+    test "append_batch/5 can fragment with the :done? flag and :batch_id", c do
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, done?: false)
+
+      assert {:ok, ^batch_id} =
+               random_events()
+               |> Stream.drop(5)
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, request_id, c.stream_name,
+                 done?: true,
+                 batch_id: batch_id
+               )
+
+      assert_receive %Spear.BatchAppendResult{
+        result: :ok,
+        batch_id: ^batch_id,
+        request_id: ^request_id
+      }
+
+      refute_receive _
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..9)
+    end
+
+    @tag compatible("~> 21.6")
+    test "an incomplete append_batch/5 fragment will time out", c do
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, done?: false)
+
+      assert_receive %Spear.BatchAppendResult{
+                       result:
+                         {:error,
+                          %Spear.Grpc.Response{message: "Timeout", status: :deadline_exceeded}},
+                       batch_id: ^batch_id,
+                       request_id: ^request_id
+                     },
+                     5_000
+
+      refute_receive _
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
+    end
+
+    # deadlines do not appear to be working no matter what timestamp I put on
+    # or how I interleave the messages
+    # @tag compatible("~> 21.6")
+    @tag :skip
+    test "append_batch/5 with a deadline in the past will fail", c do
+      _deadline = DateTime.utc_now() |> DateTime.add(-(60 * 3600), :second)
+      deadline = {0, 0}
+
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline, done?: false)
+
+      assert {:ok, ^batch_id} =
+               random_events()
+               |> Stream.drop(5)
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, request_id, c.stream_name,
+                 deadline: deadline,
+                 done?: true,
+                 batch_id: batch_id
+               )
+
+      assert_receive %Spear.BatchAppendResult{
+        result: {:error, %Spear.Grpc.Response{message: "Timeout", status: :deadline_exceeded}},
+        batch_id: ^batch_id,
+        request_id: ^request_id
+      }
+
+      refute_receive _
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
+    end
   end
 
   test "park_stream/2 composes a proper parking stream" do

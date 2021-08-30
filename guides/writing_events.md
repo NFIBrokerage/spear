@@ -1,7 +1,8 @@
 # Writing Events
 
-This guide covers specifics about the `Spear.append/4` function and general
-information about the event-writing functionality.
+This guide covers specifics about the `Spear.append/4` and
+`Spear.append_batch/5` functions and general information about the
+event-writing functionality.
 
 ## Enumeration Characteristics
 
@@ -48,7 +49,7 @@ on one very large event or, as shown above, many tiny events in a single
 call to `Spear.append/4`. Attempting to write more than the budget will fail
 the request with the above signature and no events in the request will be
 written to the EventStoreDB. This value is configurable in the EventStoreDB
-configuration.
+server configuration.
 
 ## Blocking
 
@@ -68,8 +69,64 @@ around the range of 10 and 100 KB), Spear takes conceptual breaks somewhat
 often during large requests. This allows Spear to efficiently multiplex large
 writes with large reads and subscriptions.
 
-## Batching
+## Increasing append throughput with `Spear.append_batch/5`
 
-When appending multiple events, Spear will fit as many messages as possible
-into the same HTTP2 DATA frame. This is valid according to the gRPC
-specification and has the potential to improve performance.
+EventStoreDB v21.6.0+'s BatchAppend feature is designed to improve performance
+of appending large numbers of events. The protobuf and gRPC service definitions
+give BatchAppend an advantage over the standard Append RPC both in terms
+of encoded message size (and therefore bytes over the network) and number of
+HTTP/2 requests.
+
+`Spear.append/4` is a simpler interface for appends and is a reasonable
+default. `Spear.append_batch/5` is more cumbersome to use but is also more
+powerful. In general, `Spear.append_batch/5` should be preferred when
+writing large numbers of events and when append throughput is critical.
+
+## Example: use Streams and Tasks with `Spear.append_batch/5`
+
+Say we have an `t:Enumerable.t/0` of event batches where each element is
+a tuple of the stream name to append to and a batch of events to append:
+`{stream_name, [%Spear.Event{}, ...]}`. We can use `Task.async_stream/3`
+to parallelize appends like so:
+
+```elixir
+alias Spear.BatchAppendResult, as: Result
+
+[{stream_name, event_batch}] = Enum.take(event_batch_stream, 1)
+
+{:ok, batch_id, request_id} =
+  Spear.append_batch(event_batch, conn, :new, stream_name)
+
+receive(do: (%Result{batch_id: ^batch_id, request_id: ^request_id, result: :ok} -> :ok))
+```
+
+We start by opening up a new `Spear.append_batch/5` request using the `:new`
+atom as the `request_id` and the first element of the stream as input.
+
+```elixir
+event_batch_stream
+|> Stream.drop(1)
+|> Task.async_stream(fn {stream_name, event_batch} ->
+  {:ok, batch_id} =
+    Spear.append_batch(event_batch, conn, request_id, stream_name)
+
+  receive do
+    %Result{batch_id: ^batch_id, request_id: ^request_id, result: :ok} -> :ok
+  end
+end)
+|> Stream.run()
+```
+
+Now we drop the first element of our stream (which we appended to open the
+request) and pass the rest of the stream through `Task.async_stream/2`.
+`Task.async_stream/2` will apply the anonymous function to each element
+of the stream, so we append a batch for each `{stream_name, event_batch}`
+element and await the result. `Task.async_stream/2` will spawn processes
+for each element, keeping at most `System.schedulers_online/0` processes
+running at a time.
+
+Finally we'll close the request using `Spear.cancel_subscription/2`
+
+```elixir
+:ok = Spear.cancel_subscription(conn, request_id)
+```

@@ -214,11 +214,17 @@ defmodule Spear.Event do
       [{:"event_store.client.streams.AppendReq", ..}, ..]
   """
   @doc since: "0.1.0"
-  @spec to_proposed_message(t(), encoder_mapping :: %{}) :: AppendReq.t()
+  @spec to_proposed_message(t(), encoder_mapping :: %{}, type :: :append | :batch_append) ::
+          tuple()
   def to_proposed_message(
-        %__MODULE__{} = event,
-        encoder_mapping \\ %{"application/json" => &Jason.encode!/1}
-      ) do
+        event,
+        encoder_mapping \\ %{"application/json" => &Jason.encode!/1},
+        # coveralls-ignore-start
+        type \\ :append
+        # coveralls-ignore-stop
+      )
+
+  def to_proposed_message(event, encoder_mapping, :append) do
     encoder = Map.get(encoder_mapping, event.metadata.content_type, & &1)
 
     Streams.append_req(
@@ -230,6 +236,17 @@ defmodule Spear.Event do
            id: Shared.uuid(value: {:string, event.id}),
            metadata: %{"content-type" => event.metadata.content_type, "type" => event.type}
          )}
+    )
+  end
+
+  def to_proposed_message(event, encoder_mapping, :batch_append) do
+    encoder = Map.get(encoder_mapping, event.metadata.content_type, & &1)
+
+    Streams.batch_append_req_proposed_message(
+      custom_metadata: event.metadata.custom_metadata,
+      data: encoder.(event.body),
+      id: Shared.uuid(value: {:string, event.id}),
+      metadata: %{"content-type" => event.metadata.content_type, "type" => event.type}
     )
   end
 
@@ -553,7 +570,7 @@ defmodule Spear.Event do
 
       iex> Spear.Event.uuid_v4
       "98d3a5e2-ceb4-4a78-8084-97edf9452823"
-      iex> Spear.Event.uuid_v4                   
+      iex> Spear.Event.uuid_v4
       "2629ea4b-d165-45c9-8a2f-92b5e20b894e"
   """
   @doc since: "0.1.0"
