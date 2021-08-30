@@ -11,14 +11,18 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
-## 0.10.0 - [UNRELEASED]
+## 0.10.0 - 2021-08-30
 
 ### Added
 
 - Implemented the creation, updating, reading, and deletion of persistent
-  subscriptions to the :all stream
-    - Note that this feature requires an EventStoreDB v21.6.0 or later
+  subscriptions to the `:all` stream
+    - this feature requires EventStoreDB v21.6.0 or later
 - Implemented `Spear.append_batch/5` for high-throughput asynchronous appends
+    - this feature requires EventStoreDB v21.6.0 or later
+- Added `Spear.subscribe_to_stats/3` and `c:Spear.Client.subscribe_to_stats/2`
+    - this opens a subscription for EventStoreDB monitoring
+    - this feature requires EventStoreDB v21.6.0 or later
 - Added a dependency on the `:event_store_db_gpb_protobfs` package
     - this package is just a convenience for developing spear: we can
       build gpb definitions for the EventStoreDB protobufs on-the-fly
@@ -27,9 +31,6 @@ across all EventStoreDB versions v20+.
     - this also allows other (non-Elixir even) libraries to take advantage
       of versioned, pre-generated gpb definitions for the EventStoreDB
       grpc interface
-- Added `Spear.subscribe_to_stats/3` and `c:Spear.Client.subscribe_to_stats/2`
-    - this opens a subscription for EventStoreDB monitoring
-    - this feature requires EventStoreDB v21.6.0 or later
 
 ### Changed
 
