@@ -306,7 +306,11 @@ defmodule Spear do
       direction: :forwards,
       max_count: 42,
       resolve_links?: true,
-      through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
+      through: fn stream ->
+        stream
+        |> Stream.filter(&Spear.Event.event?/1)
+        |> Stream.map(&Spear.Event.from_read_response/1)
+      end,
       timeout: 5_000,
       raw?: false,
       credentials: nil
