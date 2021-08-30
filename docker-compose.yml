@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eventstore:
-    image: ghcr.io/eventstore/eventstore/eventstore:21.2.1-alpha.0.160-buster-slim
+    image: eventstore/eventstore:21.6.0-buster-slim
     environment:
     - EVENTSTORE_START_STANDARD_PROJECTIONS=True
     - EVENTSTORE_RUN_PROJECTIONS=All
