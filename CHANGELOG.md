@@ -20,6 +20,7 @@ across all EventStoreDB versions v20+.
     - this feature requires EventStoreDB v21.6.0 or later
 - Implemented `Spear.append_batch/5` for high-throughput asynchronous appends
     - this feature requires EventStoreDB v21.6.0 or later
+    - `Spear.append_batch_stream/2` has also been added for convenience
 - Added `Spear.subscribe_to_stats/3` and `c:Spear.Client.subscribe_to_stats/2`
     - this opens a subscription for EventStoreDB monitoring
     - this feature requires EventStoreDB v21.6.0 or later
