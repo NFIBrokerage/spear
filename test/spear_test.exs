@@ -826,7 +826,7 @@ defmodule SpearTest do
         revision: revision
       }
 
-      assert {:ok, batch_id} =
+      assert {:ok, batch_id, request_id} =
                random_events()
                |> Stream.drop(5)
                |> Stream.take(5)
@@ -838,7 +838,7 @@ defmodule SpearTest do
         request_id: ^request_id
       }
 
-      assert {:ok, batch_id} =
+      assert {:ok, batch_id, request_id} =
                random_events()
                |> Stream.drop(10)
                |> Stream.take(5)
@@ -850,7 +850,7 @@ defmodule SpearTest do
         request_id: ^request_id
       }
 
-      assert {:ok, batch_id} =
+      assert {:ok, batch_id, request_id} =
                random_events()
                |> Stream.drop(15)
                |> Stream.take(5)
@@ -874,7 +874,7 @@ defmodule SpearTest do
                |> Stream.take(5)
                |> Spear.append_batch(c.conn, :new, c.stream_name, done?: false)
 
-      assert {:ok, ^batch_id} =
+      assert {:ok, ^batch_id, ^request_id} =
                random_events()
                |> Stream.drop(5)
                |> Stream.take(5)
@@ -932,7 +932,7 @@ defmodule SpearTest do
                |> Stream.take(5)
                |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline, done?: false)
 
-      assert {:ok, ^batch_id} =
+      assert {:ok, ^batch_id, ^request_id} =
                random_events()
                |> Stream.drop(5)
                |> Stream.take(5)
@@ -953,6 +953,25 @@ defmodule SpearTest do
       assert Spear.cancel_subscription(c.conn, request_id) == :ok
 
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
+    end
+
+    @tag compatible("~> 21.6")
+    test "the append_batch_stream/2 helper maps a stream of batches, appends all", c do
+      stream_a = c.stream_name
+      stream_b = random_stream_name()
+
+      [
+        {stream_a, Stream.take(random_events(), 5), expect: :empty},
+        {stream_a, Stream.take(random_events(), 5)},
+        {stream_b, Stream.take(random_events(), 5), expect: :empty}
+      ]
+      |> Spear.append_batch_stream(c.conn)
+      |> Enum.each(fn ack ->
+        assert %Spear.BatchAppendResult{result: :ok} = ack
+      end)
+
+      assert Spear.stream!(c.conn, stream_a) |> Enum.count() == 10
+      assert Spear.stream!(c.conn, stream_b) |> Enum.count() == 5
     end
   end
 

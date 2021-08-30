@@ -475,7 +475,7 @@ defmodule Spear do
     set in the connection configuration, if present. See the
     [Security guide](guides/security.md) for more details.
   * `:timeout` - (default: `5_000`) the timeout for the initial call to
-    open the batch request>
+    open the batch request.
 
   ## Examples
 
@@ -487,14 +487,14 @@ defmodule Spear do
       ...>     result
       ...> end
       :ok
-      iex> {:ok, second_batch_id} =
+      iex> {:ok, second_batch_id, ^request_id} =
       ...>   Spear.append_batch(second_batch, conn, batch_id, second_stream_name)
-      {:ok, "3a1ed972-716c-4679-9cc7-c23c3544e538"}
+      {:ok, "3a1ed972-716c-4679-9cc7-c23c3544e538", #Reference<0.1691282361.2492989441.105913>}
       iex> receive(do: (%Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^second_batch_id, result: result}) -> result))
       :ok
-      iex> {:ok, third_batch_id} =
+      iex> {:ok, third_batch_id, ^request_id} =
       ...>   Spear.append_batch(third_batch, conn, batch_id, third_stream_name)
-      {:ok, "b4eb1330-8c59-48d0-8a0b-2df33672cc0b"}
+      {:ok, "b4eb1330-8c59-48d0-8a0b-2df33672cc0b", #Reference<0.1691282361.2492989441.105913>}
       iex> receive(do: (%Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^third_batch_id, result: result}) -> result))
       :ok
       iex> Spear.cancel_subscription(conn, request_id)
@@ -509,8 +509,7 @@ defmodule Spear do
           stream_name :: String.t(),
           opts :: Keyword.t()
         ) ::
-          {:ok, batch_id :: String.t()}
-          | {:ok, batch_id :: String.t(), request_id :: reference()}
+          {:ok, batch_id :: String.t(), request_id :: reference()}
           | {:error, term()}
   def append_batch(event_stream, conn, request_id, stream_name, opts \\ [])
       when is_binary(stream_name) and (is_reference(request_id) or request_id == :new) do
@@ -570,7 +569,104 @@ defmodule Spear do
   # subsequent batches are casts: totally async
   defp call_or_cast_batch(conn, message, request_id, opts) do
     :ok = Connection.cast(conn, {:push, request_id, message})
-    {:ok, opts[:batch_id]}
+    {:ok, opts[:batch_id], request_id}
+  end
+
+  @doc """
+  A convenience wrapper around `append_batch/5` for transforming a stream
+  into a batch append operation.
+
+  The `append_batch/5` function provides fine-grained control over the
+  batch append feature. This function transforms an input stream of batches
+  to apply the `append_batch/5` on all of them, making sure to clean up
+  the request once the batch is finished.
+
+  The expected `batch_stream` is an enumerable with each element follows the
+  format
+
+  ```elixir
+  {stream_name :: String.t(), events :: [Spear.Event.t()]}
+  # or
+  {stream_name :: String.t(), events :: [Spear.Event.t()], opts :: Keyword.t()}
+  ```
+
+  Where `opts` can be any option below. The options below are applied to
+  each call to `append_batch/5` when provided, except `:credentials`
+  which is only applied when specified on the first batch.
+
+  The resulting stream must be run (with an `Enum` function or `Stream.run/1`).
+  Each element is mapped to the acknowledgement `t:Spear.BatchAppendResult.t/0`
+  responses for each batch attempting to be appended.
+
+  ## Options
+
+  * `:expect` - (default: `:any`) the expectation to set on the
+    status of the stream. The write will fail if the expectation fails. See
+    `Spear.ExpectationViolation` for more information about expectations.
+  * `:raw?` - (default: `false`) a boolean which controls whether messages
+    emitted to the `:send_ack_to` process are decoded from
+    `Spear.Records.Streams.batch_append_resp/0` records. Spear preserves
+    most of the information when decoding the record into the
+    `t:Spear.BatchAppendResult.t/0` struct, but it discards duplicated
+    information such as stream name and expected revision. Setting
+    the `:raw?` flag allows one to decode the record however they wish.
+  * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
+    use as credentials for the request. This option overrides any credentials
+    set in the connection configuration, if present. See the
+    [Security guide](guides/security.md) for more details.
+  * `:timeout` - (default: `5_000`) the timeout for the initial call to
+    open the batch request. After the first batch, this argument instead
+    controls how long each `append_batch/5` operation will await an
+    acknowledgement.
+
+  ## Examples
+
+      batch_stream
+      |> Spear.append_batch_stream(conn)
+      |> Enum.reduce_while(:ok, fn ack, _acc ->
+        case ack.result do
+          :ok -> {:cont, :ok}
+          {:error, reason} -> {:halt, {:error, reason}}
+        end
+      end)
+      #=> :ok
+  """
+  @doc since: "0.10.0"
+  @doc api: :streams
+  @spec append_batch_stream(batch_stream :: Enumerable.t(), connection :: Spear.Connection.t()) ::
+          Enumerable.t()
+  def append_batch_stream(batch_stream, conn) do
+    Stream.transform(
+      batch_stream,
+      fn -> :new end,
+      fn element, request_id ->
+        {stream, events, opts} = map_append_batch_element(element)
+        timeout = Keyword.get(opts, :timeout, 5_000)
+
+        {:ok, batch_id, request_id} = Spear.append_batch(events, conn, request_id, stream, opts)
+
+        result =
+          receive do
+            %Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^batch_id} = ack ->
+              ack
+          after
+            timeout ->
+              {:error, :timeout}
+          end
+
+        {[result], request_id}
+      end,
+      fn
+        :new -> :ok
+        request_id -> Spear.cancel_subscription(conn, request_id)
+      end
+    )
+  end
+
+  defp map_append_batch_element({stream, events}), do: {stream, events, []}
+
+  defp map_append_batch_element({stream, events, opts}) do
+    {stream, events, Keyword.take(opts, [:expect, :raw?, :timeout])}
   end
 
   @doc """

@@ -100,6 +100,12 @@ defmodule Spear.Client do
               :ok | {:error, any()} | tuple()
 
   @doc """
+  A wrapper around `Spear.append_batch_stream/2`
+  """
+  @doc since: "0.10.0"
+  @callback append_batch_stream(batch_stream :: Enumerable.t()) :: Enumerable.t()
+
+  @doc """
   A wrapper around `Spear.cancel_subscription/2`
   """
   @doc since: "0.1.0"
@@ -644,6 +650,11 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def append_batch(event_stream, request_id, stream_name, opts \\ []) do
         Spear.append_batch(event_stream, __MODULE__, request_id, stream_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def append_batch_stream(batch_stream) do
+        Spear.append_batch_stream(batch_stream, __MODULE__)
       end
 
       @impl unquote(__MODULE__)
