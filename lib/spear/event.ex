@@ -641,4 +641,9 @@ defmodule Spear.Event do
   @spec id(t()) :: String.t()
   def id(%__MODULE__{link: %__MODULE__{} = link}), do: id(link)
   def id(%__MODULE__{id: id}), do: id
+
+  @doc false
+  def event?(Streams.read_resp(content: {:event, _event})), do: true
+  def event?(%__MODULE__{}), do: true
+  def event?(_), do: false
 end
