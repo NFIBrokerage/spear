@@ -15,13 +15,15 @@ defmodule Spear.Reading.Stream do
 
   @type t :: %__MODULE__{}
 
+  require Spear.Records.Streams, as: Streams
   alias Spear.Reading
 
-  import Spear.Records.Streams,
-    only: [
-      read_resp: 1,
-      read_resp_stream_not_found: 0
-    ]
+  # matches explicitly on event ReadResps
+  defmacrop event do
+    quote do
+      Spear.Records.Streams.read_resp(content: {:event, _event})
+    end
+  end
 
   def new!(opts) do
     opts = Keyword.put(opts, :max_count, opts[:chunk_size])
@@ -43,7 +45,8 @@ defmodule Spear.Reading.Stream do
 
   def wrap_buffer_in_decode_stream(state, buffer, unfold_fn) do
     case unfold_chunk(buffer) do
-      {read_resp(content: {:stream_not_found, read_resp_stream_not_found()}), _rest} ->
+      {Streams.read_resp(content: {:stream_not_found, Streams.read_resp_stream_not_found()}),
+       _rest} ->
         []
 
       {message, _rest} ->
@@ -60,7 +63,7 @@ defmodule Spear.Reading.Stream do
   defp request(state, raw?) do
     read_request = Reading.build_read_request(state)
 
-    Spear.request(state.connection, Spear.Records.Streams, :Read, [read_request],
+    Spear.request(state.connection, Streams, :Read, [read_request],
       timeout: state.timeout,
       credentials: state.credentials,
       raw?: raw?
@@ -77,7 +80,7 @@ defmodule Spear.Reading.Stream do
   def unfold_chunk(buffer) when is_binary(buffer) do
     Spear.Grpc.decode_next_message(
       buffer,
-      {Spear.Records.Streams.service_module(), :"event_store.client.streams.ReadResp"}
+      {Streams.service_module(), :"event_store.client.streams.ReadResp"}
     )
   end
 
@@ -87,11 +90,13 @@ defmodule Spear.Reading.Stream do
   defp unfold_continuous(%__MODULE__{buffer: <<>>, from: from} = state) do
     response = request!(%__MODULE__{state | max_count: state.max_count + 1})
 
-    case unfold_chunk(response) do
-      # discard the first message since it is `from`
-      {^from, <<_head, _::binary>> = rest} ->
-        unfold_continuous(%__MODULE__{state | buffer: rest})
-
+    # discard the first message since it is `from`
+    with {^from, <<_head, _::binary>> = rest} <- unfold_chunk(response),
+         # look ahead in `rest` to ensure it's an event read response
+         {event(), _} <- unfold_chunk(rest) do
+      unfold_continuous(%__MODULE__{state | buffer: rest})
+    else
+      # discard trailing stream position message
       _ ->
         nil
     end
@@ -99,8 +104,12 @@ defmodule Spear.Reading.Stream do
 
   defp unfold_continuous(%__MODULE__{buffer: buffer} = state) do
     case unfold_chunk(buffer) do
-      {message, remaining_buffer} ->
+      {event() = message, remaining_buffer} ->
         {message, %__MODULE__{state | buffer: remaining_buffer, from: message}}
+
+      # skip non-event read responses
+      {Streams.read_resp(), remaining_buffer} ->
+        unfold_continuous(%__MODULE__{state | buffer: remaining_buffer})
 
       _ ->
         nil

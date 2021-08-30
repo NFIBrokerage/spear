@@ -31,6 +31,14 @@ across all EventStoreDB versions v20+.
     - this opens a subscription for EventStoreDB monitoring
     - this feature requires EventStoreDB v21.6.0 or later
 
+### Changed
+
+- Non-event read responses are now discarded when reading from a stream
+    - this will allow the compatibility of spear v0.10.0 with the next
+      release of EventStoreDB
+    - this should not change behavior with any existing EventStoreDB
+      versions
+
 ### Fixed
 
 - Fixed the `Spear.set_global_acl/4` function to correctly append ACL
