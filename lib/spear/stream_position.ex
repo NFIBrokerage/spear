@@ -10,15 +10,15 @@ defmodule Spear.StreamPosition do
   # revisit this branch when the next release of EventStoreDB comes out
   # and fill in the above version, as well as adding documentation and
   # doc metadata for this module
-  # also document Spear.AllPosition
+  # also document Spear.Position
 
   require Spear.Records.Streams, as: Streams
-  alias Spear.AllPosition
+  alias Spear.Position
 
   @type t :: %__MODULE__{
           kind: :revision | :all_position,
-          next: integer() | Spear.AllPosition.t(),
-          last: integer() | Spear.AllPosition.t()
+          next: integer() | Spear.Position.t(),
+          last: integer() | Spear.Position.t()
         }
 
   defstruct [:kind, :next, :last]
@@ -45,8 +45,8 @@ defmodule Spear.StreamPosition do
       ) do
     %__MODULE__{
       kind: :all_position,
-      next: AllPosition.from_record(next),
-      last: AllPosition.from_record(last)
+      next: Position.from_record(next),
+      last: Position.from_record(last)
     }
   end
 end
