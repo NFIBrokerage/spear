@@ -30,6 +30,12 @@ defmodule VersionHelper do
       pattern == :nightly and @version == :nightly ->
         :version_compatible
 
+      not is_binary(pattern) ->
+        :version_incompatible
+
+      @version == :nightly ->
+        :version_compatible
+
       Version.match?(@version, pattern) ->
         :version_compatible
 
