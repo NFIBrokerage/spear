@@ -4,13 +4,37 @@ defmodule VersionHelper do
   EventStoreDB version declared in the env
   """
 
-  @version System.get_env("EVENTSTORE_VERSION")
+  version =
+    case System.get_env("EVENTSTORE_VERSION") do
+      nil -> :error
+      version -> {:ok, version}
+    end
+
+  version =
+    with {:ok, version} <- version,
+         [capture] <- Regex.run(~r"\d[\d\.]+", version) do
+      capture
+    else
+      nil ->
+        # if the regex doesn't match then we're using the CI/nightly image
+        :nightly
+
+      :error ->
+        raise "Could not parse the eventstore version! Set the EVENTSTORE_VERSION environment variable."
+    end
+
+  @version version
 
   def compatible(pattern) do
-    if Version.match?(@version, pattern) do
-      :version_compatible
-    else
-      :version_incompatible
+    cond do
+      pattern == :nightly and @version == :nightly ->
+        :version_compatible
+
+      Version.match?(@version, pattern) ->
+        :version_compatible
+
+      true ->
+        :version_incompatible
     end
   end
 end
