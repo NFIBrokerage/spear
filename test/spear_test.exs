@@ -919,28 +919,14 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
     end
 
-    # deadlines do not appear to be working no matter what timestamp I put on
-    # or how I interleave the messages
-    # @tag compatible("~> 21.6")
-    @tag :skip
+    @tag compatible(:nightly)
     test "append_batch/5 with a deadline in the past will fail", c do
-      _deadline = DateTime.utc_now() |> DateTime.add(-(60 * 3600), :second)
       deadline = {0, 0}
 
       assert {:ok, batch_id, request_id} =
                random_events()
                |> Stream.take(5)
-               |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline, done?: false)
-
-      assert {:ok, ^batch_id, ^request_id} =
-               random_events()
-               |> Stream.drop(5)
-               |> Stream.take(5)
-               |> Spear.append_batch(c.conn, request_id, c.stream_name,
-                 deadline: deadline,
-                 done?: true,
-                 batch_id: batch_id
-               )
+               |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline)
 
       assert_receive %Spear.BatchAppendResult{
         result: {:error, %Spear.Grpc.Response{message: "Timeout", status: :deadline_exceeded}},

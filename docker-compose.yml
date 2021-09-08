@@ -3,24 +3,30 @@ version: '3.8'
 services:
   eventstore:
     image: eventstore/eventstore:21.6.0-buster-slim
+    # switch to nightly:
+    # image: ghcr.io/eventstore/eventstore:ci
     environment:
     - EVENTSTORE_START_STANDARD_PROJECTIONS=True
     - EVENTSTORE_RUN_PROJECTIONS=All
     volumes:
     - spear_eventstore:/var/lib/eventstore
     - ./eventstoredb:/etc/eventstore:ro
+    # to run in insecure mode, which can be nice for debugging protobuf
+    # messages via wireshark
     # command: "--insecure --run-projections=All"
     ports:
     - 2113:2113
 
   app:
-    image: elixir:1.12.1
+    image: elixir:1.12.2
     depends_on:
     - eventstore
     environment:
     - 'ERL_AFLAGS=-kernel shell_history enabled'
     - EVENTSTORE_HOST=eventstore
     - EVENTSTORE_VERSION=21.6.0
+    # switch to nightly:
+    # - EVENTSTORE_VERSION=nightly
     volumes:
     - ./:/app
     working_dir: /app

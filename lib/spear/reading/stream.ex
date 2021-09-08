@@ -108,8 +108,11 @@ defmodule Spear.Reading.Stream do
         {message, %__MODULE__{state | buffer: remaining_buffer, from: message}}
 
       # skip non-event read responses
+      # coveralls-ignore-start
       {Streams.read_resp(), remaining_buffer} ->
         unfold_continuous(%__MODULE__{state | buffer: remaining_buffer})
+
+      # coveralls-ignore-stop
 
       _ ->
         nil
