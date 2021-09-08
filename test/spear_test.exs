@@ -927,7 +927,7 @@ defmodule SpearTest do
       assert {:ok, batch_id, request_id} =
                random_events()
                |> Stream.take(5)
-               |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline, done?: true)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, deadline: deadline)
 
       assert_receive %Spear.BatchAppendResult{
         result: {:error, %Spear.Grpc.Response{message: "Timeout", status: :deadline_exceeded}},
