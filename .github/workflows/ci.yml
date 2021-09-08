@@ -15,7 +15,7 @@ jobs:
         beam:
         - elixir: "1.7.4"
           otp: "21.3"
-        - elixir: "1.12.2"
+        - elixir: "1.12.3"
           otp: "24.0"
         eventstore:
         - "eventstore/eventstore:20.10.2-buster-slim"
