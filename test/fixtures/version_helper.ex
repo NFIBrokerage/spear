@@ -25,23 +25,20 @@ defmodule VersionHelper do
 
   @version version
 
-  def compatible(pattern) do
-    # we get some "warning: this check/guard will always yield the same result"s
-    # on old elixir versions if we don't do this because the compiler is too
-    # smart for its own good :P
-    version = @version
+  defp version, do: @version
 
+  def compatible(pattern) do
     cond do
-      pattern == :nightly and version == :nightly ->
+      pattern == :nightly and version() == :nightly ->
         :version_compatible
 
       not is_binary(pattern) ->
         :version_incompatible
 
-      version == :nightly ->
+      version() == :nightly ->
         :version_compatible
 
-      Version.match?(version, pattern) ->
+      Version.match?(version(), pattern) ->
         :version_compatible
 
       true ->
