@@ -919,7 +919,6 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
     end
 
-    # fixed https://github.com/EventStore/EventStore/pull/3138
     @tag compatible(:nightly)
     test "append_batch/5 with a deadline in the past will fail", c do
       _deadline = DateTime.utc_now() |> DateTime.add(-(60 * 3600), :second)
