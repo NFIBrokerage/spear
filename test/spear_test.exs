@@ -921,8 +921,7 @@ defmodule SpearTest do
 
     @tag compatible(:nightly)
     test "append_batch/5 with a deadline in the past will fail", c do
-      _deadline = DateTime.utc_now() |> DateTime.add(-(60 * 3600), :second)
-      deadline = {0, 0}
+      deadline = Map.update!(DateTime.utc_now(), :second, &(&1 - 1))
 
       assert {:ok, batch_id, request_id} =
                random_events()
