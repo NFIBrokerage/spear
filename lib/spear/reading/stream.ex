@@ -7,6 +7,7 @@ defmodule Spear.Reading.Stream do
     :from,
     :max_count,
     :direction,
+    :filter,
     :resolve_links?,
     :timeout,
     :buffer,

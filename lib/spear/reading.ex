@@ -33,7 +33,7 @@ defmodule Spear.Reading do
           read_direction: map_direction(params.direction),
           resolve_links: params.resolve_links?,
           count_option: {:count, params.max_count},
-          filter_option: map_filter(nil),
+          filter_option: map_filter(params.filter),
           uuid_option: @uuid
         )
     )
