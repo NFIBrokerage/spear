@@ -101,6 +101,20 @@ defmodule SpearTest do
       assert match?(%Spear.StreamPosition{kind: :all_position}, position)
     end
 
+    @tag compatible(:nightly)
+    test "stream!/3 and read_stream/3 may pass a filter on the :all stream", c do
+      filter = %Spear.Filter{
+        on: :stream_name,
+        by: [c.stream_name],
+        checkpoint_after: @checkpoint_after
+      }
+
+      assert {:ok, events} = Spear.read_stream(c.conn, :all, filter: filter)
+      assert Enum.count(events) == 7
+
+      assert Spear.stream!(c.conn, :all, filter: filter) |> Enum.count() == 7
+    end
+
     test "subscribing at the beginning of a stream emits all of the events", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :start)
 

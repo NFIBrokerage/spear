@@ -17,6 +17,11 @@ across all EventStoreDB versions v20+.
 
 - Added the `:include_position?` option to `Spear.read_stream/3` to emit a
   `t:Spear.StreamPosition.t/0` after any events
+- Added the `:filter` option to `Spear.read_stream/3` and `Spear.stream!/3`
+    - This allows one to perform a non-subscription read of the `$all` stream
+      and use a server-side filter
+
+These features are not currently released in EventStoreDB.
 
 ## 0.10.0 - 2021-08-30
 

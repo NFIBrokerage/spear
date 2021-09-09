@@ -103,6 +103,9 @@ defmodule Spear do
     Reading the EventStoreDB stream forwards will return events in the order
     in which they were written to the EventStoreDB; reading backwards will
     return events in the opposite order.
+  * `:filter` - (default: `nil`) the server-side filter to apply. This option
+    is only valid if the `stream_name` is `:all`. See `Spear.Filter` for more
+    information. This feature requires EventStoreDB vTODO+.
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
@@ -178,6 +181,7 @@ defmodule Spear do
       from: :start,
       direction: :forwards,
       chunk_size: 128,
+      filter: nil,
       resolve_links?: true,
       through: fn stream -> Stream.map(stream, &Spear.Event.from_read_response/1) end,
       timeout: 5_000,
@@ -226,6 +230,9 @@ defmodule Spear do
     Reading the EventStoreDB stream forwards will return events in the order
     in which they were written to the EventStoreDB; reading backwards will
     return events in the opposite order.
+  * `:filter` - (default: `nil`) the server-side filter to apply. This option
+    is only valid if the `stream_name` is `:all`. See `Spear.Filter` for more
+    information. This feature requires EventStoreDB vTODO+.
   * `:resolve_links?` - (default: `true`) whether or not to request that
     link references be resolved. See the moduledocs for more information
     about link resolution.
@@ -315,6 +322,7 @@ defmodule Spear do
       from: :start,
       direction: :forwards,
       max_count: 42,
+      filter: nil,
       resolve_links?: true,
       through: fn stream ->
         stream |> filter.() |> Stream.map(&Spear.Event.from_read_response/1)
