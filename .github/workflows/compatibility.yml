@@ -4,7 +4,7 @@ on: push
 
 jobs:
   compatibility:
-    name: Compatibility
+    name: Bless
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
