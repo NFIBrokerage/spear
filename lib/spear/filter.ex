@@ -289,6 +289,7 @@ defmodule Spear.Filter do
   end
 
   @doc false
+  # coveralls-ignore-start
   def _to_persistent_filter_options(%__MODULE__{} = filter) do
     Persistent.create_req_all_options_filter_options(
       checkpointIntervalMultiplier: div(filter.checkpoint_after, @checkpoint_multiplier),
@@ -302,7 +303,6 @@ defmodule Spear.Filter do
     {map_filter_type(filter.on), map_persistent_filter_expression(filter.by)}
   end
 
-  # coveralls-ignore-start
   defp map_persistent_filter_expression(%Regex{} = regex) do
     regex |> Regex.source() |> map_persistent_filter_expression()
   end
@@ -311,11 +311,11 @@ defmodule Spear.Filter do
     Persistent.create_req_all_options_filter_options_expression(regex: regex)
   end
 
-  # coveralls-ignore-stop
-
   defp map_persistent_filter_expression(prefixes) when is_list(prefixes) do
     Persistent.create_req_all_options_filter_options_expression(prefix: prefixes)
   end
+
+  # coveralls-ignore-stop
 end
 
 # IMHO this is a bit unnecessary and really just makes it harder to read

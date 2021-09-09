@@ -242,6 +242,7 @@ defmodule SpearTest do
       assert Spear.delete_persistent_subscription(c.conn, c.stream_name, group) == :ok
     end
 
+    @tag :flaky
     @tag compatible("~> 21.6")
     test "a psub to :all works as expected", c do
       group = uuid_v4()
@@ -491,6 +492,7 @@ defmodule SpearTest do
       Spear.cancel_subscription(c.conn, sub)
     end
 
+    @tag :flaky
     test "a subscription can pick up from a checkpoint", c do
       filter = %Spear.Filter{on: :stream_name, by: [c.stream_name]}
       type = "checkpoint-test"

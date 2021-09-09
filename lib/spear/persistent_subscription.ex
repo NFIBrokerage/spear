@@ -130,15 +130,16 @@ defmodule Spear.PersistentSubscription do
   end
 
   @doc false
-  # coveralls-ignore-start
-  # coveralls-ignore-stop
   def map_short_stream_option(stream_name) when is_binary(stream_name) do
     {:stream_identifier, Shared.stream_identifier(stream_name: stream_name)}
   end
 
+  # coveralls-ignore-start
   def map_short_stream_option(:all) do
     {:all, Shared.empty()}
   end
+
+  # coveralls-ignore-stop
 
   @doc false
   def map_create_stream_option(stream_name, opts) when is_binary(stream_name) do
@@ -149,16 +150,14 @@ defmodule Spear.PersistentSubscription do
      )}
   end
 
+  # coveralls-ignore-start
   def map_create_stream_option(:all, opts) do
     from = Keyword.get(opts, :from, :start)
 
     position =
       with {:position, commit, prepare} <- map_all_position(from) do
-        # coveralls-ignore-start
         {:position,
          Persistent.create_req_position(commit_position: commit, prepare_position: prepare)}
-
-        # coveralls-ignore-stop
       end
 
     {:all,
@@ -167,6 +166,8 @@ defmodule Spear.PersistentSubscription do
        filter_option: map_filter(Keyword.get(opts, :filter))
      )}
   end
+
+  # coveralls-ignore-stop
 
   defp map_create_request_stream_identifier(:all), do: :undefined
 

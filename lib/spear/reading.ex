@@ -93,6 +93,7 @@ defmodule Spear.Reading do
      Streams.read_req_options_position(commit_position: commit, prepare_position: prepare)}
   end
 
+  # coveralls-ignore-start
   defp map_all_position(%Spear.Filter.Checkpoint{
          commit_position: commit,
          prepare_position: prepare
@@ -100,6 +101,8 @@ defmodule Spear.Reading do
     {:position,
      Streams.read_req_options_position(commit_position: commit, prepare_position: prepare)}
   end
+
+  # coveralls-ignore-stop
 
   defp map_all_position(:start), do: {:start, empty()}
 
