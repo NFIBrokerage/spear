@@ -1,0 +1,77 @@
+name: Compatibility
+
+on: push
+
+jobs:
+  compatibility:
+    name: Compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        beam:
+        - elixir: "1.7.4"
+          otp: "21.3"
+        - elixir: "1.12.3"
+          otp: "24.0"
+        eventstore:
+        - "eventstore/eventstore:20.10.2-buster-slim"
+        - "eventstore/eventstore:21.6.0-buster-slim"
+    env:
+      MIX_ENV: test
+      EVENTSTORE_HOST: localhost
+      EVENTSTORE_VERSION: ${{ matrix.eventstore }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set the EventStoreDB version
+      run: sed -i 's|ghcr.io/eventstore/eventstore:ci|${{ matrix.eventstore }}|g' docker-compose.yml
+
+    - name: Spawn docker-compose EventStoreDB container
+      run: docker-compose up --detach eventstore
+
+    - name: Setup Elixir and Erlang versions
+      uses: erlef/setup-beam@v1.7.0
+      with:
+        otp-version: ${{ matrix.beam.otp }}
+        elixir-version: ${{ matrix.beam.elixir }}
+
+    - name: Restore the deps cache
+      uses: actions/cache@v1
+      id: deps-cache
+      with:
+        path: deps
+        key: ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-deps-mixlockhash-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-deps-
+
+    - name: Restore the _build cache
+      uses: actions/cache@v1
+      id: build-cache
+      with:
+        path: _build
+        key: ${{ runner.os }}-${{ matrix.beam.elixir  }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-build-mixlockhash-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-build-
+
+    - name: Fetch mix dependencies
+      if: steps.deps-cache.outputs.cache-hit != 'true'
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+
+    - name: Compile dependencies
+      if: steps.deps-cache.outputs.cache-hit != 'true'
+      run: mix deps.compile
+
+    - name: Compile
+      run: mix compile --warnings-as-errors --force
+
+    - name: Run tests
+      run: mix test --exclude version_incompatible
+
+    - name: Credo
+      run: mix credo
