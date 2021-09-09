@@ -108,6 +108,18 @@ defmodule Spear.Reading do
 
   defp map_all_position(:end), do: {:end, empty()}
 
+  # coveralls-ignore-start
+  defp map_stream_revision(
+         Streams.read_resp(
+           content:
+             {:stream_position, Streams.read_resp_stream_position(next_stream_position: revision)}
+         )
+       ) do
+    {:revision, revision}
+  end
+
+  # coveralls-ignore-stop
+
   defp map_stream_revision(Streams.read_resp() = read_resp) do
     read_resp
     |> Spear.Event.from_read_response(link?: true)

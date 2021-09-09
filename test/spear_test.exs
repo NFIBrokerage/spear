@@ -90,6 +90,17 @@ defmodule SpearTest do
       assert all_expected_type?.(events)
     end
 
+    @tag compatible(:nightly)
+    test "read_stream/3 can be used to determine the stream position", c do
+      assert {:ok, events} = Spear.read_stream(c.conn, c.stream_name, include_position?: true)
+      assert [position] = Enum.drop(events, 7)
+      assert match?(%Spear.StreamPosition{kind: :revision, next: 6, last: 6}, position)
+
+      assert {:ok, events} = Spear.read_stream(c.conn, :all, include_position?: true)
+      position = Enum.to_list(events) |> List.last()
+      assert match?(%Spear.StreamPosition{kind: :all_position}, position)
+    end
+
     test "subscribing at the beginning of a stream emits all of the events", c do
       assert {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name, from: :start)
 

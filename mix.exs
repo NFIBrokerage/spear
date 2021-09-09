@@ -47,7 +47,7 @@ defmodule Spear.MixProject do
       # hard dependencies
       {:mint, "~> 1.0"},
       {:gpb, "~> 4.0"},
-      {:event_store_db_gpb_protobufs, "~> 2.0"},
+      {:event_store_db_gpb_protobufs, "== 2.1.0-rc.1"},
       {:connection, "~> 1.0"},
       # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
