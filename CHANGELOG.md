@@ -11,6 +11,13 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## [UNRELEASED]
+
+### Added
+
+- Added the `:include_position?` option to `Spear.read_stream/3` to emit a
+  `t:Spear.StreamPosition.t/0` after any events
+
 ## 0.10.0 - 2021-08-30
 
 ### Added

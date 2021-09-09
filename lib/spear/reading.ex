@@ -108,6 +108,7 @@ defmodule Spear.Reading do
 
   defp map_all_position(:end), do: {:end, empty()}
 
+  # coveralls-ignore-start
   defp map_stream_revision(
          Streams.read_resp(
            content:
@@ -116,6 +117,8 @@ defmodule Spear.Reading do
        ) do
     {:revision, revision}
   end
+
+  # coveralls-ignore-stop
 
   defp map_stream_revision(Streams.read_resp() = read_resp) do
     read_resp

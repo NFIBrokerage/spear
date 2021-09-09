@@ -235,6 +235,9 @@ defmodule Spear do
     be returned from this function. `:infinity` is _not_ a valid value for
     `:max_count`. Use `stream!/3` for an enumerable which reads an EventStoreDB
     stream in its entirety in chunked network requests.
+  * `:include_position?` - (default: `false`) whether to include the trailing
+    `t:Spear.StreamPosition.t/0` message in the stream. This feature only
+    works with EventStoreDB vTODO+.
   * `:timeout` - (default: `5_000` - 5s) the time allowed for the read of the
     single chunk of events in the EventStoreDB stream. Note that the gRPC request
     which reads events from the EventStoreDB is front-loaded in this function:
@@ -301,15 +304,20 @@ defmodule Spear do
   @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
+    filter =
+      if Keyword.get(opts, :include_position?, false) do
+        fn stream -> stream end
+      else
+        fn stream -> Stream.filter(stream, &Spear.Event.event?/1) end
+      end
+
     default_read_opts = [
       from: :start,
       direction: :forwards,
       max_count: 42,
       resolve_links?: true,
       through: fn stream ->
-        stream
-        |> Stream.filter(&Spear.Event.event?/1)
-        |> Stream.map(&Spear.Event.from_read_response/1)
+        stream |> filter.() |> Stream.map(&Spear.Event.from_read_response/1)
       end,
       timeout: 5_000,
       raw?: false,
