@@ -10,6 +10,13 @@ A sharp EventStoreDB 20+ client backed by mint :yum:
 
 ## FAQ
 
+**What's EventStoreDB?**
+
+[EventStoreDB](https://www.eventstore.com/) is a database designed for
+[Event Sourcing](https://microservices.io/patterns/data/event-sourcing.html).
+Instead of tables with rows and columns, EventStoreDB stores information in
+immutable _events_ which are appended to _streams_.
+
 **Why the name "spear"?**
 
 1. best gum flavor
@@ -33,15 +40,6 @@ That project looks good but it depends on
 other dependencies. It also provides a server and client implementation in
 one library. This library only needs a client.
 
-<!--
-
-Wanted to keep this #shade out of the online+viewable readme:
-
-Also the code hygiene is... questionable 🤔
-https://github.com/elixir-grpc/grpc/blob/eff8a8828d27ddd7f63a3c1dd5aae86246df215e/lib/grpc/adapter/gun.ex#L170-L262
-
--->
-
 **Does TLS work?**
 
 Yep! As of v0.1.3, custom and public CAs may be used for encrypted connections.
@@ -57,7 +55,7 @@ compatible dependencies and similar styles of making connections.
 
 **How many dependencies are we talking here?**
 
-Spear's reliance on Mint and `:gpb` give it a very small dependency tree:
+Spear's reliance on Mint and `:gpb` give it a somewhat small dependency tree:
 
 ```
 $ mix deps.tree --only prod
@@ -74,7 +72,10 @@ spear
 
 **How close is this to being able to be used?**
 
-Check out the roadmap in [#7](https://github.com/NFIBrokerage/spear/issues/7)
+We `@NFIBrokerage` already use Spear for some production connections to
+Event Store Cloud. See the roadmap in
+[#7](https://github.com/NFIBrokerage/spear/issues/7) with the plans for
+reaching the v1.0.0 release.
 
 ## Installation
 
