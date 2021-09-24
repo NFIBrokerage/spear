@@ -598,6 +598,11 @@ defmodule Spear.Event do
   for more information). Pass the `:id` option to `new/3` to override the
   default random UUID generation.
 
+  Note that it this implementation is naive and not easily portable across
+  programming languages because of the reliance on `:erlang.phash2/1`.
+  A v5 UUID can be used instead to the same effect with more portability,
+  however a v5 UUID generator is not included in this library.
+
   ## Examples
 
       iex> Spear.Event.uuid_v4 %{"foo" => "bar"}
