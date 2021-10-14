@@ -90,7 +90,9 @@ defmodule SpearTest do
       assert all_expected_type?.(events)
     end
 
-    @tag compatible(:nightly)
+    @tag :skip
+    # this behavior appears to have been reverted in the nightly build
+    # @tag compatible(:nightly)
     test "read_stream/3 can be used to determine the stream position", c do
       assert {:ok, events} = Spear.read_stream(c.conn, c.stream_name, include_position?: true)
       assert [position] = Enum.drop(events, 7)
