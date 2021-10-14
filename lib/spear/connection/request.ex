@@ -209,16 +209,8 @@ defmodule Spear.Connection.Request do
   defp get_smallest_window(conn, request_ref) do
     min(
       Mint.HTTP2.get_window_size(conn, :connection),
-      safe_get_request_window_size(conn, request_ref)
-    )
-  end
-
-  defp safe_get_request_window_size(conn, request_ref) do
-    if Map.has_key?(conn.ref_to_stream_id, request_ref) do
       Mint.HTTP2.get_window_size(conn, {:request, request_ref})
-    else
-      :infinity
-    end
+    )
   end
 
   # the bidirectional BatchAppend has some odd behavior if the first
