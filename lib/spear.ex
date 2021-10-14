@@ -313,7 +313,9 @@ defmodule Spear do
   def read_stream(connection, stream_name, opts \\ []) do
     filter =
       if Keyword.get(opts, :include_position?, false) do
+        # coveralls-ignore-start
         fn stream -> stream end
+        # coveralls-ignore-stop
       else
         fn stream -> Stream.filter(stream, &Spear.Event.event?/1) end
       end

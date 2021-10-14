@@ -1,3 +1,4 @@
+# coveralls-ignore-start
 defmodule Spear.StreamPosition do
   @moduledoc """
   A data structure representing a position in a stream
@@ -50,3 +51,5 @@ defmodule Spear.StreamPosition do
     }
   end
 end
+
+# coveralls-ignore-start
