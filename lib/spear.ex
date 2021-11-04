@@ -70,6 +70,7 @@ defmodule Spear do
   require Spear.Records.Gossip, as: Gossip
   require Spear.Records.Persistent, as: Persistent
   require Spear.Records.Monitoring, as: Monitoring
+  require Spear.Records.ServerFeatures, as: ServerFeatures
   require Spear.Records.Shared, as: Shared
 
   @doc """
@@ -242,9 +243,6 @@ defmodule Spear do
     be returned from this function. `:infinity` is _not_ a valid value for
     `:max_count`. Use `stream!/3` for an enumerable which reads an EventStoreDB
     stream in its entirety in chunked network requests.
-  * `:include_position?` - (default: `false`) whether to include the trailing
-    `t:Spear.StreamPosition.t/0` message in the stream. This feature only
-    works with EventStoreDB vTODO+.
   * `:timeout` - (default: `5_000` - 5s) the time allowed for the read of the
     single chunk of events in the EventStoreDB stream. Note that the gRPC request
     which reads events from the EventStoreDB is front-loaded in this function:
@@ -311,15 +309,6 @@ defmodule Spear do
   @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
-    filter =
-      if Keyword.get(opts, :include_position?, false) do
-        # coveralls-ignore-start
-        fn stream -> stream end
-        # coveralls-ignore-stop
-      else
-        fn stream -> Stream.filter(stream, &Spear.Event.event?/1) end
-      end
-
     default_read_opts = [
       from: :start,
       direction: :forwards,
@@ -327,7 +316,9 @@ defmodule Spear do
       filter: nil,
       resolve_links?: true,
       through: fn stream ->
-        stream |> filter.() |> Stream.map(&Spear.Event.from_read_response/1)
+        stream
+        |> Stream.filter(&Spear.Event.event?/1)
+        |> Stream.map(&Spear.Event.from_read_response/1)
       end,
       timeout: 5_000,
       raw?: false,
@@ -2515,5 +2506,68 @@ defmodule Spear do
       {{:subscription, subscriber, through}, request},
       opts[:timeout]
     )
+  end
+
+  @doc """
+  Requests the available server RPCs
+
+  This function is compatible with server version v21.10.0 and later.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.get_supported_rpcs(conn)
+      {:ok,
+       [
+         %Spear.SupportedRpc{
+           features: ["stream", "all"],
+           rpc: "create",
+           service: "event_store.client.persistent_subscriptions.persistentsubscriptions"
+         },
+         %Spear.SupportedRpc{
+           features: ["stream", "all"],
+           rpc: "update",
+           service: "event_store.client.persistent_subscriptions.persistentsubscriptions"
+         },
+         ..
+       ]}
+  """
+  @doc since: "0.11.0"
+  @doc api: :server_features
+  @spec get_supported_rpcs(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, [Spear.SupportedRpc.t()]} | {:error, any()}
+  def get_supported_rpcs(conn, opts \\ []) do
+    with {:ok, ServerFeatures.supported_methods(methods: methods)} <-
+           request(conn, ServerFeatures, :GetSupportedMethods, [empty()], opts) do
+      {:ok, Enum.map(methods, &Spear.SupportedRpc.from_proto/1)}
+    end
+  end
+
+  @doc """
+  Determines the current version of the connected server
+
+  This function is compatible with server version v21.10.0 and later.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.get_server_version(conn)
+      {:ok, "21.10.0"}
+  """
+  @doc since: "0.11.0"
+  @doc api: :server_features
+  @spec get_server_version(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, [String.t()]} | {:error, any()}
+  def get_server_version(conn, opts \\ []) do
+    with {:ok, ServerFeatures.supported_methods(event_store_server_version: version)} <-
+           request(conn, ServerFeatures, :GetSupportedMethods, [empty()], opts) do
+      {:ok, version}
+    end
   end
 end

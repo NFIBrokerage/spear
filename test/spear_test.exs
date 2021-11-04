@@ -90,20 +90,7 @@ defmodule SpearTest do
       assert all_expected_type?.(events)
     end
 
-    @tag :skip
-    # this behavior appears to have been reverted in the nightly build
-    # @tag compatible(:nightly)
-    test "read_stream/3 can be used to determine the stream position", c do
-      assert {:ok, events} = Spear.read_stream(c.conn, c.stream_name, include_position?: true)
-      assert [position] = Enum.drop(events, 7)
-      assert match?(%Spear.StreamPosition{kind: :revision, next: 6, last: 6}, position)
-
-      assert {:ok, events} = Spear.read_stream(c.conn, :all, include_position?: true)
-      position = Enum.to_list(events) |> List.last()
-      assert match?(%Spear.StreamPosition{kind: :all_position}, position)
-    end
-
-    @tag compatible(:nightly)
+    @tag compatible(">= 21.10.0")
     test "stream!/3 and read_stream/3 may pass a filter on the :all stream", c do
       filter = %Spear.Filter{
         on: :stream_name,
@@ -270,7 +257,7 @@ defmodule SpearTest do
     end
 
     @tag :flaky
-    @tag compatible("~> 21.6")
+    @tag compatible(">= 21.6.0")
     test "a psub to :all works as expected", c do
       group = uuid_v4()
       settings = %Spear.PersistentSubscription.Settings{}
@@ -676,7 +663,7 @@ defmodule SpearTest do
       assert Spear.restart_persistent_subscriptions(c.conn) == :ok
     end
 
-    @tag compatible("~> 21.0")
+    @tag compatible(">= 21.0.0")
     test "the cluster info shows one active node on localhost", c do
       assert {:ok, [%Spear.ClusterMember{address: "127.0.0.1", alive?: true}]} =
                Spear.cluster_info(c.conn)
@@ -829,7 +816,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, category, from: :start, chunk_size: 2) |> Enum.count() == 6
     end
 
-    @tag compatible("~> 21.0")
+    @tag compatible(">= 21.0.0")
     test "a process may subscribe to stats updates with subscribe_to_stats/3", c do
       assert {:ok, subscription} = Spear.subscribe_to_stats(c.conn, self(), interval: 200)
       assert_receive stats when is_map(stats)
@@ -841,7 +828,7 @@ defmodule SpearTest do
       assert Spear.cancel_subscription(c.conn, subscription) == :ok
     end
 
-    @tag compatible("~> 21.6")
+    @tag compatible(">= 21.6.0")
     test "append_batch/5 appends a batch of events", c do
       assert {:ok, batch_id, request_id} =
                random_events()
@@ -896,7 +883,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..19)
     end
 
-    @tag compatible("~> 21.6")
+    @tag compatible(">= 21.6.0")
     test "append_batch/5 can fragment with the :done? flag and :batch_id", c do
       assert {:ok, batch_id, request_id} =
                random_events()
@@ -925,7 +912,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..9)
     end
 
-    @tag compatible("~> 21.6")
+    @tag compatible(">= 21.6.0")
     test "an incomplete append_batch/5 fragment will time out", c do
       assert {:ok, batch_id, request_id} =
                random_events()
@@ -948,7 +935,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
     end
 
-    @tag compatible(:nightly)
+    @tag compatible(">= 21.10.0")
     test "append_batch/5 with a deadline in the past will fail", c do
       deadline = {0, 0}
 
@@ -970,7 +957,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.to_list() == []
     end
 
-    @tag compatible("~> 21.6")
+    @tag compatible(">= 21.6.0")
     test "the append_batch_stream/2 helper maps a stream of batches, appends all", c do
       stream_a = c.stream_name
       stream_b = random_stream_name()
@@ -987,6 +974,16 @@ defmodule SpearTest do
 
       assert Spear.stream!(c.conn, stream_a) |> Enum.count() == 10
       assert Spear.stream!(c.conn, stream_b) |> Enum.count() == 5
+    end
+
+    @tag compatible(">= 21.10.0")
+    test "the server version can be determined with get_server_version/2", c do
+      assert match?({:ok, version} when is_binary(version), Spear.get_server_version(c.conn))
+    end
+
+    @tag compatible(">= 21.10.0")
+    test "the server's implemented RPCs can be determined with get_supported_rpcs/2", c do
+      assert match?({:ok, [%Spear.SupportedRpc{} | _]}, Spear.get_supported_rpcs(c.conn))
     end
   end
 

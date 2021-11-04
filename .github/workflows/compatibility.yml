@@ -15,8 +15,8 @@ jobs:
         - elixir: "1.12.3"
           otp: "24.0"
         eventstore:
-        - "eventstore/eventstore:20.10.2-buster-slim"
-        - "eventstore/eventstore:21.6.0-buster-slim"
+        - 20.10.2
+        - 21.10.0
     env:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost
@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set the EventStoreDB version
-      run: sed -i 's|ghcr.io/eventstore/eventstore:ci|${{ matrix.eventstore }}|g' docker-compose.yml
+      run: sed -i 's|ghcr.io/eventstore/eventstore:ci|eventstore/eventstore:${{ matrix.eventstore }}-buster-slim|g' docker-compose.yml
 
     - name: Spawn docker-compose EventStoreDB container
       run: docker-compose up --detach eventstore

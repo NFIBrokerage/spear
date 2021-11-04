@@ -9,7 +9,7 @@ jobs:
     env:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost
-      EVENTSTORE_VERSION: ${{ matrix.eventstore }}
+      EVENTSTORE_VERSION: nightly
 
     steps:
     - name: Checkout

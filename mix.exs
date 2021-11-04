@@ -47,7 +47,7 @@ defmodule Spear.MixProject do
       # hard dependencies
       {:mint, "~> 1.0"},
       {:gpb, "~> 4.0"},
-      {:event_store_db_gpb_protobufs, "== 2.1.0-rc.1"},
+      {:event_store_db_gpb_protobufs, "~> 2.1"},
       {:connection, "~> 1.0"},
       # optional dependencies
       {:jason, ">= 0.0.0", optional: true},
@@ -110,7 +110,8 @@ defmodule Spear.MixProject do
           Spear.PersistentSubscription,
           Spear.PersistentSubscription.Settings,
           Spear.Position,
-          Spear.BatchAppendResult
+          Spear.BatchAppendResult,
+          Spear.SupportedRpc
         ],
         "Record interfaces": [
           Spear.Records.Shared,
@@ -122,7 +123,8 @@ defmodule Spear.MixProject do
           Spear.Records.Gossip,
           Spear.Records.Monitoring,
           Spear.Records.Google,
-          Spear.Records.Status
+          Spear.Records.Status,
+          Spear.Records.ServerFeatures
         ]
       ],
       groups_for_functions: [
@@ -133,7 +135,8 @@ defmodule Spear.MixProject do
         Projections: &(&1[:api] == :projections),
         "Persistent Subscriptions": &(&1[:api] == :persistent),
         Gossip: &(&1[:api] == :gossip),
-        Monitoring: &(&1[:api] == :monitoring)
+        Monitoring: &(&1[:api] == :monitoring),
+        "Server Features": &(&1[:api] == :server_features)
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"

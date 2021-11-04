@@ -11,17 +11,27 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
-## [UNRELEASED]
+## 0.11.0 - 2021-11-04
 
 ### Added
 
-- Added the `:include_position?` option to `Spear.read_stream/3` to emit a
-  `t:Spear.StreamPosition.t/0` after any events
 - Added the `:filter` option to `Spear.read_stream/3` and `Spear.stream!/3`
     - This allows one to perform a non-subscription read of the `$all` stream
       and use a server-side filter
+- Added `Spear.get_supported_rpcs/2` and `c:Spear.Client.get_supported_rpcs/1`
+  for getting the available RPC methods implemented in the connected
+  EventStoreDB server
+- Added `Spear.get_server_version/2` and `c:Spear.Client.get_server_version/2`
+  for getting the version string of the connected EventStoreDB Server
 
-These features are not currently released in EventStoreDB.
+These features require the new EventStoreDB version v21.10.0 released on
+2021-11-03.
+
+### Changed
+
+- According to the [v21.10.0 server release notes](https://www.eventstore.com/blog/21.10.0-release-notes)'s
+  breaking changes section, deleting a stream that does not currently exist
+  will now throw an error
 
 ## 0.10.0 - 2021-08-30
 
