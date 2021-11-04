@@ -70,6 +70,7 @@ defmodule Spear do
   require Spear.Records.Gossip, as: Gossip
   require Spear.Records.Persistent, as: Persistent
   require Spear.Records.Monitoring, as: Monitoring
+  require Spear.Records.ServerFeatures, as: ServerFeatures
   require Spear.Records.Shared, as: Shared
 
   @doc """
@@ -2505,5 +2506,68 @@ defmodule Spear do
       {{:subscription, subscriber, through}, request},
       opts[:timeout]
     )
+  end
+
+  @doc """
+  Requests the available server RPCs
+
+  This function is compatible with server version v21.10.0 and later.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.get_supported_rpcs(conn)
+      {:ok,
+       [
+         %Spear.SupportedRpc{
+           features: ["stream", "all"],
+           rpc: "create",
+           service: "event_store.client.persistent_subscriptions.persistentsubscriptions"
+         },
+         %Spear.SupportedRpc{
+           features: ["stream", "all"],
+           rpc: "update",
+           service: "event_store.client.persistent_subscriptions.persistentsubscriptions"
+         },
+         ..
+       ]}
+  """
+  @doc since: "0.11.0"
+  @doc api: :server_features
+  @spec get_supported_rpcs(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, [Spear.SupportedRpc.t()]} | {:error, any()}
+  def get_supported_rpcs(conn, opts \\ []) do
+    with {:ok, ServerFeatures.supported_methods(methods: methods)} <-
+           request(conn, ServerFeatures, :GetSupportedMethods, [empty()], opts) do
+      {:ok, Enum.map(methods, &Spear.SupportedRpc.from_proto/1)}
+    end
+  end
+
+  @doc """
+  Determines the current version of the connected server
+
+  This function is compatible with server version v21.10.0 and later.
+
+  ## Options
+
+  Options are passed to `request/5`.
+
+  ## Examples
+
+      iex> Spear.get_server_version(conn)
+      {:ok, "21.10.0"}
+  """
+  @doc since: "0.11.0"
+  @doc api: :server_features
+  @spec get_server_version(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
+          {:ok, [String.t()]} | {:error, any()}
+  def get_server_version(conn, opts \\ []) do
+    with {:ok, ServerFeatures.supported_methods(event_store_server_version: version)} <-
+           request(conn, ServerFeatures, :GetSupportedMethods, [empty()], opts) do
+      {:ok, version}
+    end
   end
 end

@@ -975,6 +975,16 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, stream_a) |> Enum.count() == 10
       assert Spear.stream!(c.conn, stream_b) |> Enum.count() == 5
     end
+
+    @tag compatible(">= 21.10.0")
+    test "the server version can be determined with get_server_version/2", c do
+      assert match?({:ok, version} when is_binary(version), Spear.get_server_version(c.conn))
+    end
+
+    @tag compatible(">= 21.10.0")
+    test "the server's implemented RPCs can be determined with get_supported_rpcs/2", c do
+      assert match?({:ok, [%Spear.SupportedRpc{} | _]}, Spear.get_supported_rpcs(c.conn))
+    end
   end
 
   test "park_stream/2 composes a proper parking stream" do
