@@ -625,6 +625,30 @@ defmodule Spear.Client do
               opts :: Keyword.t()
             ) :: {:ok, reference()} | {:error, any()}
 
+  @doc """
+  A wrapper around `Spear.get_supported_rpcs/1`
+  """
+  @doc since: "0.11.0"
+  @callback get_supported_rpcs() :: {:ok, [Spear.SupportedRpc.t()]} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_supported_rpcs/2`
+  """
+  @doc since: "0.11.0"
+  @callback get_supported_rpcs(Keyword.t()) :: {:ok, [Spear.SupportedRpc.t()]} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_server_version/1`
+  """
+  @doc since: "0.11.0"
+  @callback get_server_version() :: {:ok, String.t()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_server_version/2`
+  """
+  @doc since: "0.11.0"
+  @callback get_server_version(Keyword.t()) :: {:ok, String.t()} | {:error, any()}
+
   @optional_callbacks start_link: 1
 
   defmacro __using__(opts) when is_list(opts) do
@@ -826,6 +850,16 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def subscribe_to_stats(subscriber, opts \\ []) do
         Spear.subscribe_to_stats(__MODULE__, subscriber, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def get_supported_rpcs(opts \\ []) do
+        Spear.get_supported_rpcs(__MODULE__, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def get_server_version(opts \\ []) do
+        Spear.get_server_version(__MODULE__, opts)
       end
     end
   end
