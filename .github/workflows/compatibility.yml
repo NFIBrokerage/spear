@@ -16,7 +16,7 @@ jobs:
           otp: "24.0"
         eventstore:
         - "eventstore/eventstore:20.10.2-buster-slim"
-        - "eventstore/eventstore:21.6.0-buster-slim"
+        - "eventstore/eventstore:21.10.0-alpine"
     env:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost
