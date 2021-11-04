@@ -34,7 +34,8 @@ defmodule Spear.Reading do
           resolve_links: params.resolve_links?,
           count_option: {:count, params.max_count},
           filter_option: map_filter(params.filter),
-          uuid_option: @uuid
+          uuid_option: @uuid,
+          control_option: Streams.read_req_options_control_option(compatibility: 1)
         )
     )
   end
@@ -49,7 +50,8 @@ defmodule Spear.Reading do
             resolve_links: params.resolve_links?,
             count_option: {:subscription, Streams.read_req_options_subscription_options()},
             filter_option: map_filter(params.filter),
-            uuid_option: @uuid
+            uuid_option: @uuid,
+            control_option: Streams.read_req_options_control_option(compatibility: 1)
           )
       )
 
@@ -109,14 +111,14 @@ defmodule Spear.Reading do
   defp map_all_position(:end), do: {:end, empty()}
 
   # coveralls-ignore-start
-  defp map_stream_revision(
-         Streams.read_resp(
-           content:
-             {:stream_position, Streams.read_resp_stream_position(next_stream_position: revision)}
-         )
-       ) do
-    {:revision, revision}
-  end
+  # defp map_stream_revision(
+  #        Streams.read_resp(
+  #          content:
+  #            {:stream_position, Streams.read_resp_stream_position(next_stream_position: revision)}
+  #        )
+  #      ) do
+  #   {:revision, revision}
+  # end
 
   # coveralls-ignore-stop
 
