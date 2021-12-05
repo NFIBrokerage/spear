@@ -149,7 +149,7 @@ defmodule Spear.Connection.Request do
     # turn overload_message into a binary, break it down to allowed size
     # send what any of what the overload_message binary can be sent,
     # add the rest of overload_message binary to the buffer
-    fittable_size = max(max_size - (buffer_size - overload_message_size) - 1, 0)
+    fittable_size = max_size - (buffer_size - overload_message_size)
 
     <<fittable_binary::binary-size(fittable_size), overload_binary::binary>> =
       IO.iodata_to_binary(overload_message)
