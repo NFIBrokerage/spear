@@ -16,20 +16,6 @@ defmodule Spear.Connection do
   If configuration parameters must change between disconnects and reconnects,
   spawning and killing connections with a `DynamicSupervisor` is recommended.
 
-  `Spear.Connection` will attempt to connect immediately after GenServer init.
-  Failures to connect will result in back-off retries in segments of 500ms.
-  Any GenServer to a connection process may return `{:error, :closed}` if the
-  connection process is alive but the HTTP2 connection to the EventStoreDB
-  is not yet (re)established. `Spear.Connection` will automatically attempt
-  to re-connect to the EventStoreDB if the connection is severed.
-
-  `Spear.Connection` processes accept `GenServer.call/3`s of `:close` to
-  force a disconnect from an EventStoreDB and a subsequent `GenServer.cast/2`
-  of `:connect` to reconnect based on the configuration supplied at init-time.
-
-  If configuration parameters must change between disconnects and reconnects,
-  spawning and killing connections with a `DynamicSupervisor` is recommended.
-
   ## Configuration
 
   See the `Spear.Connection.Configuration` module for available configuration
