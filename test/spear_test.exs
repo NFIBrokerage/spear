@@ -142,25 +142,27 @@ defmodule SpearTest do
     end
 
     test "a deletion request will fail if the expectation mismatches", c do
-      assert Spear.delete_stream(c.conn, c.stream_name, expect: :empty) ==
-               {:error,
-                %Spear.Grpc.Response{
-                  data: "",
-                  message:
-                    "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: -1, Actual version: ",
-                  status: :failed_precondition,
-                  status_code: 9
-                }}
+      assert {:error,
+              %Spear.Grpc.Response{
+                data: "",
+                message: message,
+                status: :failed_precondition,
+                status_code: 9
+              }} = Spear.delete_stream(c.conn, c.stream_name, expect: :empty)
 
-      assert Spear.delete_stream(c.conn, c.stream_name, expect: 3) ==
-               {:error,
-                %Spear.Grpc.Response{
-                  data: "",
-                  message:
-                    "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: 3, Actual version: ",
-                  status: :failed_precondition,
-                  status_code: 9
-                }}
+      assert message =~
+               "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: -1, Actual version: "
+
+      assert {:error,
+              %Spear.Grpc.Response{
+                data: "",
+                message: message,
+                status: :failed_precondition,
+                status_code: 9
+              }} = Spear.delete_stream(c.conn, c.stream_name, expect: 3)
+
+      assert message =~
+               "Append failed due to WrongExpectedVersion. Stream: #{c.stream_name}, Expected version: 3, Actual version: "
     end
 
     test "a user can be CRUD-ed", c do
