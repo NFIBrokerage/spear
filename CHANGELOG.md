@@ -11,6 +11,11 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.0.0 - 2022-05-11
+
+This release represent stability in the API. There are no functional changes
+between this release and v0.11.0.
+
 ## 0.11.0 - 2021-11-04
 
 ### Added
