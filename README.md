@@ -28,7 +28,7 @@ immutable _events_ which are appended to _streams_.
 [`elixir-mint/mint`](https://github.com/elixir-mint/mint) is a functional
 HTTP client which supports HTTP2.
 
-As the kids say these days, gRPC is spicy HTTP2. Practically speaking,
+gRPC is pretty thin protocol built on top of HTTP/2. Practically speaking,
 gRPC just adds some well-known headers and a message format that allows
 messages to not be aligned with HTTP2 DATA frames.  It's relatively trivial
 to implement gRPC with a nice HTTP2 library like mint :slightly_smiling_face:.
@@ -37,7 +37,7 @@ to implement gRPC with a nice HTTP2 library like mint :slightly_smiling_face:.
 
 That project looks good but it depends on
 [`:gun`](https://github.com/ninenines/gun) which doesn't play nice with
-other dependencies. It also provides a server and client implementation in
+other dependencies[^1]. It also provides a server and client implementation in
 one library. This library only needs a client.
 
 **Does TLS work?**
@@ -250,3 +250,5 @@ efficient event-processing pipelines and topologies with EventStoreDB
 via [GenStage](https://github.com/elixir-lang/gen_stage) and
 [Broadway](https://github.com/dashbitco/broadway) producers? Check out
 [Volley](https://github.com/NFIBrokerage/volley).
+
+[^1]: https://github.com/NFIBrokerage/spear/issues/66
