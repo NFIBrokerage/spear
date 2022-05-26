@@ -51,11 +51,15 @@ defmodule Spear.Reading.Stream do
        _rest} ->
         []
 
-      {message, _rest} ->
+      {event() = message, _rest} ->
         Stream.unfold(
           %__MODULE__{state | buffer: buffer, from: message},
           unfold_fn
         )
+
+      {Streams.read_resp(content: {content_case, _}), _rest}
+      when content_case in [:last_stream_position, :first_stream_position] ->
+        []
 
       nil ->
         []
