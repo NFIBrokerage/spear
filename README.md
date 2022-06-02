@@ -84,7 +84,7 @@ Add `:spear` to your mix dependencies in `mix.exs`
 ```elixir
 def deps do
   [
-    {:spear, "~> 0.1"},
+    {:spear, "~> 1.0"},
     # If you want to encode events as JSON, :jason is a great library for
     # encoding and decoding and works out-of-the-box with spear.
     # Any JSON (de)serializer should work though, so you don't *need* to add
