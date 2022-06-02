@@ -11,7 +11,16 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.0.2 - 2022-06-02
+
+### Fixed
+
+- `0` may now be passed in the `:expect` option when appending or batch
+  appending
+
 ## 1.0.1 - 2022-05-26
+
+### Fixed
 
 - Fixed `Spear.stream!/3` when providing a `:from` event number that does not
   exist
