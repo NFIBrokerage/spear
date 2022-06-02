@@ -69,7 +69,7 @@ defmodule Spear.Writing do
     )
   end
 
-  defp map_expectation(revision) when is_integer(revision) and revision >= 1,
+  defp map_expectation(revision) when is_integer(revision) and revision >= 0,
     do: {:revision, revision}
 
   defp map_expectation(:empty), do: {:no_stream, empty()}
@@ -135,7 +135,7 @@ defmodule Spear.Writing do
   defp map_deadline(deadline), do: Google.timestamp(deadline)
   # coveralls-ignore-stop
 
-  defp map_expected_position(revision) when is_integer(revision) and revision >= 1,
+  defp map_expected_position(revision) when is_integer(revision) and revision >= 0,
     do: {:stream_position, revision}
 
   defp map_expected_position(:empty), do: {:no_stream, Google.empty()}
