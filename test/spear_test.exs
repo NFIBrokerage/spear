@@ -60,9 +60,14 @@ defmodule SpearTest do
     end
 
     test "an empty expectation will fail on the wrong stream revision", c do
-      assert {:error, reason} = Spear.append([random_event()], c.conn, c.stream_name, expect: 3)
+      wrong_expected_revision = Enum.random(0..5)
 
-      assert reason == %Spear.ExpectationViolation{current: 6, expected: 3}
+      assert {:error, reason} =
+               Spear.append([random_event()], c.conn, c.stream_name,
+                 expect: wrong_expected_revision
+               )
+
+      assert reason == %Spear.ExpectationViolation{current: 6, expected: wrong_expected_revision}
     end
 
     test "a stream may be streamed backwards", c do
