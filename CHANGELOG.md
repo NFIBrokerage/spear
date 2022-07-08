@@ -11,6 +11,15 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.1.0 - 2022-07-08
+
+### Added
+
+- A duration may now be specified for the `:deadline` option to
+  `Spear.append_batch/5`
+    - Passing a duration (instead of a timestamp) requires EventStoreDB
+      version 21.10.5 or higher
+
 ## 1.0.2 - 2022-06-02
 
 ### Fixed

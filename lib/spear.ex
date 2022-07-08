@@ -483,6 +483,11 @@ defmodule Spear do
     use as credentials for the request. This option overrides any credentials
     set in the connection configuration, if present. See the
     [Security guide](guides/security.md) for more details.
+  * `:deadline` - (default: `nil`) the deadline for the batch to be appended.
+    This is like `:timeout` but is interpreted on the EventStoreDB server.
+    This may be a `DateTime` or a tuple of `{seconds, nanos}` since 1970
+    (smeared) but may be a tuple `{:duration, seconds, nanos}` when using
+    EventStoreDB version 21.10.5 or higher.
   * `:timeout` - (default: `5_000`) the timeout for the initial call to
     open the batch request.
 

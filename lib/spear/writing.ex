@@ -132,7 +132,10 @@ defmodule Spear.Writing do
 
   defp map_deadline(nil), do: :undefined
   # coveralls-ignore-start
-  defp map_deadline(deadline), do: {:deadline_21_10_0, Google.timestamp(deadline)}
+  defp map_deadline({:duration, seconds, nanos}),
+    do: {:deadline, Google.duration(seconds, nanos)}
+
+  defp map_deadline(timestamp), do: {:deadline_21_10_0, Google.timestamp(timestamp)}
   # coveralls-ignore-stop
 
   defp map_expected_position(revision) when is_integer(revision) and revision >= 0,
