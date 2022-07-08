@@ -126,13 +126,13 @@ defmodule Spear.Writing do
     batch_append_req_options(
       stream_identifier: stream_identifier(stream_name: params.stream_name),
       expected_stream_position: map_expected_position(params.expect),
-      deadline: map_deadline(params.deadline)
+      deadline_option: map_deadline(params.deadline)
     )
   end
 
   defp map_deadline(nil), do: :undefined
   # coveralls-ignore-start
-  defp map_deadline(deadline), do: Google.timestamp(deadline)
+  defp map_deadline(deadline), do: {:deadline_21_10_0, Google.timestamp(deadline)}
   # coveralls-ignore-stop
 
   defp map_expected_position(revision) when is_integer(revision) and revision >= 0,
