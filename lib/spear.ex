@@ -2140,6 +2140,36 @@ defmodule Spear do
   The `:buffer_size` should align with the consumer's ability to batch
   process events.
 
+  ## Delivery guarantees
+
+  Persistent subscriptions provide at-least once delivery. Messages may be
+  re-delivered under a few circumstances:
+
+  * Negatively acknowledging a message with `nack/4` with the `:action` set
+    to `:retry` will queue the message for re-delivery.
+  * A message may be handled successfully but not within the configured
+    `:message_timeout`. If the server does not receive an `ack/3` within the
+    timeout, the message may be re-delivered.
+  * The acknowledgement from `ack/3` may be lost. This can happen in a few
+    cases:
+      * If the acknowledgement is sent and then a subscription is immediately
+        cancelled (either explicitly with `Spear.cancel_subscription/2` or if
+        the subscription process terminates immediately after sending an ack),
+        the EventStoreDB may discard the ack. This is because of a limitation
+        in the protocol which conflates the closing of a subscription with
+        the corruption of data being sent to the server. Subscription processes
+        may wish to sleep between the last acknowledgement and exiting to reduce
+        the chances of this happening.
+      * An unreliable network may drop the packet containing the
+        acknowledgement.
+
+  Re-delivered messages may arrive out-of-order. Cases of repeated delivery
+  or out-of-order delivery should be handled at the application level.
+
+  Also see the
+  [EventStoreDB Server docs](https://developers.eventstore.com/server/v21.10/persistent-subscriptions.html#persistent-subscription)
+  on Persistent Subscriptions.
+
   ## Options
 
   * `:timeout` - (default: `5_000`ms - 5s) the time to await a subscription
