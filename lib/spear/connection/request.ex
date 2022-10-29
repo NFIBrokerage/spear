@@ -84,7 +84,7 @@ defmodule Spear.Connection.Request do
 
     {:cont, {[], 0, smallest_window}}
     |> continuation.()
-    |> handle_contination(state, request)
+    |> handle_continuation(state, request)
   end
 
   def emit_messages(
@@ -110,11 +110,11 @@ defmodule Spear.Connection.Request do
 
         {:cont, {[{buffer, buffer_size}], buffer_size, smallest_window}}
         |> continuation.()
-        |> handle_contination(state, request)
+        |> handle_continuation(state, request)
     end
   end
 
-  defp handle_contination(
+  defp handle_continuation(
          {finished, {message_buffer, _buffer_size, _max_size}},
          state,
          request
@@ -138,7 +138,7 @@ defmodule Spear.Connection.Request do
     |> post_stream_hook(request.request_ref)
   end
 
-  defp handle_contination(
+  defp handle_continuation(
          {:suspended,
           {[{overload_message, overload_message_size} | messages_that_fit], buffer_size,
            max_size}, next_continuation},

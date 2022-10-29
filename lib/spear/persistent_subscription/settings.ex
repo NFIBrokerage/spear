@@ -60,7 +60,7 @@ defmodule Spear.PersistentSubscription.Settings do
   import Spear.Records.Persistent
 
   @doc false
-  def to_record(settings, opration)
+  def to_record(settings, operation)
 
   def to_record(%__MODULE__{} = settings, :create) do
     create_req_settings(

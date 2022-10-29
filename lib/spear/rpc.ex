@@ -2,7 +2,7 @@ defmodule Spear.Rpc do
   @moduledoc false
   require Record
 
-  # simple struct for an RPC definiton, used by Spear.Service
+  # simple struct for an RPC definition, used by Spear.Service
 
   @type t :: %__MODULE__{}
 
