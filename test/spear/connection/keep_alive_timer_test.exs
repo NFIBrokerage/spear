@@ -14,7 +14,7 @@ defmodule Spear.Connection.KeepAliveTimerTest do
     assert timer.timeout_timers == %{}
   end
 
-  test "starting a timeout timer inserts the timer into timout_timers" do
+  test "starting a timeout timer inserts the timer into timeout_timers" do
     ref = make_ref()
 
     timer = %KeepAliveTimer{interval: 20, timeout: 10} |> KeepAliveTimer.start_timeout_timer(ref)
@@ -24,7 +24,7 @@ defmodule Spear.Connection.KeepAliveTimerTest do
     assert Map.has_key?(timer.timeout_timers, ref)
   end
 
-  test "canceling a timeout timer takes the timer out of timout_timers" do
+  test "canceling a timeout timer takes the timer out of timeout_timers" do
     ref = make_ref()
 
     timer =

@@ -80,7 +80,7 @@ defmodule Spear.Acl do
   @doc """
   Converts an ACL struct to a map with the keys expected by the EventStoreDB
 
-  This function is used internall by `Spear.set_global_acl/4` to create a
+  This function is used internally by `Spear.set_global_acl/4` to create a
   global ACL event body, but may be used to create an acl body on its own.
 
   ## Examples

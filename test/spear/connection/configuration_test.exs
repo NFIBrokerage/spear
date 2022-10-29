@@ -96,7 +96,7 @@ defmodule Spear.Connection.ConfigurationTest do
     assert config.valid? == true
   end
 
-  test "mint protocols and mode options cannot be overriden" do
+  test "mint protocols and mode options cannot be overridden" do
     config =
       Config.new(
         scheme: :http,

@@ -471,7 +471,7 @@ defmodule Spear do
     `Spear.ExpectationViolation` for more information about expectations.
   * `:send_ack_to` - (default: `self()`) a process or process name which
     should receive acknowledgement messages detailing whether a batch has
-    succeded or failed to be committed by the deadline.
+    succeeded or failed to be committed by the deadline.
   * `:raw?` - (default: `false`) a boolean which controls whether messages
     emitted to the `:send_ack_to` process are decoded from
     `Spear.Records.Streams.batch_append_resp/0` records. Spear preserves
@@ -887,7 +887,7 @@ defmodule Spear do
   * `:timeout` - (default: `5_000` - 5s) the time allowed to block while
     waiting for the EventStoreDB to delete the stream.
   * `:expect` - (default: `:any`) the expected state of the stream when
-    performing the deleteion. See `append/4` and `Spear.ExpectationViolation`
+    performing the deletion. See `append/4` and `Spear.ExpectationViolation`
     for more information.
   * `:credentials` - (default: `nil`) a two-tuple `{username, password}` to
     use as credentials for the request. This option overrides any credentials
@@ -1876,7 +1876,7 @@ defmodule Spear do
   * `:from` - the position or revision in the stream where the persistent
     subscription should start. This option may be `:start` or `:end`
     describing the beginning or end of the stream. When the `stream_name`
-    is `:all`, this paramater describes the prepare and commit positions
+    is `:all`, this parameter describes the prepare and commit positions
     in the `:all` stream which can be found on any event emitted from a
     subscription to the `:all` stream. When the `stream_name` is not the
     `:all` stream, this option may be an integer representing the event
@@ -2096,7 +2096,7 @@ defmodule Spear do
   has explicitly told the subscriber that the subscription is terminated.
   This can occur for persistent subscriptions in the case where the
   subscription is deleted (e.g. via `Spear.delete_persistent_subscription/4`).
-  `subscription` is the reference retuned by this function.
+  `subscription` is the reference returned by this function.
 
   ```elixir
   iex> Spear.create_persistent_subscription(conn, "asdf", "asdf", %Spear.PersistentSubscription.Settings{})

@@ -58,7 +58,7 @@ defmodule Spear.Request do
       {"te", "trailers"},
       # {"grpc-timeout", "10S"},
       {"content-type", "application/grpc+proto"},
-      {"grpc-endcoding", "identity"},
+      {"grpc-encoding", "identity"},
       {"grpc-accept-encoding", "identity,deflate,gzip"},
       {"accept-encoding", "identity"},
       {"user-agent", Grpc.user_agent()}
