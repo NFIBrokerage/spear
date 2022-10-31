@@ -1932,6 +1932,76 @@ defmodule Spear do
   end
 
   @doc """
+  Gets information pertaining to a persistent subcription.
+
+  Requires server version 22.10 or above.
+
+  `opts` are passed to the underlying request.
+
+  ## Examples 
+      iex> Spear.get_persistent_subscription_info(conn, "accounts", "subscription-group")
+      {:ok,
+      %Spear.PersistentSubscription.Info{
+       event_source: "accounts",
+       group_name: "subscription-group",
+       status: "Live",
+       average_per_second: 0,
+       total_items: 78,
+       count_since_last_measurement: 0,
+       last_checkpointed_event_position: "31",
+       last_known_event_position: "36",
+       start_from: "0",
+       message_timeout_milliseconds: 30000,
+       max_retry_count: 10,
+       live_buffer_size: 500,
+       buffer_size: 500,
+       read_batch_size: 20,
+       check_point_after_milliseconds: 2000,
+       min_check_point_count: 10,
+       max_check_point_count: 1000,
+       read_buffer_count: 0,
+       live_buffer_count: 36,
+       retry_buffer_count: 0,
+       total_in_flight_messages: 0,
+       outstanding_messages_count: 0,
+       named_consumer_strategy: :RoundRobin,
+       max_subscriber_count: 0,
+       parked_message_count: 1,
+       connections: [],
+       extra_statistics?: false,
+       resolve_link_tos?: false
+      }}
+  """
+  @doc since: "1.1.2"
+  @doc api: :persistent
+  @spec get_persistent_subscription_info(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t() | :all,
+          group_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: {:ok, Spear.PersistentSubcription.Info.t()} | {:error, any()}
+  def get_persistent_subscription_info(conn, stream_name, group_name, opts \\ []) do
+    require Spear.Records.Shared
+    require Spear.Records.Persistent
+    stream_id = Spear.Records.Shared.stream_identifier(stream_name: stream_name)
+
+    stream_options =
+      Spear.Records.Persistent.get_info_req_options(
+        stream_option: {:stream_identifier, stream_id},
+        group_name: group_name
+      )
+
+    get_info_message = Spear.Records.Persistent.get_info_req(options: stream_options)
+
+    with {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} <-
+           Spear.request(conn, Spear.Records.Persistent, :GetInfo, [get_info_message], opts) do
+      {:ok, Spear.PersistentSubscription.Info.from_proto(info)}
+    else
+      error -> error
+    end
+  end
+
+  @doc """
   Updates an existing persistent subscription
 
   See `t:Spear.PersistentSubscription.Settings.t/0` for more information.
