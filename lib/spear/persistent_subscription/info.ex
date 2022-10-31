@@ -1,9 +1,9 @@
 defmodule Spear.PersistentSubscription.Info do
-    @moduledoc """
-    A struct representing information pertaining to a persistent subscription.
+  @moduledoc """
+  A struct representing information pertaining to a persistent subscription.
 
-    Returned by `Spear.Client.get_persistent_subscription_info/4`
-    """
+  Returned by `Spear.Client.get_persistent_subscription_info/4`
+  """
   require Spear.Records.Persistent, as: Persistent
 
   defmodule ConnectionInfo do
@@ -101,13 +101,13 @@ defmodule Spear.PersistentSubscription.Info do
   alias __MODULE__.ConnectionInfo
   alias Spear.PersistentSubscription.Settings
 
-      @typedoc """
-      details of a persistent subscription.
+  @typedoc """
+  details of a persistent subscription.
 
-      See the EventStoredDB for more details.
-      """
-      @typedoc since: "1.1.2"
-      @type t :: %__MODULE__{
+  See the EventStoredDB for more details.
+  """
+  @typedoc since: "1.1.2"
+  @type t :: %__MODULE__{
           event_source: String.t(),
           group_name: String.t(),
           status: String.t(),
@@ -136,7 +136,8 @@ defmodule Spear.PersistentSubscription.Info do
           named_consumer_strategy: Settings.consumer_strategy(),
           max_subscriber_count: integer(),
           parked_message_count: integer()
-            }
+  }
+
   defstruct [
     :event_source,
     :group_name,
