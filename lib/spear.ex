@@ -1988,6 +1988,7 @@ defmodule Spear do
     case Spear.request(conn, Spear.Records.Persistent, :GetInfo, [get_info_message], opts) do
       {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} ->
         {:ok, Spear.PersistentSubscription.Info.from_proto(info)}
+
       error ->
         error
     end
