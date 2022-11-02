@@ -291,6 +291,63 @@ defmodule SpearTest do
       assert length(events) == 7
       assert Enum.all?(events, &(&1.metadata.stream_name == c.stream_name))
     end
+
+    @tag compatible(">= 22.10.0")
+    test "info about a psub can be fetched", c do
+      stream = c.stream_name
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
+
+      assert {:ok, %Spear.PersistentSubscription.Info{event_source: ^stream, group_name: ^group}} =
+               Spear.get_persistent_subscription_info(c.conn, stream, group)
+
+      assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
+    end
+
+    @tag compatible(">= 22.10.0")
+    test "info about a psub to :all can be fetched", c do
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      assert Spear.create_persistent_subscription(c.conn, :all, group, settings) == :ok
+
+      assert {:ok, %Spear.PersistentSubscription.Info{event_source: :all, group_name: ^group}} =
+               Spear.get_persistent_subscription_info(c.conn, :all, group)
+
+      assert Spear.delete_persistent_subscription(c.conn, :all, group) == :ok
+    end
+
+    @tag compatible(">= 22.10.0")
+    test "fetched info about a psub contains connections info", c do
+      stream = c.stream_name
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      assert Spear.create_persistent_subscription(c.conn, stream, group, settings) == :ok
+
+      assert {:ok, sub} = Spear.connect_to_persistent_subscription(c.conn, self(), stream, group)
+
+      assert {:ok,
+              %Spear.PersistentSubscription.Info{
+                event_source: ^stream,
+                group_name: ^group,
+                connections: [%Spear.PersistentSubscription.Info.ConnectionInfo{}]
+              }} = Spear.get_persistent_subscription_info(c.conn, stream, group)
+
+      assert Spear.cancel_subscription(c.conn, sub) == :ok
+
+      assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
+    end
+
+    @tag compatible(">= 22.10.0")
+    test "fetching info about a non existent psub returns an error", c do
+      group = uuid_v4()
+
+      assert {:error, %Spear.Grpc.Response{status: :not_found}} =
+               Spear.get_persistent_subscription_info(c.conn, "non_existent", group)
+    end
   end
 
   describe "given a subscription to a stream" do
