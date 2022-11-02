@@ -1985,11 +1985,11 @@ defmodule Spear do
     get_info_message =
       Spear.PersistentSubscription.Info.build_info_request(stream_name, group_name)
 
-    with {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} <-
-           Spear.request(conn, Spear.Records.Persistent, :GetInfo, [get_info_message], opts) do
-      {:ok, Spear.PersistentSubscription.Info.from_proto(info)}
-    else
-      error -> error
+    case Spear.request(conn, Spear.Records.Persistent, :GetInfo, [get_info_message], opts) do
+      {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} ->
+        {:ok, Spear.PersistentSubscription.Info.from_proto(info)}
+      error ->
+        error
     end
   end
 
