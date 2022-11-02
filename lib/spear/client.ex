@@ -508,6 +508,25 @@ defmodule Spear.Client do
             ) :: :ok | {:error, any()}
 
   @doc """
+  A wrapper around `Spear.get_persistent_subscription_info/3`
+  """
+  @doc since: "1.2.0"
+  @callback get_persistent_subscription_info(
+              stream_name :: String.t() | :all,
+              group_name :: String.t()
+            ) :: {:ok, Spear.PersistentSubscription.Info.t()} | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.get_persistent_subscription_info/4`
+  """
+  @doc since: "1.2.0"
+  @callback get_persistent_subscription_info(
+              stream_name :: String.t() | :all,
+              group_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: {:ok, Spear.PersistentSubscription.Info.t()} | {:error, any()}
+
+  @doc """
   A wrapper around `Spear.update_persistent_subscription/4`
   """
   @doc since: "0.6.0"
@@ -608,6 +627,36 @@ defmodule Spear.Client do
               event_or_ids :: Spear.Event.t() | [String.t()],
               opts :: Keyword.t()
             ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.replay_parked_messages/3`
+  """
+  @doc since: "1.2.0"
+  @callback replay_parked_messages(stream_name :: String.t() | :all, group_name :: String.t()) ::
+              :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.replay_parked_messages/4`
+  """
+  @doc since: "1.2.0"
+  @callback replay_parked_messages(
+              stream_name :: String.t() | :all,
+              group_name :: String.t(),
+              opts :: Keyword.t()
+            ) :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.restart_persistent_subscription_subsystem/1`
+  """
+  @doc since: "1.2.0"
+  @callback restart_persistent_subscription_subsystem() :: :ok | {:error, any()}
+
+  @doc """
+  A wrapper around `Spear.restart_persistent_subscription_subsystem/2`
+  """
+  @doc since: "1.2.0"
+  @callback restart_persistent_subscription_subsystem(opts :: Keyword.t()) ::
+              :ok | {:error, any()}
 
   @doc """
   A wrapper around `Spear.subscribe_to_stats/2`
@@ -812,6 +861,11 @@ defmodule Spear.Client do
       end
 
       @impl unquote(__MODULE__)
+      def get_persistent_subscription_info(stream_name, group_name, opts \\ []) do
+        Spear.get_persistent_subscription_info(__MODULE__, stream_name, group_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
       def update_persistent_subscription(stream_name, group_name, settings, opts \\ []) do
         Spear.update_persistent_subscription(__MODULE__, stream_name, group_name, settings, opts)
       end
@@ -845,6 +899,16 @@ defmodule Spear.Client do
       @impl unquote(__MODULE__)
       def nack(subscription, event_or_ids, opts \\ []) do
         Spear.nack(__MODULE__, subscription, event_or_ids, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def replay_parked_messages(stream_name, group_name, opts \\ []) do
+        Spear.replay_parked_messages(__MODULE__, stream_name, group_name, opts)
+      end
+
+      @impl unquote(__MODULE__)
+      def restart_persistent_subscription_subsystem(opts \\ []) do
+        Spear.restart_persistent_subscription_subsystem(__MODULE__, opts)
       end
 
       @impl unquote(__MODULE__)
