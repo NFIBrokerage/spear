@@ -350,6 +350,37 @@ defmodule SpearTest do
     end
   end
 
+  describe "given a stream contains 1 event" do
+    setup c do
+      :ok =
+        random_events()
+        |> Stream.take(1)
+        |> Spear.append(c.conn, c.stream_name, expect: :empty)
+    end
+
+    @tag compatible(">= 22.6.0")
+    test "in a persistent subscription, parked messages may be replayed", c do
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+      assert Spear.create_persistent_subscription(c.conn, c.stream_name, group, settings) == :ok
+
+      assert {:ok, sub} =
+               Spear.connect_to_persistent_subscription(c.conn, self(), c.stream_name, group)
+
+      assert_receive %Spear.Event{metadata: %{stream_revision: 0}} = event
+      assert Spear.nack(c.conn, sub, event, action: :park) == :ok
+
+      refute_receive _
+
+      assert Spear.replay_parked_messages(c.conn, c.stream_name, group) == :ok
+
+      assert_receive %Spear.Event{metadata: %{stream_revision: 0}}
+
+      assert Spear.cancel_subscription(c.conn, sub) == :ok
+      assert Spear.delete_persistent_subscription(c.conn, c.stream_name, group) == :ok
+    end
+  end
+
   describe "given a subscription to a stream" do
     setup c do
       {:ok, sub} = Spear.subscribe(c.conn, self(), c.stream_name)

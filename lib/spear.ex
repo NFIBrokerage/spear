@@ -2102,6 +2102,8 @@ defmodule Spear do
   @spec list_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           {:ok, Enumerable.t()} | {:error, any()}
   def list_persistent_subscriptions(conn, opts \\ []) do
+    # NOTE: this can be implemented without these hacks after v22.6.0
+    # with persistent's List RPC.
     read_opts =
       opts
       |> Keyword.merge(
@@ -2491,6 +2493,77 @@ defmodule Spear do
 
     Connection.cast(conn, {:push, sub, message})
   end
+
+  @doc """
+  Requests that the server replays any messages parked for a persistent subscription
+  stream and group.
+
+  ## Options
+
+  * `:stop_at` - the number of messages to request be replayed. If not specified, the
+    number of messages is not limited.
+
+  Remaining options are passed to `Spear.request/5`.
+
+  ## Examples
+
+      iex> Spear.create_persistent_subscription(conn, "my_stream", "my_group", %Spear.PersistentSubscription.Settings{})
+      # ... nack some events with the `:park` action ...
+      iex> Spear.replay_parked(conn, "my_stream", "my_group")
+      :ok
+      # ... parked messages are re-delivered ...
+  """
+  @doc api: :persistent
+  @spec replay_parked_messages(
+          connection :: Spear.Connection.t(),
+          stream_name :: String.t() | :all,
+          group_name :: String.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  def replay_parked_messages(conn, stream_name, group_name, opts \\ [])
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
+    stop_at_option =
+      case Keyword.fetch(opts, :stop_at) do
+        {:ok, stop_at} when is_integer(stop_at) ->
+          {:stop_at, stop_at}
+
+        :error ->
+          {:no_limit, Shared.empty()}
+      end
+
+    message =
+      Persistent.replay_parked_req(
+        options:
+          Persistent.replay_parked_req_options(
+            group_name: group_name,
+            stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
+            stop_at_option: stop_at_option
+          )
+      )
+
+    with {:ok, Persistent.replay_parked_resp()} <-
+           request(conn, Persistent, :ReplayParked, [message], opts) do
+      :ok
+    end
+  end
+
+  @doc """
+  Restarts the persistent subscription subsystem on the EventStoreDB server.
+  """
+  @doc api: :persistent
+  @spec restart_persistent_subscription_subsystem(
+          conn :: Spear.Connection.t(),
+          opts :: Keyword.t()
+        ) :: :ok | {:error, any()}
+  # coveralls-ignore-start
+  def restart_persistent_subscription_subsystem(conn, opts \\ []) do
+    with {:ok, Shared.empty()} <-
+           request(conn, Persistent, :RestartSubsystem, [Shared.empty()], opts) do
+      :ok
+    end
+  end
+
+  # coveralls-ignore-stop
 
   @doc """
   Returns the parked events stream for a persistent subscription stream and
