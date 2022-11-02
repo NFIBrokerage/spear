@@ -29,6 +29,7 @@ defmodule Spear.PersistentSubscription.Info do
       defstruct [:key, :value]
 
       @doc false
+      # coveralls-ignore-start
       def from_proto(
             Persistent.subscription_info_measurement(
               key: key,
@@ -37,6 +38,8 @@ defmodule Spear.PersistentSubscription.Info do
           ) do
         %__MODULE__{key: key, value: value}
       end
+
+      # coveralls-ignore-stop
     end
 
     alias __MODULE__.Measurement

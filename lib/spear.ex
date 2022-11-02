@@ -1678,8 +1678,8 @@ defmodule Spear do
   @doc api: :operations
   @spec merge_indexes(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
+  # coveralls-ignore-start
   def merge_indexes(conn, opts \\ []) do
-    # coveralls-ignore-start
     with {:ok, empty()} <- request(conn, Operations, :MergeIndexes, [empty()], opts) do
       :ok
     end
@@ -1710,7 +1710,6 @@ defmodule Spear do
   @spec resign_node(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
   def resign_node(conn, opts \\ []) do
-    # coveralls-ignore-start
     with {:ok, empty()} <- request(conn, Operations, :ResignNode, [empty()], opts) do
       :ok
     end
@@ -1743,7 +1742,6 @@ defmodule Spear do
           priority :: integer(),
           opts :: Keyword.t()
         ) :: :ok | {:error, any()}
-  # coveralls-ignore-start
   def set_node_priority(conn, priority, opts \\ [])
 
   def set_node_priority(conn, priority, opts) when is_integer(priority) do
@@ -1775,12 +1773,13 @@ defmodule Spear do
   @spec restart_persistent_subscriptions(connection :: Spear.Connection.t(), opts :: Keyword.t()) ::
           :ok | {:error, any()}
   def restart_persistent_subscriptions(conn, opts \\ []) do
-    # coveralls-ignore-start
     with {:ok, empty()} <-
            request(conn, Operations, :RestartPersistentSubscriptions, [empty()], opts) do
       :ok
     end
   end
+
+  # coveralls-ignore-stop
 
   @doc """
   Reads the cluster information from the connected EventStoreDB
@@ -2525,8 +2524,11 @@ defmodule Spear do
       when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
     stop_at_option =
       case Keyword.fetch(opts, :stop_at) do
+        # coveralls-ignore-start
         {:ok, stop_at} when is_integer(stop_at) ->
           {:stop_at, stop_at}
+
+        # coveralls-ignore-stop
 
         :error ->
           {:no_limit, Shared.empty()}
