@@ -11,6 +11,16 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.2.0 - 2022-11-02
+
+### Added
+
+- Added support for Persistent Subscription RPCs introduced in
+  server version 22.6.0:
+    * `Spear.get_persistent_subscription_info/4`
+    * `Spear.replay_parked_messages/4`
+    * `Spear.restart_persistent_subscription_subsystem/2`
+
 ## 1.1.0 - 2022-07-08
 
 ### Added
