@@ -311,10 +311,10 @@ defmodule SpearTest do
       group = uuid_v4()
       settings = %Spear.PersistentSubscription.Settings{}
 
-      assert Spear.create_persistent_subscription(c.conn, stream, :all, settings) == :ok
+      assert Spear.create_persistent_subscription(c.conn, :all, group, settings) == :ok
 
       assert {:ok, %Spear.PersistentSubscription.Info{event_source: :all, group_name: ^group}} =
-               Spear.get_persistent_subscription_info(c.conn, stream, group)
+               Spear.get_persistent_subscription_info(c.conn, :all, group)
 
       assert Spear.delete_persistent_subscription(c.conn, :all, group) == :ok
     end
