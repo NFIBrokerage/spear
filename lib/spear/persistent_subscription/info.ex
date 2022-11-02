@@ -136,7 +136,7 @@ defmodule Spear.PersistentSubscription.Info do
           named_consumer_strategy: Settings.consumer_strategy(),
           max_subscriber_count: integer(),
           parked_message_count: integer()
-  }
+        }
 
   defstruct [
     :event_source,

@@ -1987,7 +1987,7 @@ defmodule Spear do
 
     stream_options =
       Spear.Records.Persistent.get_info_req_options(
-        stream_option: {:stream_identifier, stream_id},
+        stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
         group_name: group_name
       )
 
