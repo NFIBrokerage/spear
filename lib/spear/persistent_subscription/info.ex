@@ -2,7 +2,7 @@ defmodule Spear.PersistentSubscription.Info do
   @moduledoc """
   A struct representing information pertaining to a persistent subscription.
 
-  Returned by `Spear.Client.get_persistent_subscription_info/4`
+  Returned by `Spear.get_persistent_subscription_info/4`
   """
   require Spear.Records.Persistent, as: Persistent
 
