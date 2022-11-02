@@ -1981,17 +1981,9 @@ defmodule Spear do
           opts :: Keyword.t()
         ) :: {:ok, Spear.PersistentSubcription.Info.t()} | {:error, any()}
   def get_persistent_subscription_info(conn, stream_name, group_name, opts \\ []) do
-    require Spear.Records.Shared
-    require Spear.Records.Persistent
-    stream_id = Spear.Records.Shared.stream_identifier(stream_name: stream_name)
 
-    stream_options =
-      Spear.Records.Persistent.get_info_req_options(
-        stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
-        group_name: group_name
-      )
-
-    get_info_message = Spear.Records.Persistent.get_info_req(options: stream_options)
+    get_info_message = 
+      Spear.PersistentSubscription.Info.build_info_request(stream_name, group_name)
 
     with {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} <-
            Spear.request(conn, Spear.Records.Persistent, :GetInfo, [get_info_message], opts) do

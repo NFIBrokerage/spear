@@ -169,6 +169,7 @@ defmodule Spear.PersistentSubscription.Info do
     resolve_link_tos?: false
   ]
 
+  @doc false
   def from_proto(
         Persistent.subscription_info(
           event_source: event_source,
@@ -231,6 +232,19 @@ defmodule Spear.PersistentSubscription.Info do
       max_subscriber_count: max_subscriber_count,
       parked_message_count: parked_message_count
     }
+  end
+
+  @doc false
+  def build_info_request(stream_name, group_name) do
+    require Spear.Records.Persistent
+
+    stream_options =
+      Spear.Records.Persistent.get_info_req_options(
+        stream_option: Spear.PersistentSubscription.map_short_stream_option(stream_name),
+        group_name: group_name
+      )
+
+    Spear.Records.Persistent.get_info_req(options: stream_options)
   end
 
   defp from_sub_strategy("RoundRobin"), do: :RoundRobin
