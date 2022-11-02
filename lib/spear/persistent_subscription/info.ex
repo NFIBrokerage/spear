@@ -108,7 +108,7 @@ defmodule Spear.PersistentSubscription.Info do
   """
   @typedoc since: "1.1.2"
   @type t :: %__MODULE__{
-          event_source: String.t(),
+          event_source: String.t() | :all,
           group_name: String.t(),
           status: String.t(),
           connections: list(ConnectionInfo.t()),
@@ -203,7 +203,7 @@ defmodule Spear.PersistentSubscription.Info do
         )
       ) do
     %__MODULE__{
-      event_source: event_source,
+      event_source: map_stream_name(event_source),
       group_name: group_name,
       status: status,
       connections: Enum.map(connections, &ConnectionInfo.from_proto(&1)),
@@ -246,6 +246,9 @@ defmodule Spear.PersistentSubscription.Info do
 
     Spear.Records.Persistent.get_info_req(options: stream_options)
   end
+
+  defp map_stream_name("$all"), do: :all
+  defp map_stream_name(name), do: name
 
   defp from_sub_strategy("RoundRobin"), do: :RoundRobin
   defp from_sub_strategy("Pinned"), do: :Pinned
