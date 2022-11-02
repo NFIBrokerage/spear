@@ -307,6 +307,19 @@ defmodule SpearTest do
     end
 
     @tag compatible(">= 22.10.0")
+    test "info about a psub to :all can be fetched", c do
+      group = uuid_v4()
+      settings = %Spear.PersistentSubscription.Settings{}
+
+      assert Spear.create_persistent_subscription(c.conn, stream, :all, settings) == :ok
+
+      assert {:ok, %Spear.PersistentSubscription.Info{event_source: :all, group_name: ^group}} =
+               Spear.get_persistent_subscription_info(c.conn, stream, group)
+
+      assert Spear.delete_persistent_subscription(c.conn, :all, group) == :ok
+    end
+
+    @tag compatible(">= 22.10.0")
     test "fetched info about a psub contains connections info", c do
       stream = c.stream_name
       group = uuid_v4()
