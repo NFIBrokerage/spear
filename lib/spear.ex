@@ -1934,7 +1934,7 @@ defmodule Spear do
   @doc """
   Gets information pertaining to a persistent subcription.
 
-  Requires server version 22.10 or above.
+  Requires server version 22.6.0 or above.
 
   `opts` are passed to the underlying request.
 

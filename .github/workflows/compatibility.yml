@@ -16,7 +16,7 @@ jobs:
           otp: "24.0"
         eventstore:
         - 20.10.2
-        - 21.10.0
+        - 22.6.0
     env:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost

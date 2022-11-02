@@ -292,7 +292,7 @@ defmodule SpearTest do
       assert Enum.all?(events, &(&1.metadata.stream_name == c.stream_name))
     end
 
-    @tag compatible(">= 22.10.0")
+    @tag compatible(">= 22.6.0")
     test "info about a psub can be fetched", c do
       stream = c.stream_name
       group = uuid_v4()
@@ -306,7 +306,7 @@ defmodule SpearTest do
       assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
     end
 
-    @tag compatible(">= 22.10.0")
+    @tag compatible(">= 22.6.0")
     test "info about a psub to :all can be fetched", c do
       group = uuid_v4()
       settings = %Spear.PersistentSubscription.Settings{}
@@ -319,7 +319,7 @@ defmodule SpearTest do
       assert Spear.delete_persistent_subscription(c.conn, :all, group) == :ok
     end
 
-    @tag compatible(">= 22.10.0")
+    @tag compatible(">= 22.6.0")
     test "fetched info about a psub contains connections info", c do
       stream = c.stream_name
       group = uuid_v4()
@@ -341,7 +341,7 @@ defmodule SpearTest do
       assert Spear.delete_persistent_subscription(c.conn, stream, group) == :ok
     end
 
-    @tag compatible(">= 22.10.0")
+    @tag compatible(">= 22.6.0")
     test "fetching info about a non existent psub returns an error", c do
       group = uuid_v4()
 
