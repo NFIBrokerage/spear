@@ -1980,9 +1980,9 @@ defmodule Spear do
           group_name :: String.t(),
           opts :: Keyword.t()
         ) :: {:ok, Spear.PersistentSubcription.Info.t()} | {:error, any()}
-  def get_persistent_subscription_info(conn, stream_name, group_name, opts \\ []) do
-
-    get_info_message = 
+  def get_persistent_subscription_info(conn, stream_name, group_name, opts \\ [])
+      when (is_binary(stream_name) or stream_name == :all) and is_binary(group_name) do
+    get_info_message =
       Spear.PersistentSubscription.Info.build_info_request(stream_name, group_name)
 
     with {:ok, Spear.Records.Persistent.get_info_resp(subscription_info: info)} <-
