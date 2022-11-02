@@ -333,7 +333,7 @@ defmodule SpearTest do
               %Spear.PersistentSubscription.Info{
                 event_source: ^stream,
                 group_name: ^group,
-                connections: [%Spear.PersistentSubscrion.Info.ConnectionInfo{}]
+                connections: [%Spear.PersistentSubscription.Info.ConnectionInfo{}]
               }} = Spear.get_persistent_subscription_info(c.conn, stream, group)
 
       assert Spear.cancel_subscription(c.conn, sub) == :ok
