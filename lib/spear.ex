@@ -1972,7 +1972,7 @@ defmodule Spear do
        resolve_link_tos?: false
       }}
   """
-  @doc since: "1.1.2"
+  @doc since: "1.2.0"
   @doc api: :persistent
   @spec get_persistent_subscription_info(
           connection :: Spear.Connection.t(),
@@ -2513,6 +2513,7 @@ defmodule Spear do
       :ok
       # ... parked messages are re-delivered ...
   """
+  @doc since: "1.2.0"
   @doc api: :persistent
   @spec replay_parked_messages(
           connection :: Spear.Connection.t(),
@@ -2550,6 +2551,7 @@ defmodule Spear do
   @doc """
   Restarts the persistent subscription subsystem on the EventStoreDB server.
   """
+  @doc since: "1.2.0"
   @doc api: :persistent
   @spec restart_persistent_subscription_subsystem(
           conn :: Spear.Connection.t(),
