@@ -60,4 +60,13 @@ defmodule Spear.ConnectionTest do
     conn = start_supervised!({Spear.Connection, config})
     assert Spear.append([], conn, "some_stream") == {:error, :read_only}
   end
+
+  test "a connection with an incorrect password cannot subscribe to a stream" do
+    config =
+      update_in(@good_config[:connection_string], &String.replace(&1, "changeit", "foobarbaz"))
+
+    conn = start_supervised!({Spear.Connection, config})
+    assert {:error, reason} = Spear.subscribe(conn, self(), :all)
+    assert reason.message == "Bad HTTP status code: 401, should be 200"
+  end
 end

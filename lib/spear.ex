@@ -814,7 +814,22 @@ defmodule Spear do
 
     request = opts |> Enum.into(%{}) |> Spear.Reading.build_subscribe_request()
 
-    Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout])
+    case Connection.call(conn, {{:subscription, subscriber, through}, request}, opts[:timeout]) do
+      {:ok, subscription} when is_reference(subscription) ->
+        {:ok, subscription}
+
+      {:ok, %Spear.Connection.Response{} = response} ->
+        grpc_response =
+          Spear.Grpc.Response.from_connection_response(response, request.rpc, opts[:raw?])
+
+        {:error, grpc_response}
+
+      # coveralls-ignore-start
+      error ->
+        error
+
+        # coveralls-ignore-stop
+    end
   end
 
   @doc """
@@ -1937,7 +1952,7 @@ defmodule Spear do
 
   `opts` are passed to the underlying request.
 
-  ## Examples 
+  ## Examples
       iex> Spear.get_persistent_subscription_info(conn, "accounts", "subscription-group")
       {:ok,
       %Spear.PersistentSubscription.Info{
