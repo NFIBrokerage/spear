@@ -11,6 +11,17 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.2.1 - 2022-11-14
+
+### Fixed
+
+- Fixed the return values for `Spear.subscribe/4` when the subscription request
+  fails.
+
+For example, if a connection is made with an invalid password, `Spear.subscribe/4`
+would previously return `{:ok, %Spear.Connection.Response{}}` (an internal
+struct). Now `Spear.subscribe/4` returns `{:error, %Spear.Grpc.Response{}}`.
+
 ## 1.2.0 - 2022-11-02
 
 ### Added
