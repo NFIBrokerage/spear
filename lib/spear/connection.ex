@@ -170,6 +170,14 @@ defmodule Spear.Connection do
   def connect(_, s) do
     case do_connect(s.config) do
       {:ok, conn} ->
+        case s.config.register_with do
+          %{registry: reg, key: k, value: _} ->
+            Registry.register(reg, k, Map.get(s.config.register_with, :value, nil))
+
+          _ ->
+            nil
+        end
+
         {:ok, %__MODULE__{s | conn: conn, keep_alive_timer: KeepAliveTimer.start(s.config)}}
 
       {:error, _reason} ->
@@ -189,6 +197,14 @@ defmodule Spear.Connection do
         requests: %{},
         keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
     }
+
+    case s.config.register_with do
+      %{registry: reg, key: k, value: _} ->
+        Registry.unregister(reg, k)
+
+      _ ->
+        nil
+    end
 
     case info do
       {:close, from} ->

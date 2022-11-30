@@ -72,7 +72,8 @@ defmodule Spear.Connection.Configuration do
           mint_opts: Keyword.t(),
           valid?: boolean(),
           errors: Keyword.t(),
-          read_only?: boolean()
+          read_only?: boolean(),
+          register_with: %{registry: atom(), key: atom(), value: term() | nil} | nil
         }
 
   defstruct scheme: :http,
@@ -86,7 +87,8 @@ defmodule Spear.Connection.Configuration do
             mint_opts: [],
             valid?: true,
             errors: [],
-            read_only?: false
+            read_only?: false,
+            register_with: nil
 
   @doc false
   def credentials(%__MODULE__{username: username, password: password}) do
