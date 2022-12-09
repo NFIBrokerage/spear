@@ -79,8 +79,8 @@ defmodule Spear.Connection.Configuration do
           valid?: boolean(),
           errors: Keyword.t(),
           read_only?: boolean(),
-          on_connect: fun() | {module(), atom(), []} | nil,
-          on_disconnect: fun() | {module(), atom(), []} | nil
+          on_connect: fun() | {module(), atom(), [any()]} | nil,
+          on_disconnect: fun() | {module(), atom(), [any()]} | nil
         }
 
   defstruct scheme: :http,
