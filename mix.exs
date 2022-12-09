@@ -91,7 +91,8 @@ defmodule Spear.MixProject do
         "guides/writing_events.md",
         "guides/streams.md",
         "guides/link_resolution.md",
-        "guides/security.md"
+        "guides/security.md",
+        "guides/pooling.md"
       ],
       groups_for_extras: [
         Guides: Path.wildcard("guides/*.md")
