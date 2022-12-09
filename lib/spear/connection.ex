@@ -170,13 +170,7 @@ defmodule Spear.Connection do
   def connect(_, s) do
     case do_connect(s.config) do
       {:ok, conn} ->
-        case s.config.register_with do
-          %{registry: reg, key: k, value: _} ->
-            Registry.register(reg, k, Map.get(s.config.register_with, :value, nil))
-
-          _ ->
-            nil
-        end
+        run_function(s.config.on_connect)
 
         {:ok, %__MODULE__{s | conn: conn, keep_alive_timer: KeepAliveTimer.start(s.config)}}
 
@@ -198,13 +192,7 @@ defmodule Spear.Connection do
         keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
     }
 
-    case s.config.register_with do
-      %{registry: reg, key: k, value: _} ->
-        Registry.unregister(reg, k)
-
-      _ ->
-        nil
-    end
+    run_function(s.config.on_connect)
 
     case info do
       {:close, from} ->
@@ -502,4 +490,15 @@ defmodule Spear.Connection do
   end
 
   defp read_only_check(_request, _s), do: :ok
+
+  defp run_function(f) when is_function(f, 0), do: f.()
+
+  defp run_function({m, f, _}) do
+    case function_exported?(m, f, 0) do
+      true -> apply(m, f, [])
+      _ -> nil
+    end
+  end
+
+  defp run_function(_), do: nil
 end

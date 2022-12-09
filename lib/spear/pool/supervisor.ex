@@ -12,7 +12,8 @@ defmodule Spear.Pool.Supervisor do
 
     connection_args =
       Keyword.merge(init_args,
-        register_with: %{registry: SpearPoolRegistry, key: :connections, value: nil}
+        on_connect: Spear.Pool.PoolUtils.on_connect_fun(SpearPoolRegistry, :connections),
+        on_disconnect: Spear.Pool.PoolUtils.on_disconnect_fun(SpearPoolRegistry, :connections)
       )
 
     connections_specs =
@@ -26,9 +27,10 @@ defmodule Spear.Pool.Supervisor do
       start: {Supervisor, :start_link, [connections_specs, [strategy: :one_for_one]]}
     }
 
+    Spear.Pool.PoolUtils.init()
+
     children = [
       {Registry, name: SpearPoolRegistry, keys: :duplicate},
-      {Spear.Pool.PoolTable, []},
       connections_supervisor_spec
     ]
 
@@ -37,7 +39,7 @@ defmodule Spear.Pool.Supervisor do
 
   def get_conn() do
     connections = Registry.lookup(SpearPoolRegistry, :connections)
-    next_index = Spear.Pool.PoolTable.read_and_increment()
+    next_index = Spear.Pool.PoolUtils.read_and_increment()
 
     # We get the connection in the list at the incremented index, modulo
     # the number of connections in the list (so that we wrap around).

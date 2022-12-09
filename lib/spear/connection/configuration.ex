@@ -47,6 +47,12 @@ defmodule Spear.Connection.Configuration do
     be limited to read-only functionality. The list of read-only APIs can be
     queried with `Spear.Connection.read_apis/0`
 
+  * `:on_connect` - (default: `nil`) a 0-arity fun or MFA to be called when the
+    connection is established.
+
+  * `:on_disconnect` - (default: `nil`) a 0-arity fun or MFA to be called when the
+    connection is lost.
+
   See the `Spear.Connection` module docs for more information about keep-alive.
   """
   @moduledoc since: "0.2.0"
@@ -73,7 +79,8 @@ defmodule Spear.Connection.Configuration do
           valid?: boolean(),
           errors: Keyword.t(),
           read_only?: boolean(),
-          register_with: %{registry: atom(), key: atom(), value: term() | nil} | nil
+          on_connect: fun() | {module(), atom(), []} | nil,
+          on_disconnect: fun() | {module(), atom(), []} | nil
         }
 
   defstruct scheme: :http,
@@ -88,7 +95,8 @@ defmodule Spear.Connection.Configuration do
             valid?: true,
             errors: [],
             read_only?: false,
-            register_with: nil
+            on_connect: nil,
+            on_disconnect: nil
 
   @doc false
   def credentials(%__MODULE__{username: username, password: password}) do
