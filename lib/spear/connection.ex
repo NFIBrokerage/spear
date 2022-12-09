@@ -192,7 +192,7 @@ defmodule Spear.Connection do
         keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
     }
 
-    run_function(s.config.on_connect)
+    run_function(s.config.on_disconnect)
 
     case info do
       {:close, from} ->
@@ -493,9 +493,9 @@ defmodule Spear.Connection do
 
   defp run_function(f) when is_function(f, 0), do: f.()
 
-  defp run_function({m, f, _}) do
-    case function_exported?(m, f, 0) do
-      true -> apply(m, f, [])
+  defp run_function({m, f, args}) when is_list(args) do
+    case function_exported?(m, f, Enum.count(args)) do
+      true -> apply(m, f, args)
       _ -> nil
     end
   end
