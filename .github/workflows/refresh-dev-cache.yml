@@ -31,7 +31,7 @@ env:
 jobs:
   refresh-dev-cache:
     name: Refresh Docs Cache
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       MIX_ENV: dev
 
