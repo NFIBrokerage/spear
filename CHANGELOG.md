@@ -11,6 +11,14 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.3.0 - 2022-12-09
+
+### Added
+
+- Added documentation for setting up connection pools.
+- Added `:on_connect` and `:on_disconnect` hook options for `Spear.Connection`
+  which can be used for pooling.
+
 ## 1.2.1 - 2022-11-14
 
 ### Fixed
