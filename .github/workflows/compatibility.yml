@@ -33,7 +33,7 @@ jobs:
       run: docker-compose up --detach eventstore
 
     - name: Setup Elixir and Erlang versions
-      uses: erlef/setup-beam@v1.7.0
+      uses: erlef/setup-beam@v1
       with:
         otp-version: ${{ matrix.beam.otp }}
         elixir-version: ${{ matrix.beam.elixir }}
