@@ -170,6 +170,8 @@ defmodule Spear.Connection do
   def connect(_, s) do
     case do_connect(s.config) do
       {:ok, conn} ->
+        run_function(s.config.on_connect)
+
         {:ok, %__MODULE__{s | conn: conn, keep_alive_timer: KeepAliveTimer.start(s.config)}}
 
       {:error, _reason} ->
@@ -189,6 +191,8 @@ defmodule Spear.Connection do
         requests: %{},
         keep_alive_timer: KeepAliveTimer.clear(s.keep_alive_timer)
     }
+
+    run_function(s.config.on_disconnect)
 
     case info do
       {:close, from} ->
@@ -486,4 +490,15 @@ defmodule Spear.Connection do
   end
 
   defp read_only_check(_request, _s), do: :ok
+
+  defp run_function(f) when is_function(f, 0), do: f.()
+
+  defp run_function({m, f, args}) when is_list(args) do
+    case function_exported?(m, f, Enum.count(args)) do
+      true -> apply(m, f, args)
+      _ -> nil
+    end
+  end
+
+  defp run_function(_), do: nil
 end

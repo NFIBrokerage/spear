@@ -47,6 +47,70 @@ defmodule Spear.ConnectionTest do
     assert Spear.ping(conn) == :pong
   end
 
+  test "a connection started with a 0-arity :on_connect fun invokes the fun at each connection" do
+    my_pid = self()
+
+    f = fn -> send(my_pid, :fun_invoked) end
+    config = [{:on_connect, f} | @good_config]
+
+    conn = start_supervised!({Spear.Connection, config})
+
+    assert_receive(:fun_invoked)
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert Connection.cast(conn, :connect) == :ok
+    assert_receive(:fun_invoked)
+  end
+
+  test "a connection started with a 0-arity :on_disconnect fun invokes the fun at each disconnection" do
+    my_pid = self()
+
+    f = fn -> send(my_pid, :fun_invoked) end
+    config = [{:on_disconnect, f} | @good_config]
+
+    conn = start_supervised!({Spear.Connection, config})
+
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert_receive(:fun_invoked)
+    assert Connection.cast(conn, :connect) == :ok
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert_receive(:fun_invoked)
+  end
+
+  test "a connection started with a :on_connect MFA invokes it at each connection" do
+    defmodule MfaTest do
+      def send_me(pid), do: send(pid, :mfa_invoked)
+    end
+
+    my_pid = self()
+
+    config = [{:on_connect, {MfaTest, :send_me, [my_pid]}} | @good_config]
+
+    conn = start_supervised!({Spear.Connection, config})
+
+    assert_receive(:mfa_invoked)
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert Connection.cast(conn, :connect) == :ok
+    assert_receive(:mfa_invoked)
+  end
+
+  test "a connection started with a :on_disconnect MFA invokes it at each disconnection" do
+    defmodule MfaTest do
+      def send_me(pid), do: send(pid, :mfa_invoked)
+    end
+
+    my_pid = self()
+
+    config = [{:on_disconnect, {MfaTest, :send_me, [my_pid]}} | @good_config]
+
+    conn = start_supervised!({Spear.Connection, config})
+
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert_receive(:mfa_invoked)
+    assert Connection.cast(conn, :connect) == :ok
+    assert Connection.call(conn, :close) == {:ok, :closed}
+    assert_receive(:mfa_invoked)
+  end
+
   test "a connection can noop random info messages" do
     conn = start_supervised!({Spear.Connection, @good_config})
 
