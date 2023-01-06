@@ -306,7 +306,7 @@ defmodule Spear do
   """
   @doc since: "0.1.0"
   @doc api: :streams
-  @spec read_stream(Spear.Connection.t(), String.t(), Keyword.t()) ::
+  @spec read_stream(Spear.Connection.t(), String.t() | :all, Keyword.t()) ::
           {:ok, event_stream :: Enumerable.t()} | {:error, any()}
   def read_stream(connection, stream_name, opts \\ []) do
     default_read_opts = [
