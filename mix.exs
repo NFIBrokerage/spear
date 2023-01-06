@@ -25,14 +25,18 @@ defmodule Spear.MixProject do
         inch: :dev,
         bless: :test,
         test: :test,
-        dialyzer: :test
+        dialyzer: :dev
       ],
       name: "Spear",
       source_url: @source_url,
       deps: deps(),
       docs: docs(),
       package: package(),
-      description: description()
+      description: description(),
+      dialyzer: [
+        plt_add_apps: [:jason],
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ]
     ]
   end
 
@@ -50,14 +54,16 @@ defmodule Spear.MixProject do
       {:event_store_db_gpb_protobufs, "~> 2.2"},
       {:connection, "~> 1.0"},
       # optional dependencies
-      {:jason, ">= 0.0.0", optional: true},
+      {:jason, "~> 1.0", optional: true},
+
       # dev/test utilities
       {:castore, ">= 0.0.0", only: [:dev, :test]},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
       # testing suite
-      {:credo, "~> 1.5", only: :test},
+      {:credo, ">= 0.0.0", only: :test},
       {:bless, "~> 1.0", only: :test},
-      {:excoveralls, "~> 0.7", only: :test}
+      {:excoveralls, ">= 0.0.0", only: :test}
     ]
   end
 

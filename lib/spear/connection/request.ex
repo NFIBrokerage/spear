@@ -77,8 +77,8 @@ defmodule Spear.Connection.Request do
      {[{message, message_size} | message_buffer], message_size + message_buffer_size, max_size}}
   end
 
-  @spec emit_messages(%Spear.Connection{}, %__MODULE__{}) ::
-          {:ok, %Spear.Connection{}} | {:error, %Spear.Connection{}, reason :: any()}
+  @spec emit_messages(Spear.Connection.state(), %__MODULE__{}) ::
+          {:ok, Spear.Connection.state()} | {:error, Spear.Connection.state(), reason :: any()}
   def emit_messages(state, %__MODULE__{status: :done, buffer: <<>>}), do: {:ok, state}
 
   def emit_messages(state, %__MODULE__{status: :done, buffer: buffer} = request) do

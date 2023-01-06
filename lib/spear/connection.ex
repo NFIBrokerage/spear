@@ -88,6 +88,8 @@ defmodule Spear.Connection do
 
   defstruct [:config, :conn, requests: %{}, keep_alive_timer: %KeepAliveTimer{}]
 
+  @type state :: %__MODULE__{}
+
   @typedoc """
   A connection process
 
@@ -152,9 +154,7 @@ defmodule Spear.Connection do
 
       %Config{errors: errors} ->
         error_lines =
-          errors
-          |> Enum.map(fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
-          |> Enum.join("\n")
+          Enum.map_join(errors, "\n", fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
 
         Logger.error("""
         Invalid configuration passed to #{inspect(__MODULE__)}. Found the following errors:
@@ -327,10 +327,10 @@ defmodule Spear.Connection do
   def handle_info(:keep_alive_expired, s), do: {:disconnect, :keep_alive_timeout, s}
 
   def handle_info(message, s) do
-    with %Mint.HTTP2{} = conn <- s.conn,
-         {:ok, conn, responses} <- Mint.HTTP2.stream(conn, message) do
-      {:noreply, put_in(s.conn, conn) |> handle_responses(responses)}
-    else
+    case Mint.HTTP2.stream(s.conn, message) do
+      {:ok, conn, responses} ->
+        {:noreply, put_in(s.conn, conn) |> handle_responses(responses)}
+
       # coveralls-ignore-start
       {:error, conn, reason, responses} ->
         s = put_in(s.conn, conn) |> handle_responses(responses)
