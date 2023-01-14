@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eventstore:
-    image: ghcr.io/eventstore/eventstore:ci
+    image: eventstore/eventstore:21.10.9-alpha-arm64v8
     environment:
     - EVENTSTORE_START_STANDARD_PROJECTIONS=True
     - EVENTSTORE_RUN_PROJECTIONS=All

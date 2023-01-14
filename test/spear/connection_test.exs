@@ -3,7 +3,7 @@ defmodule Spear.ConnectionTest do
 
   import ExUnit.CaptureLog
 
-  @good_config Application.fetch_env!(:spear, :config)
+  @good_config Application.compile_env!(:spear, :config)
 
   describe "given a connection_string leading nowhere" do
     setup do
@@ -77,13 +77,13 @@ defmodule Spear.ConnectionTest do
   end
 
   test "a connection started with a :on_connect MFA invokes it at each connection" do
-    defmodule MfaTest do
+    defmodule MfaConnectTest do
       def send_me(pid), do: send(pid, :mfa_invoked)
     end
 
     my_pid = self()
 
-    config = [{:on_connect, {MfaTest, :send_me, [my_pid]}} | @good_config]
+    config = [{:on_connect, {MfaConnectTest, :send_me, [my_pid]}} | @good_config]
 
     conn = start_supervised!({Spear.Connection, config})
 
@@ -94,13 +94,13 @@ defmodule Spear.ConnectionTest do
   end
 
   test "a connection started with a :on_disconnect MFA invokes it at each disconnection" do
-    defmodule MfaTest do
+    defmodule MfaDisconnectTest do
       def send_me(pid), do: send(pid, :mfa_invoked)
     end
 
     my_pid = self()
 
-    config = [{:on_disconnect, {MfaTest, :send_me, [my_pid]}} | @good_config]
+    config = [{:on_disconnect, {MfaDisconnectTest, :send_me, [my_pid]}} | @good_config]
 
     conn = start_supervised!({Spear.Connection, config})
 
