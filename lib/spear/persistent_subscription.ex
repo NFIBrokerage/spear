@@ -26,13 +26,9 @@ defmodule Spear.PersistentSubscription do
     and performing a no-op in the consumer. Skipping may be a good option for
     dealing with poison messages: malformed or otherwise completely
     unhandleable events.
-  * `:stop` - stops the EventStoreDB from re-sending the event. The event is
-    not parked or retried. It is unclear how this differs from the `:skip`
-    action. This function does not stop the persistent subscription:
-    use `Spear.cancel_subscription/3` to shut down the connection.
   """
   @typedoc since: "0.6.0"
-  @type nack_action :: :unknown | :park | :retry | :skip | :stop
+  @type nack_action :: :unknown | :park | :retry | :skip
 
   @typedoc """
   A persistent subscription.
