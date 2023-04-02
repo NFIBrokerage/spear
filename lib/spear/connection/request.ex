@@ -79,6 +79,28 @@ defmodule Spear.Connection.Request do
 
   @spec emit_messages(%Spear.Connection{}, %__MODULE__{}) ::
           {:ok, %Spear.Connection{}} | {:error, %Spear.Connection{}, reason :: any()}
+  def emit_messages(state, %__MODULE__{status: :done, buffer: <<>>}), do: {:ok, state}
+
+  def emit_messages(state, %__MODULE__{status: :done, buffer: buffer} = request) do
+    smallest_window = get_smallest_window(state.conn, request.request_ref)
+
+    {bytes_to_send, size, rest} =
+      case buffer do
+        <<bytes_to_send::binary-size(smallest_window), rest::binary>> ->
+          {bytes_to_send, smallest_window, rest}
+
+        ^buffer ->
+          {buffer, byte_size(buffer), <<>>}
+      end
+
+    state
+    |> put_request(%__MODULE__{request | buffer: rest})
+    |> stream_messages(
+      request.request_ref,
+      [{bytes_to_send, size}]
+    )
+  end
+
   def emit_messages(state, %__MODULE__{buffer: <<>>, continuation: continuation} = request) do
     smallest_window = get_smallest_window(state.conn, request.request_ref)
 
@@ -107,6 +129,7 @@ defmodule Spear.Connection.Request do
         # so we resume the happy path of cramming as many messages as possible
         # into frames
         buffer_size = byte_size(buffer)
+        request = put_in(request.buffer, <<>>)
 
         {:cont, {[{buffer, buffer_size}], buffer_size, smallest_window}}
         |> continuation.()
@@ -233,26 +256,30 @@ defmodule Spear.Connection.Request do
   # coveralls-ignore-stop
 
   def continue_requests(state) do
-    state.requests
-    |> Enum.filter(fn
-      {_request_ref, %__MODULE__{} = request} -> request.status == :streaming
-      _ -> false
+    Enum.reduce(state.requests, state, fn
+      {_request_ref, %__MODULE__{status: status, buffer: buffer} = request}, state
+      when status == :streaming or buffer != <<>> ->
+        continue_request(state, request)
+
+      _, state ->
+        state
     end)
-    |> Enum.reduce(state, fn {request_ref, request}, state ->
-      case emit_messages(state, request) do
-        {:ok, state} ->
-          state
+  end
 
-        {:error, state, reason} ->
-          # coveralls-ignore-start
-          {%{from: from}, state} = pop_in(state.requests[request_ref])
+  def continue_request(state, request) do
+    case emit_messages(state, request) do
+      {:ok, state} ->
+        state
 
-          GenServer.reply(from, {:error, reason})
+      {:error, state, reason} ->
+        # coveralls-ignore-start
+        {%{from: from}, state} = pop_in(state.requests[request.request_ref])
 
-          state
-          # coveralls-ignore-stop
-      end
-    end)
+        GenServer.reply(from, {:error, reason})
+
+        state
+        # coveralls-ignore-stop
+    end
   end
 
   def handle_data(%__MODULE__{type: :request} = request, new_data) do
@@ -307,4 +334,8 @@ defmodule Spear.Connection.Request do
   end
 
   defp monitor_subscription(_), do: nil
+
+  def append_data(request, data) do
+    update_in(request.buffer, &(&1 <> data))
+  end
 end

@@ -209,22 +209,17 @@ defmodule Spear.Connection do
   def handle_cast(:connect, s), do: {:connect, s.config, s}
 
   def handle_cast({:push, request_ref, message}, s) when is_reference(request_ref) do
-    # YARD backpressure and http2 window sizes
-    with %{rpc: rpc} <- s.requests[request_ref],
-         {wire_data, _size} =
-           Spear.Request.to_wire_data(message, rpc.service_module, rpc.request_type),
-         {:ok, conn} <- Mint.HTTP2.stream_request_body(s.conn, request_ref, wire_data) do
-      {:noreply, put_in(s.conn, conn)}
-    else
-      # coveralls-ignore-start
-      nil ->
+    case Map.fetch(s.requests, request_ref) do
+      {:ok, %{rpc: rpc} = request} ->
+        {wire_data, _size} =
+          Spear.Request.to_wire_data(message, rpc.service_module, rpc.request_type)
+
+        request = Request.append_data(request, IO.iodata_to_binary(wire_data))
+        s = Request.continue_request(s, request)
         {:noreply, s}
 
-      {:error, conn, reason} ->
-        s = put_in(s.conn, conn)
-
-        if reason == @closed, do: {:disconnect, :closed, s}, else: {:noreply, s}
-        # coveralls-ignore-stop
+      :error ->
+        {:noreply, s}
     end
   end
 
