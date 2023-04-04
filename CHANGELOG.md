@@ -11,6 +11,15 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.3.1 - 2023-04-04
+
+### Fixed
+
+- HTTP/2 window size is now properly checked in `Spear.Connection` before
+  attempting to send ack, nack, and batch-append messages.
+    - Without this fix, some ack, nack and batch-append messages could be
+      silently dropped on busy connections.
+
 ## 1.3.0 - 2022-12-09
 
 ### Added
