@@ -100,7 +100,7 @@ defmodule Spear.Event do
     turn the event's body into binary data. If the content-type is
     `"application/json"`, the EventStoreDB and Spear (in
     `Spear.Event.from_read_response/2`)
-  * `:custom_metadata` - (default: `""`) an event field outside of the body
+  * `:custom_metadata` - (default: `""`) an event field outside the body
     meant as a bag for storing custom attributes about an event. Usage of this
     field is not obligatory: leaving it blank is perfectly normal.
 
@@ -140,6 +140,35 @@ defmodule Spear.Event do
     }
   ]
   ```
+
+  ## Event Store DB Event Metadata
+
+  All names starting with $ are reserved space for internal use, the most commonly used are the following:
+
+  - `$correlationId`:	The application level correlation ID associated with this message.
+  - `$causationId`:	The application level causation ID associated with this message.
+
+  In order to use these fields, you must pass them as custom metadata:
+
+  ```elixir
+  iex> custom_metadata =  Jason.encode!(%{"$correlationId" => "...", "$causationId" => "..."})
+  ...> Spear.Event.new("my_event", %{"id" => 1}, custom_metadata: custom_metadata)
+  %Spear.Event{
+    id: "d77c1abc-0200-4804-81cd-eca726911166",
+    type: "my_event",
+    body: %{"id" => 1},
+    link: nil,
+    metadata: %{
+      content_type: "application/json",
+      custom_metadata: "{\"$causationId\":\"...\",\"$correlationId\":\"...\"}"
+    }
+  }
+  ```
+
+  > #### Custom Metadata Format {: .tip}
+  >
+  > In order to leverage the EventStoreDB System Projections such as `$by_correlation_id` or JS Projections; you must
+  > pass the custom metadata as JSON.
 
   ## Examples
 
