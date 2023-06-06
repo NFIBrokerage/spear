@@ -933,7 +933,7 @@ defmodule Spear.Client do
       {:ok, otp_app} ->
         quote do
           def start_link(args) do
-            Application.get_env(unquote(otp_app), __MODULE__)
+            Application.get_env(unquote(otp_app), __MODULE__, [])
             |> Keyword.merge(args)
             |> Keyword.put(:name, __MODULE__)
             |> Spear.Connection.start_link()
