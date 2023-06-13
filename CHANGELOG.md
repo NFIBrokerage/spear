@@ -11,6 +11,14 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.3.2 - 2023-06-12
+
+### Fixed
+
+- Fixed a crash on start-up when Application environment values were not
+  set for a `Spear.Client` module using `use Spear.Client`.
+- Improved documentation for event metadata.
+
 ## 1.3.1 - 2023-04-04
 
 ### Fixed
