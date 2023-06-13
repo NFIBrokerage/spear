@@ -13,7 +13,7 @@ services:
     # messages via wireshark
     # command: "--insecure --run-projections=All"
     ports:
-    - 2113:2113
+    - '2113:2113'
 
   app:
     image: elixir:1.12.2

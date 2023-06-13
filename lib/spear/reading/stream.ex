@@ -82,7 +82,7 @@ defmodule Spear.Reading.Stream do
     response
   end
 
-  @spec unfold_chunk(binary()) :: {struct(), binary()} | nil
+  @spec unfold_chunk(binary()) :: {tuple(), binary()} | nil
   def unfold_chunk(buffer) when is_binary(buffer) do
     Spear.Grpc.decode_next_message(
       buffer,

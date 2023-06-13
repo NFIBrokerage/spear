@@ -37,19 +37,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Determine the elixir version
-      run: echo "ELIXIR_VERSION=$(grep -h elixir .tool-versions | awk '{ print $2 }' | awk -F - '{print $1}')" >> $GITHUB_ENV
-
-    - name: Determine the otp version
-      run: echo "OTP_VERSION=$(grep -h erlang .tool-versions | awk '{ print $2 }')" >> $GITHUB_ENV
+      uses: actions/checkout@v3
 
     - name: Setup Elixir and Erlang versions
-      uses: erlef/setup-beam@v1.7.0
+      uses: erlef/setup-beam@v1
+      id: beam
       with:
-        otp-version: ${{ env.OTP_VERSION }}
-        elixir-version: ${{ env.ELIXIR_VERSION }}
+        version-file: .tool-versions
+        version-type: strict
 
     - name: Restore the deps cache
       uses: actions/cache@v1

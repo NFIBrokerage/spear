@@ -9,11 +9,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        beam:
-        - elixir: "1.7.4"
-          otp: "21.3"
-        - elixir: "1.12.3"
-          otp: "24.0"
         eventstore:
         - 20.10.2
         - 22.6.0
@@ -21,10 +16,9 @@ jobs:
       MIX_ENV: test
       EVENTSTORE_HOST: localhost
       EVENTSTORE_VERSION: ${{ matrix.eventstore }}
-
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set the EventStoreDB version
       run: sed -i 's|ghcr.io/eventstore/eventstore:ci|eventstore/eventstore:${{ matrix.eventstore }}-buster-slim|g' docker-compose.yml
@@ -34,27 +28,26 @@ jobs:
 
     - name: Setup Elixir and Erlang versions
       uses: erlef/setup-beam@v1
+      id: beam
       with:
-        otp-version: ${{ matrix.beam.otp }}
-        elixir-version: ${{ matrix.beam.elixir }}
+        version-file: .tool-versions
+        version-type: strict
 
     - name: Restore the deps cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       id: deps-cache
       with:
+        key: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-deps
+        restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-deps
         path: deps
-        key: ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-deps-mixlockhash-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-deps-
 
     - name: Restore the _build cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       id: build-cache
       with:
+        key: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-${{ env.MIX_ENV }}-build
+        restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-${{ env.MIX_ENV }}-build
         path: _build
-        key: ${{ runner.os }}-${{ matrix.beam.elixir  }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-build-mixlockhash-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-build-
 
     - name: Fetch mix dependencies
       if: steps.deps-cache.outputs.cache-hit != 'true'
@@ -72,6 +65,3 @@ jobs:
 
     - name: Run tests
       run: mix test --exclude version_incompatible
-
-    - name: Credo
-      run: mix credo
