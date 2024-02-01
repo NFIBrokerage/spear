@@ -65,7 +65,7 @@ jobs:
       run: mix compile --warnings-as-errors --force
 
     - name: Test that the EventStoreDB container is alive
-      run: docker-compose exec eventstore true
+      run: docker-compose exec --no-TTY eventstore true
 
     - name: Coveralls
       run: mix coveralls.github
