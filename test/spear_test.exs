@@ -431,7 +431,7 @@ defmodule SpearTest do
           )
         end)
 
-      assert {:error, reason} = Spear.append(events, c.conn, c.stream_name)
+      assert {:error, reason} = Spear.append(events, c.conn, c.stream_name, timeout: 15_000)
 
       assert reason == maximum_append_size_error()
     end
@@ -462,7 +462,7 @@ defmodule SpearTest do
           content_type: "application/octet-stream"
         )
 
-      assert {:error, reason} = Spear.append([big_event], c.conn, c.stream_name)
+      assert {:error, reason} = Spear.append([big_event], c.conn, c.stream_name, timeout: 15_000)
 
       assert reason == maximum_append_size_error()
     end
