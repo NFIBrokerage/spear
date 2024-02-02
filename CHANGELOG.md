@@ -11,6 +11,21 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.4.0 - 2024-02-02
+
+### Added
+
+- `Spear.stream!/3` now saves one network request when the server returns fewer
+  events than the requested chunk size.
+- Subscriptions now send `{:caught_up, subscription_ref}` and `{:fell_behind,
+  subscription_ref}` messages on EventStoreDB versions later than 23.10.
+
+### Fixed
+
+- A single HTTP/2 DATA frame might contain multiple messages from the EventStoreDB.
+  Previously only the first message was handled at a time and the remaining data
+  was buffered. Now all messages in a DATA frame are sent eagerly.
+
 ## 1.3.2 - 2023-06-12
 
 ### Fixed
