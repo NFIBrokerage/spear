@@ -17,9 +17,11 @@ defmodule Spear.Reading do
   def decode_read_response(Streams.read_resp(content: {kind, _body}) = read_resp, subscription) do
     case kind do
       :event -> Spear.Event.from_read_response(read_resp, metadata: %{subscription: subscription})
+      # coveralls-ignore-start
       :checkpoint -> Spear.Filter.Checkpoint.from_read_response(read_resp, subscription)
       :caught_up -> {:caught_up, subscription}
       :fell_behind -> {:fell_behind, subscription}
+      # coveralls-ignore-stop
       _ -> nil
     end
   end

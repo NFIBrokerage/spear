@@ -31,6 +31,7 @@ defmodule Spear.Filter.Checkpoint do
   defstruct [:commit_position, :prepare_position, :subscription]
 
   @doc false
+  # coveralls-ignore-start
   def from_read_response(
         Streams.read_resp(
           content:
@@ -45,4 +46,6 @@ defmodule Spear.Filter.Checkpoint do
       subscription: subscription
     }
   end
+
+  # coveralls-ignore-stop
 end

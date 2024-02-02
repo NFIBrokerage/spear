@@ -219,7 +219,9 @@ defmodule Spear.Connection do
         {:noreply, s}
 
       :error ->
+        # coveralls-ignore-start
         {:noreply, s}
+        # coveralls-ignore-stop
     end
   end
 

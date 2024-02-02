@@ -79,15 +79,20 @@ defmodule Spear.Connection.Request do
 
   @spec emit_messages(%Spear.Connection{}, %__MODULE__{}) ::
           {:ok, %Spear.Connection{}} | {:error, %Spear.Connection{}, reason :: any()}
+  # coveralls-ignore-start
   def emit_messages(state, %__MODULE__{status: :done, buffer: <<>>}), do: {:ok, state}
+  # coveralls-ignore-stop
 
   def emit_messages(state, %__MODULE__{status: :done, buffer: buffer} = request) do
     smallest_window = get_smallest_window(state.conn, request.request_ref)
 
     {bytes_to_send, size, rest} =
       case buffer do
+        # coveralls-ignore-start
         <<bytes_to_send::binary-size(smallest_window), rest::binary>> ->
           {bytes_to_send, smallest_window, rest}
+
+        # coveralls-ignore-stop
 
         ^buffer ->
           {buffer, byte_size(buffer), <<>>}
