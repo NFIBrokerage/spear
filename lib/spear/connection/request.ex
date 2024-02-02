@@ -292,24 +292,31 @@ defmodule Spear.Connection.Request do
         GenServer.reply(request.from, {:ok, request.request_ref})
 
         request = put_in(request.from, nil)
+
         put_in(request.response.data, rest)
+        |> handle_data(<<>>)
 
       {Persistent.read_resp(content: {:subscription_confirmation, _confirmation}), rest} ->
         GenServer.reply(request.from, {:ok, request.request_ref})
 
         request = put_in(request.from, nil)
+
         put_in(request.response.data, rest)
+        |> handle_data(<<>>)
 
       {Monitoring.stats_resp() = message, rest} ->
         request = reply_once(request)
 
         send(subscriber, through.(message, request.request_ref))
+
         put_in(request.response.data, rest)
+        |> handle_data(<<>>)
 
       {message, rest} ->
         send(subscriber, through.(message, request.request_ref))
 
         put_in(request.response.data, rest)
+        |> handle_data(<<>>)
 
       nil ->
         # coveralls-ignore-start
