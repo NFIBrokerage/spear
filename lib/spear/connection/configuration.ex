@@ -59,6 +59,14 @@ defmodule Spear.Connection.Configuration do
 
   require Logger
 
+  defmacrop warn(msg) do
+    if Version.match?(System.version(), ">= 1.11.0") do
+      quote do: Logger.warning(unquote(msg))
+    else
+      quote do: Logger.warn(unquote(msg))
+    end
+  end
+
   # ms
   @default_keepalive 10_000
 
@@ -163,7 +171,7 @@ defmodule Spear.Connection.Configuration do
         false
 
       value when value in 0..@default_keepalive ->
-        Logger.warn("Specified #{key} of #{value} is less than recommended 10_000ms")
+        warn("Specified #{key} of #{value} is less than recommended 10_000ms")
 
         value
 
