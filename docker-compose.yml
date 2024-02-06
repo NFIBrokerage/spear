@@ -6,6 +6,7 @@ services:
     environment:
     - EVENTSTORE_START_STANDARD_PROJECTIONS=True
     - EVENTSTORE_RUN_PROJECTIONS=All
+    - EVENTSTORE_TELEMETRY_OPTOUT=true
     volumes:
     - spear_eventstore:/var/lib/eventstore
     - ./eventstoredb:/etc/eventstore:ro
