@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set the EventStoreDB version
       run: sed -i 's|ghcr.io/eventstore/eventstore:ci|eventstore/eventstore:${{ matrix.eventstore }}-buster-slim|g' docker-compose.yml
@@ -39,7 +39,7 @@ jobs:
         elixir-version: ${{ matrix.beam.elixir }}
 
     - name: Restore the deps cache
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       id: deps-cache
       with:
         path: deps
@@ -48,7 +48,7 @@ jobs:
           ${{ runner.os }}-${{ matrix.beam.elixir }}-${{ matrix.beam.otp }}-${{ env.MIX_ENV }}-deps-
 
     - name: Restore the _build cache
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       id: build-cache
       with:
         path: _build
