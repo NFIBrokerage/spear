@@ -1034,8 +1034,7 @@ defmodule SpearTest do
 
       assert {:success,
               {:"event_store.client.streams.BatchAppendResp.Success", {:current_revision, 4},
-               {:position, {:"event_store.client.AllStreamPosition", _p1, _p2}}}} =
-               result
+               {:position, {:"event_store.client.AllStreamPosition", _p1, _p2}}}} = result
 
       assert Spear.cancel_subscription(c.conn, request_id) == :ok
 
