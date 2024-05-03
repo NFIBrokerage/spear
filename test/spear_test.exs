@@ -997,6 +997,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..19)
     end
 
+    @tag compatible(">= 21.6.0")
     test "the append_batch/5 with `raw?: false` returns :ok", c do
       assert {:ok, batch_id, request_id} =
                random_events()
@@ -1017,6 +1018,7 @@ defmodule SpearTest do
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..4)
     end
 
+    @tag compatible(">= 21.6.0")
     test "the append_batch/5 with `raw?: true` returns the raw result", c do
       assert {:ok, batch_id, request_id} =
                random_events()
