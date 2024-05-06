@@ -415,7 +415,7 @@ defmodule Spear do
            messages,
            Keyword.take(opts, [:credentials, :timeout])
          ) do
-      {:ok, Streams.append_resp(result: {:success, _} = response)} when raw? == true ->
+      {:ok, Streams.append_resp(result: {:success, _})} = response when raw? == true ->
         {:ok, response}
 
       {:ok, Streams.append_resp(result: {:success, _})} ->

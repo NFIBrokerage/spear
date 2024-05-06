@@ -936,9 +936,11 @@ defmodule SpearTest do
                |> Stream.take(7)
                |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: true)
 
-      assert {:success,
-              {:"event_store.client.streams.AppendResp.Success", {:current_revision, 6},
-               {:position, {:"event_store.client.streams.AppendResp.Position", _p1, _p2}}}} =
+      assert {:ok,
+              {:"event_store.client.streams.AppendResp",
+               {:success,
+                {:"event_store.client.streams.AppendResp.Success", {:current_revision, 6},
+                 {:position, {:"event_store.client.streams.AppendResp.Position", _p1, _p2}}}}}} =
                result
     end
 
