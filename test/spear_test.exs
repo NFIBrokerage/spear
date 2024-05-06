@@ -931,17 +931,26 @@ defmodule SpearTest do
     end
 
     test "the append/3 with `raw?: true` returns the raw result", c do
-      assert {:ok, result} =
+      assert {:ok, response} =
                random_events()
                |> Stream.take(7)
                |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: true)
 
-      assert {:ok,
-              {:"event_store.client.streams.AppendResp",
-               {:success,
-                {:"event_store.client.streams.AppendResp.Success", {:current_revision, 6},
-                 {:position, {:"event_store.client.streams.AppendResp.Position", _p1, _p2}}}}}} =
-               result
+      assert {:"event_store.client.streams.AppendResp",
+              {:success,
+               {:"event_store.client.streams.AppendResp.Success", {:current_revision, 6},
+                {:position, {:"event_store.client.streams.AppendResp.Position", _p1, _p2}}}}} =
+               response
+    end
+
+    test "the append/3 with `raw?: true` returns expectation error as raw", c do
+      assert {:error, response} =
+               random_events()
+               |> Stream.take(1)
+               |> Spear.append(c.conn, c.stream_name, expect: 9999, raw?: true)
+
+      assert {:"event_store.client.streams.AppendResp",
+              {:wrong_expected_version, _wrong_expected_version_pb_tuple}} = response
     end
 
     @tag compatible(">= 21.6.0")
