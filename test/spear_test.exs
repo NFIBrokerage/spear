@@ -7,6 +7,8 @@ defmodule SpearTest do
   import Spear.Uuid, only: [uuid_v4: 0]
   import VersionHelper
 
+  require Spear.Records.Streams, as: Streams
+
   @max_append_bytes 1_048_576
   @checkpoint_after 32 * 32 * 32
 
@@ -931,26 +933,21 @@ defmodule SpearTest do
     end
 
     test "the append/3 with `raw?: true` returns the raw result", c do
-      assert {:ok, response} =
-               random_events()
-               |> Stream.take(7)
-               |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: true)
+      result =
+        random_events()
+        |> Stream.take(7)
+        |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: true)
 
-      assert {:"event_store.client.streams.AppendResp",
-              {:success,
-               {:"event_store.client.streams.AppendResp.Success", {:current_revision, 6},
-                {:position, {:"event_store.client.streams.AppendResp.Position", _p1, _p2}}}}} =
-               response
+      assert {:ok, Streams.append_resp(result: {:success, _})} = result
     end
 
     test "the append/3 with `raw?: true` returns expectation error as raw", c do
-      assert {:error, response} =
-               random_events()
-               |> Stream.take(1)
-               |> Spear.append(c.conn, c.stream_name, expect: 9999, raw?: true)
+      result =
+        random_events()
+        |> Stream.take(1)
+        |> Spear.append(c.conn, c.stream_name, expect: 9999, raw?: true)
 
-      assert {:"event_store.client.streams.AppendResp",
-              {:wrong_expected_version, _wrong_expected_version_pb_tuple}} = response
+      assert {:ok, Streams.append_resp(result: {:wrong_expected_version, _})} = result
     end
 
     @tag compatible(">= 21.6.0")

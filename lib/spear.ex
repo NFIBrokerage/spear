@@ -415,15 +415,11 @@ defmodule Spear do
            messages,
            Keyword.take(opts, [:credentials, :timeout])
          ) do
-      {:ok, Streams.append_resp(result: {:success, _}) = response} when raw? == true ->
+      {:ok, response} when raw? == true ->
         {:ok, response}
 
       {:ok, Streams.append_resp(result: {:success, _})} ->
         :ok
-
-      {:ok, Streams.append_resp(result: {:wrong_expected_version, _}) = response}
-      when raw? == true ->
-        {:error, response}
 
       {:ok, Streams.append_resp(result: {:wrong_expected_version, expectation_violation})} ->
         {:error, Spear.Writing.map_expectation_violation(expectation_violation)}
