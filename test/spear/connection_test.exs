@@ -3,7 +3,7 @@ defmodule Spear.ConnectionTest do
 
   import ExUnit.CaptureLog
 
-  @good_config Application.fetch_env!(:spear, :config)
+  @good_config Application.compile_env!(:spear, :config)
 
   describe "given a connection_string leading nowhere" do
     setup do

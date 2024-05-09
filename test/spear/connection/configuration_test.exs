@@ -43,7 +43,7 @@ defmodule Spear.Connection.ConfigurationTest do
 
   test "small keep-alive times emit warning log messages" do
     log =
-      capture_log([level: :warn], fn ->
+      capture_log([level: :warning], fn ->
         config =
           Config.new(
             connection_string:
