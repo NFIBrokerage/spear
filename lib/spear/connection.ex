@@ -88,6 +88,9 @@ defmodule Spear.Connection do
 
   defstruct [:config, :conn, requests: %{}, keep_alive_timer: %KeepAliveTimer{}]
 
+  @typedoc false
+  @type state :: %__MODULE__{}
+
   @typedoc """
   A connection process
 
@@ -153,8 +156,7 @@ defmodule Spear.Connection do
       %Config{errors: errors} ->
         error_lines =
           errors
-          |> Enum.map(fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
-          |> Enum.join("\n")
+          |> Enum.map_join("\n", fn {key, error} -> "\t#{inspect(key)}: #{error}" end)
 
         Logger.error("""
         Invalid configuration passed to #{inspect(__MODULE__)}. Found the following errors:
