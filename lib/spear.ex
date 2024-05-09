@@ -390,7 +390,8 @@ defmodule Spear do
           connection :: Spear.Connection.t(),
           stream_name :: String.t(),
           opts :: Keyword.t()
-        ) :: :ok | {:error, reason :: Spear.ExpectationViolation.t() | any()}
+        ) ::
+          :ok | {:ok, AppendResp.t()} | {:error, reason :: Spear.ExpectationViolation.t() | any()}
   def append(event_stream, conn, stream_name, opts \\ []) when is_binary(stream_name) do
     default_write_opts = [
       expect: :any,
@@ -400,6 +401,7 @@ defmodule Spear do
 
     opts = default_write_opts |> Keyword.merge(opts)
     params = Enum.into(opts, %{})
+    raw? = Keyword.get(opts, :raw?, false)
 
     messages =
       [Spear.Writing.build_append_request(params)]
@@ -413,6 +415,9 @@ defmodule Spear do
            messages,
            Keyword.take(opts, [:credentials, :timeout])
          ) do
+      {:ok, response} when raw? == true ->
+        {:ok, response}
+
       {:ok, Streams.append_resp(result: {:success, _})} ->
         :ok
 

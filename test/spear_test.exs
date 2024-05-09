@@ -7,6 +7,8 @@ defmodule SpearTest do
   import Spear.Uuid, only: [uuid_v4: 0]
   import VersionHelper
 
+  require Spear.Records.Streams, as: Streams
+
   @max_append_bytes 1_048_576
   @checkpoint_after 32 * 32 * 32
 
@@ -923,6 +925,31 @@ defmodule SpearTest do
       assert Spear.cancel_subscription(c.conn, subscription) == :ok
     end
 
+    test "the append/3 with `raw?: false` returns :ok", c do
+      assert :ok =
+               random_events()
+               |> Stream.take(7)
+               |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: false)
+    end
+
+    test "the append/3 with `raw?: true` returns the raw result", c do
+      result =
+        random_events()
+        |> Stream.take(7)
+        |> Spear.append(c.conn, c.stream_name, expect: :empty, raw?: true)
+
+      assert {:ok, Streams.append_resp(result: {:success, _})} = result
+    end
+
+    test "the append/3 with `raw?: true` returns expectation error as raw", c do
+      result =
+        random_events()
+        |> Stream.take(1)
+        |> Spear.append(c.conn, c.stream_name, expect: 9999, raw?: true)
+
+      assert {:ok, Streams.append_resp(result: {:wrong_expected_version, _})} = result
+    end
+
     @tag compatible(">= 21.6.0")
     test "append_batch/5 appends a batch of events", c do
       assert {:ok, batch_id, request_id} =
@@ -976,6 +1003,48 @@ defmodule SpearTest do
       assert Spear.cancel_subscription(c.conn, request_id) == :ok
 
       assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..19)
+    end
+
+    @tag compatible(">= 21.6.0")
+    test "the append_batch/5 with `raw?: false` returns :ok", c do
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, expect: :empty, raw?: false)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: result,
+        batch_id: ^batch_id,
+        request_id: ^request_id,
+        revision: 4
+      }
+
+      assert :ok = result
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..4)
+    end
+
+    @tag compatible(">= 21.6.0")
+    test "the append_batch/5 with `raw?: true` returns the raw result", c do
+      assert {:ok, batch_id, request_id} =
+               random_events()
+               |> Stream.take(5)
+               |> Spear.append_batch(c.conn, :new, c.stream_name, expect: :empty, raw?: true)
+
+      assert_receive %Spear.BatchAppendResult{
+        result: result,
+        batch_id: ^batch_id,
+        request_id: ^request_id,
+        revision: 4
+      }
+
+      assert {:success, Streams.batch_append_resp_success()} = result
+
+      assert Spear.cancel_subscription(c.conn, request_id) == :ok
+
+      assert Spear.stream!(c.conn, c.stream_name) |> Enum.map(& &1.body) == Enum.to_list(0..4)
     end
 
     @tag compatible(">= 21.6.0")
