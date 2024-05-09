@@ -1040,9 +1040,7 @@ defmodule SpearTest do
         revision: 4
       }
 
-      assert {:success,
-              {:"event_store.client.streams.BatchAppendResp.Success", {:current_revision, 4},
-               {:position, {:"event_store.client.AllStreamPosition", _p1, _p2}}}} = result
+      assert {:success, Streams.batch_append_resp_success()} = result
 
       assert Spear.cancel_subscription(c.conn, request_id) == :ok
 
