@@ -10,13 +10,13 @@ defmodule Spear.Grpc do
     mint_version =
       case :application.get_key(:mint, :vsn) do
         {:ok, version} -> version
-        _ -> '0.0.0'
+        _ -> ~c"0.0.0"
       end
 
     spear_version =
       case :application.get_key(:spear, :vsn) do
         {:ok, version} -> version
-        _ -> '0.0.0'
+        _ -> ~c"0.0.0"
       end
 
     "grpc-elixir-spear/#{spear_version} (mint #{mint_version}; Elixir #{System.version()}; OTP #{System.otp_release()})"
