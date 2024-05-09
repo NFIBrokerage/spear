@@ -16,7 +16,7 @@ services:
     - 2113:2113
 
   app:
-    image: elixir:1.12.2
+    image: elixir:1.16.2
     depends_on:
     - eventstore
     environment:
