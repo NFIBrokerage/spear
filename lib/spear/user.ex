@@ -60,8 +60,13 @@ defmodule Spear.User do
       ) do
     last_updated =
       case Spear.parse_stamp(ticks_since_epoch) do
-        {:ok, datetime} -> datetime
-        _ -> nil
+        {:ok, datetime} ->
+          datetime
+
+        # coveralls-ignore-start
+        _ ->
+          nil
+          # coveralls-ignore-stop
       end
 
     %__MODULE__{

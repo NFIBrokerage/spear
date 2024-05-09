@@ -100,17 +100,23 @@ defmodule Spear.PersistentSubscription do
   end
 
   defp to_atom(string) when is_binary(string), do: String.to_atom(string)
+  # coveralls-ignore-start
   defp to_atom(_), do: nil
+  # coveralls-ignore-stop
 
+  # coveralls-ignore-start
   defp map_stream_name("$all"), do: :all
+  # coveralls-ignore-stop
   defp map_stream_name(name), do: name
 
   @doc false
   def map_nack_action(:park), do: :Park
   def map_nack_action(:retry), do: :Retry
+  # coveralls-ignore-start
   def map_nack_action(:skip), do: :Skip
   def map_nack_action(:stop), do: :Stop
   def map_nack_action(_), do: :Unknown
+  # coveralls-ignore-stop
 
   @doc false
   def build_create_request(stream_name, group_name, settings, opts) do

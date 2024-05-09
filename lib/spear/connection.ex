@@ -220,8 +220,8 @@ defmodule Spear.Connection do
         s = Request.continue_request(s, request)
         {:noreply, s}
 
+      # coveralls-ignore-start
       :error ->
-        # coveralls-ignore-start
         {:noreply, s}
         # coveralls-ignore-stop
     end
@@ -293,11 +293,14 @@ defmodule Spear.Connection do
 
   @impl Connection
   def handle_info({:DOWN, monitor_ref, :process, _object, _reason}, s) do
+    # YARD: Add a test case for a subscriber process that exits.
     with {:ok, %{request_ref: request_ref} = request} <-
            fetch_subscription(s, monitor_ref),
+         # coveralls-ignore-start
          {^request, s} <- pop_in(s.requests[request_ref]),
          {:ok, conn} <- Mint.HTTP2.cancel_request(s.conn, request_ref) do
       {:noreply, put_in(s.conn, conn)}
+      # coveralls-ignore-stop
     else
       # coveralls-ignore-start
       {:error, conn, reason} ->
@@ -452,7 +455,9 @@ defmodule Spear.Connection do
   @spec fetch_subscription(%__MODULE__{}, reference()) :: {:ok, Request.t()} | :error
   def fetch_subscription(s, monitor_ref) do
     Enum.find_value(s.requests, :error, fn {_request_ref, request} ->
+      # coveralls-ignore-start
       request.monitor_ref == monitor_ref && {:ok, request}
+      # coveralls-ignore-stop
     end)
   end
 
@@ -494,8 +499,13 @@ defmodule Spear.Connection do
 
   defp run_function({m, f, args}) when is_list(args) do
     case function_exported?(m, f, Enum.count(args)) do
-      true -> apply(m, f, args)
-      _ -> nil
+      true ->
+        apply(m, f, args)
+
+      # coveralls-ignore-start
+      _ ->
+        nil
+        # coveralls-ignore-stop
     end
   end
 

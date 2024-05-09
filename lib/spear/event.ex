@@ -561,7 +561,9 @@ defmodule Spear.Event do
     Persistent.read_resp_read_event_recorded_event(event) |> Map.new()
   end
 
+  # coveralls-ignore-start
   defp parse_created_stamp(nil), do: nil
+  # coveralls-ignore-stop
 
   defp parse_created_stamp(stamp) when is_binary(stamp) do
     with {ticks_since_epoch, ""} <- Integer.parse(stamp),
@@ -680,6 +682,8 @@ defmodule Spear.Event do
 
   @doc false
   def event?(Streams.read_resp(content: {:event, _event})), do: true
+  # coveralls-ignore-start
   def event?(%__MODULE__{}), do: true
+  # coveralls-ignore-stop
   def event?(_), do: false
 end

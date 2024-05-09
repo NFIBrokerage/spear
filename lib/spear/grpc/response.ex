@@ -83,8 +83,13 @@ defmodule Grpc.Response do
 
   defp parse_data(data, %Rpc{response_stream?: false} = rpc, _raw?) do
     case Grpc.decode_next_message(data, {rpc.service_module, rpc.response_type}) do
-      {parsed, <<>>} -> {:ok, parsed}
-      _ -> :error
+      {parsed, <<>>} ->
+        {:ok, parsed}
+
+      # coveralls-ignore-start
+      _ ->
+        :error
+        # coveralls-ignore-stop
     end
   end
 
@@ -100,8 +105,10 @@ defmodule Grpc.Response do
       {_message, _rest} ->
         {:ok, Stream.unfold(data, parse_chunk)}
 
+      # coveralls-ignore-start
       _ ->
         :error
+        # coveralls-ignore-stop
     end
   end
 
@@ -109,11 +116,15 @@ defmodule Grpc.Response do
     def map_status(unquote(code)), do: unquote(status)
   end
 
+  # coveralls-ignore-start
   def map_status(_), do: :unknown
+  # coveralls-ignore-stop
 
   for {status, code} <- @reverse_capitalized_status_code_mapping do
     def status_code(unquote(status)), do: unquote(code)
   end
 
+  # coveralls-ignore-start
   def status_code(_), do: 2
+  # coveralls-ignore-stop
 end

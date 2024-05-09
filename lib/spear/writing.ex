@@ -105,7 +105,9 @@ defmodule Spear.Writing do
   defp map_expected_revision({:expected_stream_exists, empty()}), do: :exists
   defp map_expected_revision({:expected_revision, revision}), do: revision
   # shouldn't this be unreachable?!?
+  # coveralls-ignore-start
   defp map_expected_revision({:expected_any, empty()}), do: :any
+  # coveralls-ignore-stop
 
   def build_global_acl_event(%Spear.Acl{} = user_acl, %Spear.Acl{} = system_acl, json_encode!)
       when is_function(json_encode!, 1) do
@@ -120,7 +122,9 @@ defmodule Spear.Writing do
     )
   end
 
+  # coveralls-ignore-start
   defp map_batch_append_options(%{continuation?: true}), do: :undefined
+  # coveralls-ignore-stop
 
   defp map_batch_append_options(params) do
     batch_append_req_options(

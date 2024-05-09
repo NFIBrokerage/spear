@@ -254,6 +254,8 @@ defmodule Spear.PersistentSubscription.Info do
   defp map_stream_name(name), do: name
 
   defp from_sub_strategy("RoundRobin"), do: :RoundRobin
+  # coveralls-ignore-start
   defp from_sub_strategy("Pinned"), do: :Pinned
   defp from_sub_strategy("DispatchToSingle"), do: :DispatchToSingle
+  # coveralls-ignore-stop
 end

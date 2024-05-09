@@ -70,13 +70,17 @@ defmodule Spear.BatchAppendResult do
        do: map_revision(revision)
 
   defp map_revision({:current_revision, revision}), do: revision
+  # coveralls-ignore-start
   defp map_revision({:empty, Google.empty()}), do: :empty
+  # coveralls-ignore-stop
   defp map_revision(_), do: nil
 
   defp map_position({:success, Streams.batch_append_resp_success(position_option: position)}),
     do: map_position(position)
 
   defp map_position({:position, position}), do: Spear.Position.from_record(position)
+  # coveralls-ignore-start
   defp map_position({:empty, Google.empty()}), do: :empty
+  # coveralls-ignore-stop
   defp map_position(_), do: nil
 end

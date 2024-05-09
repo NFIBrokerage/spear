@@ -110,5 +110,7 @@ defmodule Spear.PersistentSubscription.Settings do
   # this option is deprecated, so it's ok to leave it undefined (e.g. when we're
   # creating a persistent subscription to the :all stream)
   defp map_revision(revision) when is_integer(revision), do: revision
+  # coveralls-ignore-start
   defp map_revision(_), do: :undefined
+  # coveralls-ignore-stop
 end

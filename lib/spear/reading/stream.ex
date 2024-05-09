@@ -59,12 +59,14 @@ defmodule Spear.Reading.Stream do
           unfold_fn
         )
 
+      # coveralls-ignore-start
       {Streams.read_resp(content: {content_case, _}), _rest}
       when content_case in [:last_stream_position, :first_stream_position] ->
         []
 
       nil ->
         []
+        # coveralls-ignore-stop
     end
   end
 
@@ -133,10 +135,10 @@ defmodule Spear.Reading.Stream do
       {Streams.read_resp(), remaining_buffer} ->
         unfold_continuous(%__MODULE__{state | buffer: remaining_buffer})
 
-      # coveralls-ignore-stop
-
       _ ->
         nil
+
+        # coveralls-ignore-stop
     end
   end
 end

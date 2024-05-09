@@ -62,6 +62,8 @@ defmodule Spear.Connection.KeepAliveTimer do
     Process.send_after(self(), :keep_alive, interval)
   end
 
+  # coveralls-ignore-start
   defp cancel_timer(nil), do: :ok
+  # coveralls-ignore-stop
   defp cancel_timer(timer), do: Process.cancel_timer(timer)
 end

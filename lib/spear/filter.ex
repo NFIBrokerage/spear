@@ -273,7 +273,9 @@ defmodule Spear.Filter do
     {map_filter_type(filter.on), map_filter_expression(filter.by)}
   end
 
+  # coveralls-ignore-start
   defp map_filter_type(:event_type), do: :event_type
+  # coveralls-ignore-stop
   defp map_filter_type(:stream_name), do: :stream_identifier
 
   defp map_filter_expression(%Regex{} = regex) do

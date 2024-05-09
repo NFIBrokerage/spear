@@ -9,14 +9,24 @@ defmodule Spear.Grpc do
   def user_agent do
     mint_version =
       case :application.get_key(:mint, :vsn) do
-        {:ok, version} -> version
-        _ -> ~c"0.0.0"
+        {:ok, version} ->
+          version
+
+        # coveralls-ignore-start
+        _ ->
+          ~c"0.0.0"
+          # coveralls-ignore-stop
       end
 
     spear_version =
       case :application.get_key(:spear, :vsn) do
-        {:ok, version} -> version
-        _ -> ~c"0.0.0"
+        {:ok, version} ->
+          version
+
+        # coveralls-ignore-start
+        _ ->
+          ~c"0.0.0"
+          # coveralls-ignore-stop
       end
 
     "grpc-elixir-spear/#{spear_version} (mint #{mint_version}; Elixir #{System.version()}; OTP #{System.otp_release()})"

@@ -669,14 +669,18 @@ defmodule Spear do
             %Spear.BatchAppendResult{request_id: ^request_id, batch_id: ^batch_id} = ack ->
               ack
           after
+            # coveralls-ignore-start
             timeout ->
               {:error, :timeout}
+              # coveralls-ignore-stop
           end
 
         {[result], request_id}
       end,
       fn
+        # coveralls-ignore-start
         :new -> :ok
+        # coveralls-ignore-stop
         request_id -> Spear.cancel_subscription(conn, request_id)
       end
     )

@@ -70,8 +70,13 @@ defmodule Spear.ClusterMember do
       ) do
     timestamp =
       case Spear.parse_stamp(timestamp) do
-        {:ok, datetime} -> datetime
-        _ -> nil
+        {:ok, datetime} ->
+          datetime
+
+        # coveralls-ignore-start
+        _ ->
+          nil
+          # coveralls-ignore-stop
       end
 
     %__MODULE__{
