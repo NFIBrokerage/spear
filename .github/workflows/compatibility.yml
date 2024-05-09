@@ -5,15 +5,15 @@ on: [push, pull_request]
 jobs:
   compatibility:
     name: Bless
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         beam:
-        - elixir: "1.7.4"
-          otp: "21.3"
         - elixir: "1.12.3"
           otp: "24.0"
+        - elixir: "1.16.2"
+          otp: "26.2"
         eventstore:
         - 20.10.2
         - 22.6.0

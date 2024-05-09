@@ -25,13 +25,10 @@ on:
 # Would like to run this as a scheduled workflow, but that is not currently
 # supported by the actions/cache action.
 
-env:
-  CUATRO_HEX_KEY: ${{ secrets.CUATRO_HEX_KEY }}
-
 jobs:
   refresh-dev-cache:
     name: Refresh Docs Cache
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       MIX_ENV: dev
 
