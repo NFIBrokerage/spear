@@ -11,6 +11,15 @@ behind new EventStoreDB versions. You should not downgrade your Spear version
 in order to avoid these features: Spear aims to keep a stable interface usable
 across all EventStoreDB versions v20+.
 
+## 1.4.1 - 2024-08-03
+
+### Fixed
+
+- Fixed the format of output returned by `Spear.append/3` when passing the
+  option `raw?: true`.
+    - Previously this function returned `:ok` with this option. It now returns
+      `{:ok, AppendResp.t()}` with the append response record from the server.
+
 ## 1.4.0 - 2024-02-02
 
 ### Added
