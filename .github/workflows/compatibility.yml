@@ -26,14 +26,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Install docker-compose
-      run: sudo apt install docker-compose
-
     - name: Set the EventStoreDB version
       run: sed -i 's|ghcr.io/eventstore/eventstore:ci|eventstore/eventstore:${{ matrix.eventstore }}-buster-slim|g' docker-compose.yml
 
-    - name: Spawn docker-compose EventStoreDB container
-      run: docker-compose up --detach eventstore
+    - name: Spawn docker compose EventStoreDB container
+      run: docker compose up --detach eventstore
 
     - name: Setup Elixir and Erlang versions
       uses: erlef/setup-beam@v1
@@ -74,7 +71,7 @@ jobs:
       run: mix compile --warnings-as-errors --force
 
     - name: Test that the EventStoreDB container is alive
-      run: docker-compose exec --no-TTY eventstore true
+      run: docker compose exec --no-TTY eventstore true
 
     - name: Run tests
       run: mix test --exclude version_incompatible
