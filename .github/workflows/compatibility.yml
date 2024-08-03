@@ -26,6 +26,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Install docker-compose
+      run: sudo apt install docker-compose
+
     - name: Set the EventStoreDB version
       run: sed -i 's|ghcr.io/eventstore/eventstore:ci|eventstore/eventstore:${{ matrix.eventstore }}-buster-slim|g' docker-compose.yml
 

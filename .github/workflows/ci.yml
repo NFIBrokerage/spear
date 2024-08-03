@@ -17,6 +17,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Install docker-compose
+      run: sudo apt install docker-compose
+
     - name: Spawn docker-compose EventStoreDB container
       run: docker-compose up --detach eventstore
 
